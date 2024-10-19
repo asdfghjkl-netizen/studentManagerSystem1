@@ -1,0 +1,37 @@
+<template>
+  <div class="table-container">
+    <el-table height="200" :data="tableData" style="width: 100%; text-align: center" border>
+      <el-table-column prop="id" label="序号" width="70">
+        <template #default="scope">
+          {{ scope.$index + 1 }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="dateTime" label="日期" width="200" />
+      <el-table-column prop="studyStatus" :label="`${studentName}学习表现`" width="200" />
+      <el-table-column prop="score" label="得分" width="100" />
+    </el-table>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { defineProps, ref, watchEffect } from "vue";
+import { studentInfo } from "@/utils/getTableData";
+
+// 获取学生学习状态
+const studentStatus = ref([]);
+// 接收父组件传递过来的studentName
+const props = defineProps({ studentName: { type: String, default: "" } })
+// 获取学生学习状态数据列表
+const tableData = ref(studentStatus);
+
+watchEffect(() => {
+  studentInfo(props.studentName).then(res => { studentStatus.value = res })
+})
+</script>
+
+<style scoped lang="scss">
+.table-container {
+  margin: auto;
+  width: 83%;
+}
+</style>

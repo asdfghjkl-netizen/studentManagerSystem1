@@ -164,6 +164,7 @@ import TeamInfo from "./components/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { ElMessage } from "element-plus";
 import { importExcelFile } from "./store/excelOptions";
+import { uploadExcelFile } from "@/utils/api/uploadFiles";
 
 const importFile = importExcelFile();
 const fileInput = ref(null);
@@ -447,7 +448,12 @@ watchEffect(() => {
   handleSelectRoom(radio1.value);
   getclassName();
 })
-onMounted(() => { getImgURL() })
+onMounted(() => {
+  getImgURL();
+  uploadExcelFile().then(res => {
+    console.log(res);
+  })
+})
 </script>
 
 <style lang="scss" scoped>

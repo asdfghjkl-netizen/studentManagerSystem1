@@ -5,15 +5,18 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "start": "node server.js"
   },
   "dependencies": {
+    "axios": "^1.7.7",
     "core-js": "^3.6.5",
+    "cors": "^2.8.5",
     "element-plus": "^2.8.1",
     "exceljs": "^4.4.0",
+    "express": "^4.21.1",
     "file-saver": "^2.0.5",
     "fs": "0.0.1-security",
-    "path": "^0.12.7",
     "pinia": "^2.2.2",
     "pinia-plugin-persist": "^1.0.0",
     "sass": "^1.79.1",
@@ -56,5 +59,18 @@
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "description": "",
+  "main": "babel.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lanxiya2006/studentManagerSystem1.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lanxiya2006/studentManagerSystem1/issues"
+  },
+  "homepage": "https://github.com/Lanxiya2006/studentManagerSystem1#readme"
 }

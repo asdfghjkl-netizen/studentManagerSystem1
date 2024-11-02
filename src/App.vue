@@ -94,11 +94,17 @@
       </el-col>
     </el-row>
   </div>
-  <el-button type="primary" @click="exportExcel">导出excel</el-button>
-  <input ref="fileInput" type="file" accept=".xls,.xlsx" class="upload-file" @change="importExcel($event as any)" />
+  <!-- 导入导出按钮 -->
+  <div class="btn-group">
+    <el-button type="primary" @click="exportExcel">导出excel</el-button>
+    <!-- <input ref="fileInput" type="file" accept=".xls,.xlsx" class="upload-file" @change="importExcel($event as any)" /> -->
+    <el-upload :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
+      <el-button type="primary">Click to upload</el-button>
+    </el-upload>
+  </div>
 
   <!--  
-  弹出的学生卡对话框
+  弹出的学生卡对话框   
     require==>返回依赖项的导出。调用是同步的。不会触发对服务器的请求。编译器确保依赖项可用。
     close-on-click-modal==>是否可以通过点击 modal 关闭 Dialog
     destroy-on-close==>当关闭 Dialog 时，销毁其中的元素
@@ -156,6 +162,7 @@
 </template>
 
 <script lang="ts" setup>
+import type { UploadProps } from 'element-plus'
 import ExcelJS from "exceljs";
 import StudentTable from "@/components/studentInfo/studentTable.vue";
 import TeamTable from "./components/teamInfo/teamTable.vue";
@@ -164,10 +171,10 @@ import TeamInfo from "./components/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { ElMessage } from "element-plus";
 import { importExcelFile } from "./store/excelOptions";
-import { uploadExcelFile } from "@/utils/api/uploadFiles";
+import { getFileList } from "./utils/api/excelFiles";
 
 const importFile = importExcelFile();
-const fileInput = ref(null);
+const fileInput = ref("");
 // 学生座位表选择数据，默认为1---》班级座位表
 const radio1 = ref("1");
 // 定义学生卡对话框的状态
@@ -182,7 +189,7 @@ const data = reactive({
     21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
     41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
     61, 62, 63, 64, 65, 66, 67, 68, 69, 70],
-  // 模拟后台返回的团队列表
+  // 模拟后台返回的团队列表getExcelFile
   teamList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
   studentList: {} as any,          // 将seatList和stuSeat合并成新的对象
   selectedStuIndices: [],          // 记录已选择的学生索引(随机选择的学生列表)
@@ -190,7 +197,7 @@ const data = reactive({
   selectTeamList: [] as number[],  // 获取所选团队的id
   studentName: '' as string,       // 获取学生姓名
   teamId: '' as any,               // 获取团队id
-  teamLists: importFile.teamLists, // 获取团队列表
+  teamLists: importFile.teamLists, // 获取团队列表 
 })
 
 // 随机选择学生
@@ -301,11 +308,12 @@ const getclassName = () => {
   // console.log(className.value);
 }
 
-// 导入excel
-const importExcel = (event: { target: { files: any } }) => {
+// 导入excel   event: { target: { files: any } }
+const importExcel: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
+  console.log('uploadFile', uploadFile, uploadFiles);
   try {
-    importFile.importExcel(event);
-    fileInput.value = importFile.ecxelFile;
+    importFile.importExcel(uploadFile);
+    fileInput.value = (importFile.fileName || data.fileName) || "";
     ElMessage.success("导入成功");
   } catch (error) {
     ElMessage.error(error);
@@ -449,10 +457,8 @@ watchEffect(() => {
   getclassName();
 })
 onMounted(() => {
-  getImgURL();
-  uploadExcelFile().then(res => {
-    console.log(res);
-  })
+  getImgURL()
+  getFileList().then(res => { console.log(res) })
 })
 </script>
 
@@ -487,6 +493,22 @@ onMounted(() => {
   ::v-deep(.el-col) {
     margin: 0.5rem 0;
   }
+}
+
+.btn-group {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 2rem;
+  width: 30%;
+  height: 70px;
+}
+
+.el-upload-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  position: relative;
+  float: left;
 }
 
 .student_info {

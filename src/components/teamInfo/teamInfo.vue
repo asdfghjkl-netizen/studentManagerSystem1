@@ -48,19 +48,20 @@
         </td>
       </tr>
     </div>
-    <el-button type="primary" style="width: 100%;" @click="submit">提交</el-button>
+    <el-button type="primary" style="width: 100%;" @click.prevent="submit">提交</el-button>
   </div>
 </template>
 
 <script lang="ts" setup>
+// import * as FileSaver from "file-saver";
 import { importExcelFile } from "@/store/excelOptions";
 import { onMounted, ref, defineProps, reactive, computed, watch, watchEffect } from "vue";
 import ExcelJS from "exceljs";
 import { ElMessage } from "element-plus";
-import * as FileSaver from "file-saver";
 import { getDateTime } from "@/utils/dateTime"
 import { getTeamInfo, getStudentsInfo } from "@/utils/getTableData";
 import { getMemberforTeam } from "@/utils/getTeamMember";
+import { uploadExcelFile, getExcelFile } from "@/utils/api/excelFiles";
 
 // 创建一个pinia实例
 const importFile = importExcelFile();
@@ -162,76 +163,99 @@ const submit = () => {
   let teamId = "第" + props.teamId + "组";
   //创建Workbook实例
   const workbook = new ExcelJS.Workbook();
-  // 使用FileReader对象来读取文件内容
-  const fileReader = new FileReader()
-  // 二进制字符串的形式加载文件  文件信息存储在pinia中
-  fileReader.readAsArrayBuffer(importFile.files[0])
+  // // 使用FileReader对象来读取文件内容
+  // const fileReader = new FileReader()
+  // // 二进制字符串的形式加载文件  文件信息存储在pinia中
+  // fileReader.readAsArrayBuffer(importFile.files)
 
-  fileReader.onload = ev => {
-    // 从 buffer中加载数据解析
-    workbook.xlsx.load(ev.target.result as ArrayBuffer).then(workbook => {
-      // 获取第一个worksheet内容（学生信息表）
-      let worksheet = workbook.getWorksheet(teamId)
-      // 创建要写入的数据
-      const data = [
-        { dateTime: dateTime.value, studyStatus: studyStatusString.value, score: score.value },
+  // fileReader.onload = ev => {
+  // 从 buffer中加载数据解析
+  workbook.xlsx.load(importFile.buffer.data).then(workbook => {
+    // 获取第一个worksheet内容（学生信息表）
+    let worksheet = workbook.getWorksheet(teamId)
+    // 创建要写入的数据
+    const data = [
+      { dateTime: dateTime.value, studyStatus: studyStatusString.value, score: score.value },
+    ];
+    // 判断当前学生是否已存在，如果不存在，则创建新的工作表并添加数据；否则在原有工作表中添加数据
+    if (!worksheet) {
+      let stuWorkSheet = workbook.addWorksheet(teamId);
+      // 添加表头
+      stuWorkSheet.columns = [
+        { header: "时间", key: "dateTime", width: 25 },
+        { header: teamId + '学习表现', key: "studyStatus", width: 20 },
+        { header: "得分", key: "score", width: 10 },
       ];
-      // 判断当前学生是否已存在，如果不存在，则创建新的工作表并添加数据；否则在原有工作表中添加数据
-      if (!worksheet) {
-        let stuWorkSheet = workbook.addWorksheet(teamId);
-        // 添加表头
-        stuWorkSheet.columns = [
-          { header: "时间", key: "dateTime", width: 25 },
-          { header: teamId + '学习表现', key: "studyStatus", width: 20 },
-          { header: "得分", key: "score", width: 10 },
-        ];
-        // 设置表头居中 和加粗
-        stuWorkSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-        stuWorkSheet.getRow(1).font = { bold: true };
-        // 写入数据
-        stuWorkSheet.addRows(data);
-        ElMessage.success('提交成功')
-      } if (worksheet) {
-        /**
-         * 有两行数据:
-         * 时间	                钟雯靖学习表现	得分
-         *  2024-09-2814:32:07	回答问题	      6
-         *  现在要在下一行逐行添加新的数据，如何用exceljs来写 
-         */
-        // 1. 获取最后一行的行号，
-        let lastRowNumber = worksheet.lastRow.number;
-        // 再根据行号获取最后一行的数据
-        worksheet.addRow(lastRowNumber + 1).values = [dateTime.value, studyStatusString.value, score.value];
-        ElMessage.success('数据已更新');
-      }
-      // 保存工作表到excel文件buffer  writeBuffer
-      workbook.xlsx.writeBuffer().then((buffer) => {
-        // 创建一个Blob对象
-        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-        // // 创建一个a标签
-        // const a = document.createElement('a')
-        // // 创建一个URL对象
-        // const url = URL.createObjectURL(blob)
-        // // 设置a标签的href属性为URL对象
-        // a.href = url
-        // // 设置a标签的download属性为文件名
-        // a.download = '学生信息表.xlsx'
-        // // 模拟点击a标签
-        // a.click()
-        // // 释放URL对象
-        // URL.revokeObjectURL(url)
-        // 定义文件的路径
-        const fileName = importFile.files[0].name;
-        // 保存文件
-        FileSaver.saveAs(blob, fileName);
-        ElMessage.success("保存成功")
-      }).catch(err => {
-        ElMessage.error("保存失败", err)
-      })
-    }).catch(err => {
-      ElMessage.error("读取失败", err)
+      // 设置表头居中 和加粗
+      stuWorkSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+      stuWorkSheet.getRow(1).font = { bold: true };
+      // 写入数据
+      stuWorkSheet.addRows(data);
+    } if (worksheet) {
+      // 1. 获取最后一行的行号，
+      let lastRowNumber = worksheet.lastRow.number;
+      // 再根据行号获取最后一行的数据
+      worksheet.addRow(lastRowNumber + 1).values = [dateTime.value, studyStatusString.value, score.value];
+    }
+    // 保存工作表到excel文件buffer  writeBuffer
+    // workbook.xlsx.writeBuffer().then((buffer) => {
+    //   // 创建一个Blob对象
+    //   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    //   // // 创建一个a标签
+    //   // const a = document.createElement('a')
+    //   // // 创建一个URL对象
+    //   // const url = URL.createObjectURL(blob)
+    //   // // 设置a标签的href属性为URL对象
+    //   // a.href = url
+    //   // // 设置a标签的download属性为文件名
+    //   // a.download = '学生信息表.xlsx'
+    //   // // 模拟点击a标签
+    //   // a.click()
+    //   // // 释放URL对象
+    //   // URL.revokeObjectURL(url)
+    //   // 定义文件的路径
+    //   const fileName = importFile.files[0].name;
+    //   // 保存文件
+    //   FileSaver.saveAs(blob, fileName);
+    //   ElMessage.success("保存成功")
+    // }).catch(err => {
+    //   ElMessage.error("保存失败", err)
+    // })
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      // 创建一个Blob对象
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      // 定义文件的名称
+      const fileName = sessionStorage.getItem("fileName");
+      const encodedFileName = encodeURIComponent(fileName); // 对文件名进行编码
+      // 创建一个FormData对象，并将Blob对象作为文件添加进去
+      const formData = new FormData();
+      formData.append('file', blob, encodedFileName);
+      // 调用上传文件的接口
+      uploadExcelFile(formData).then(res => {
+        // console.log(res);
+        if (res.status != 200) {
+          ElMessage.error(res.data.error);
+          return;
+        }
+        // 获取后端传入文件的buffer
+        getExcelFile({ file: fileName }).then(res => {
+          // console.log("res", res);
+          importFile.buffer = res.data.buffer
+        })
+        // 重置分数表单
+        score.value = 0;
+        ElMessage.success(res.data.message + '\xa0' + res.data.fileName);
+      }).catch(error => {
+        ElMessage.error("保存失败", error);
+      });
+      window.onbeforeunload = function (event) {
+        event.returnValue = "我在这写点东西...";
+      };
     })
-  }
+  }).catch(err => {
+    ElMessage.error("读取失败", err)
+  })
+  // }
 }
 
 watchEffect(() => {
@@ -239,7 +263,7 @@ watchEffect(() => {
   getDateTime().then(res => { dateTime.value = res });
   getTeamInfo(props.teamId).then(res => { teamStatus.value = res })
   teamScore.value;
-}) 
+})
 onMounted(() => { handleChangeValue(selectStudyStatus.value) });
 </script>
 

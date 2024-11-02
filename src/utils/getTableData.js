@@ -18,14 +18,14 @@ async function getStudentInfo(student) {
     const importFile = importExcelFile();
     //创建Workbook实例
     const workbook = new ExcelJS.Workbook();
-    // 使用FileReader对象来读取文件内容
-    const fileReader = new FileReader()
-    // 二进制字符串的形式加载文件  文件信息存储在pinia中
-    fileReader.readAsArrayBuffer(importFile.files[0])
+    // // 使用FileReader对象来读取文件内容
+    // const fileReader = new FileReader()
+    // // 二进制字符串的形式加载文件  文件信息存储在pinia中
+    // fileReader.readAsArrayBuffer(importFile.files)
 
-    fileReader.onload = ev => {
+    // fileReader.onload = ev => {
         // 从 buffer中加载数据解析
-        workbook.xlsx.load(ev.target.result).then(() => {
+        workbook.xlsx.load(importFile.buffer.data).then(() => {
             // 获取第一个worksheet内容（学生信息表）
             const worksheet = workbook.getWorksheet(student);
             if (worksheet === undefined) {
@@ -67,14 +67,16 @@ async function getStudentInfo(student) {
                     // 将当前行的数据对象添加到数组中
                     stuStatus.push(rowData);
                 }
-                studentStatus.value[student] = stuStatus
+                // 清除stuStatus对象中所有元素为空的数据
+                const data = stuStatus.filter(item => Object.values(item).some(value => value !== null));
+                studentStatus.value[student] = data
                 // console.log("dataexl", studentStatus.value)
             }
         }).catch((err) => {
             studentStatus.value = [];
             ElMessage.error("解析失败", err);
         })
-    }
+    // }
     await new Promise(resolve => setTimeout(resolve, 100));
     return studentStatus.value[student];
 }
@@ -82,7 +84,7 @@ async function getStudentInfo(student) {
 // 存储学生信息
 let studentInfoData = ref([]);
 export async function studentInfo(student) {
-    getStudentInfo(student).then(data => { studentInfoData.value = data; })
+    getStudentInfo(student).then(data => { studentInfoData.value = data })
     return studentInfoData.value;
 }
 
@@ -92,14 +94,14 @@ export async function getStudentsInfo(students, teamLists) {
     const importFile = importExcelFile();
     //创建Workbook实例
     const workbook = new ExcelJS.Workbook();
-    // 使用FileReader对象来读取文件内容
-    const fileReader = new FileReader()
-    // 二进制字符串的形式加载文件  文件信息存储在pinia中
-    fileReader.readAsArrayBuffer(importFile.files[0])
+    // // 使用FileReader对象来读取文件内容
+    // const fileReader = new FileReader()
+    // // 二进制字符串的形式加载文件  文件信息存储在pinia中
+    // fileReader.readAsArrayBuffer(importFile.files)
 
-    fileReader.onload = ev => {
+    // fileReader.onload = ev => {
         // 从 buffer中加载数据解析
-        workbook.xlsx.load(ev.target.result).then(() => {
+        workbook.xlsx.load(importFile.buffer.data).then(() => {
             // totalScore.value = 0;
             // 遍历每个学生
             for (const student of students) {
@@ -147,7 +149,9 @@ export async function getStudentsInfo(students, teamLists) {
                         // 将当前行的数据对象添加到数组中
                         stuStatus.push(rowData);
                     }
-                    allStudentStatus.value[student] = stuStatus
+                    // 清除stuStatus对象中所有元素为空的数据
+                    const data = stuStatus.filter(item => Object.values(item).some(value => value !== null));
+                    allStudentStatus.value[student] = data
                 }
 
                 // 遍历每组————计算每组的总和
@@ -176,7 +180,7 @@ export async function getStudentsInfo(students, teamLists) {
             allStudentStatus.value = [];
             ElMessage.error("解析失败", err);
         })
-    }
+    // }
     return { totalScore: totalScore.value, allStudentStatus };
 }
 
@@ -193,14 +197,14 @@ export async function getTeamInfo(teamId) {
     const importFile = importExcelFile();
     //创建Workbook实例
     const workbook = new ExcelJS.Workbook();
-    // 使用FileReader对象来读取文件内容
-    const fileReader = new FileReader()
-    // 二进制字符串的形式加载文件  文件信息存储在pinia中
-    fileReader.readAsArrayBuffer(importFile.files[0])
+    // // 使用FileReader对象来读取文件内容
+    // const fileReader = new FileReader()
+    // // 二进制字符串的形式加载文件  文件信息存储在pinia中
+    // fileReader.readAsArrayBuffer(importFile.files)
 
-    fileReader.onload = ev => {
+    // fileReader.onload = ev => {
         // 从 buffer中加载数据解析
-        workbook.xlsx.load(ev.target.result).then(workbook => {
+        workbook.xlsx.load(importFile.buffer.data).then(workbook => {
             // 获取第一个worksheet内容（学生信息表）
             const worksheet = workbook.getWorksheet(teamName);
             if (worksheet === undefined) {
@@ -241,13 +245,15 @@ export async function getTeamInfo(teamId) {
                     // 将当前行的数据对象添加到数组中
                     stuStatus.push(rowData);
                 }
-                teamStatus.value = stuStatus
+                // 清除stuStatus对象中所有元素为空的数据
+                const data = stuStatus.filter(item => Object.values(item).some(value => value !== null));
+                teamStatus.value = data
                 // console.log("dataexl", teamStatus.value)
             }
         }).catch((err) => {
             teamStatus.value = [];
             ElMessage.error("解析失败", err);
         })
-    }
+    // }
     return teamStatus.value;
 }

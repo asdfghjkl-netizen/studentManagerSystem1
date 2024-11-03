@@ -145,7 +145,7 @@ app.post('/get-excel-file', async (req, res) => {
   console.log('fileName', fileName);
 
   if (!fileName) {
-    res.status(400).json({ error: 'No file name provided', fileName: fileName });
+    res.status(400).json({ error: 'No file name provided' });
   }
 
   const filePath = path.join(publicPath, fileName);
@@ -161,6 +161,7 @@ app.post('/get-excel-file', async (req, res) => {
     await workbook.xlsx.load(buffer);
     // 解析 Excel 文件
     const parsedData = parseExcelFile(workbook);
+    // 返回解析后的数据和二进制数据
     res.status(200).json({ parsedData, buffer: buffer });
   } catch (error) {
     res.status(500).json({ error: 'Failed to read or parse file' });

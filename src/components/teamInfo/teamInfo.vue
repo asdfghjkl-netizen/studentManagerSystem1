@@ -8,7 +8,7 @@
       </div>
       <div class="stdent-team-source">
         <h2>
-          <span style="margin-right: 35px;">小组总分 {{ teamScore + teamMemberScore }}分</span>
+          <span style="margin-right: 35px;">小组总分 {{ teamTotalScoreAll }}分</span>
           <div style="width: 150px; position: absolute; left: 510px; top: 125px;">
             <div style="margin-bottom: 10px;">团队得分 {{ teamScore }}分</div>
             <div>成员得分 {{ teamMemberScore }}分</div>
@@ -53,15 +53,14 @@
 </template>
 
 <script lang="ts" setup>
-// import * as FileSaver from "file-saver";
 import { importExcelFile } from "@/store/excelOptions";
 import { onMounted, ref, defineProps, reactive, computed, watch, watchEffect } from "vue";
 import ExcelJS from "exceljs";
 import { ElMessage } from "element-plus";
-import { getDateTime } from "@/utils/dateTime"
-import { getTeamInfo, getStudentsInfo } from "@/utils/getTableData";
-import { getMemberforTeam } from "@/utils/getTeamMember";
-import { uploadExcelFile, getExcelFile } from "@/utils/api/excelFiles";
+import { getDateTime } from "@/utils/dateTime";
+import { getTeamInfo } from "@/utils/dataOption/getTableData";
+import { saveExcel, changeSorceforExcelData } from "@/utils/dataOption/saveExcel";
+import { teamMembersScore } from "@/utils/dataOption/getScore";
 
 // 创建一个pinia实例
 const importFile = importExcelFile();
@@ -96,47 +95,16 @@ const otherStatus = ref("");
 const studyStatusString = ref("");
 // 定义团队学习状态
 const teamStatus = ref([]);
-// 每个组成员的分数（组）
-const teamMemberScores = ref();
 // 获取组分数
 const teamMemberScore = ref(0);
+// 获取小组总分数
+const teamTotalScoreAll = ref(0);
 
 // 接收父组件传递过来的studentName
 const props = defineProps({
   teamId: { type: String, default: "" },
+  isStudent: { type: Boolean, default: false },
 })
-
-// 获取组员数据
-const getTeamMemberScore = () => {
-  getMemberforTeam().then(res => {
-    // 扁平化数组
-    const flat = res.flat();
-    // 获取学生信息
-    getStudentsInfo(flat, res).then(res => {
-      // console.log("res", res);
-      teamMemberScores.value = res.totalScore;
-      // console.log(teamMemberScore.value);
-      setInterval(() => {
-        const obj = new Proxy(teamMemberScores.value, {
-          get(target, prop, receiver) {
-            // 实现获取属性时的行为
-            return Reflect.get(target, prop, receiver);
-          },
-          set(target, prop, value, receiver) {
-            // 实现设置属性时的行为
-            return Reflect.set(target, prop, value, receiver);
-          }
-        });
-        for (let key in obj) {
-          if (props.teamId === key) {
-            // console.log(`Key: ${key}, Value: ${obj[key]}`);
-            teamMemberScore.value = obj[key];
-          }
-        }
-      }, 100);
-    });
-  })
-}
 
 // 计算该组团队分
 const teamScore = computed(() => {
@@ -158,25 +126,25 @@ const handleChangeValue = (index: any) => {
 }
 
 // 提交事件
-const submit = () => {
+const submit = async () => {
+  console.log(" props.isStudent",  props.isStudent);
   // 定义团队名称
   let teamId = "第" + props.teamId + "组";
   //创建Workbook实例
   const workbook = new ExcelJS.Workbook();
-  // // 使用FileReader对象来读取文件内容
-  // const fileReader = new FileReader()
-  // // 二进制字符串的形式加载文件  文件信息存储在pinia中
-  // fileReader.readAsArrayBuffer(importFile.files)
 
-  // fileReader.onload = ev => {
-  // 从 buffer中加载数据解析
-  workbook.xlsx.load(importFile.buffer.data).then(workbook => {
-    // 获取第一个worksheet内容（学生信息表）
+  try {
+    // 从 buffer中加载数据解析
+    await workbook.xlsx.load(importFile.buffer.data);
+
     let worksheet = workbook.getWorksheet(teamId)
     // 创建要写入的数据
-    const data = [
-      { dateTime: dateTime.value, studyStatus: studyStatusString.value, score: score.value },
-    ];
+    const data = [{
+      dateTime: dateTime.value,
+      studyStatus: studyStatusString.value,
+      score: score.value
+    }];
+
     // 判断当前学生是否已存在，如果不存在，则创建新的工作表并添加数据；否则在原有工作表中添加数据
     if (!worksheet) {
       let stuWorkSheet = workbook.addWorksheet(teamId);
@@ -195,74 +163,34 @@ const submit = () => {
       // 1. 获取最后一行的行号，
       let lastRowNumber = worksheet.lastRow.number;
       // 再根据行号获取最后一行的数据
-      worksheet.addRow(lastRowNumber + 1).values = [dateTime.value, studyStatusString.value, score.value];
+      worksheet.addRow(lastRowNumber + 1).values = [
+        dateTime.value,
+        studyStatusString.value,
+        score.value
+      ];
     }
-    // 保存工作表到excel文件buffer  writeBuffer
-    // workbook.xlsx.writeBuffer().then((buffer) => {
-    //   // 创建一个Blob对象
-    //   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-    //   // // 创建一个a标签
-    //   // const a = document.createElement('a')
-    //   // // 创建一个URL对象
-    //   // const url = URL.createObjectURL(blob)
-    //   // // 设置a标签的href属性为URL对象
-    //   // a.href = url
-    //   // // 设置a标签的download属性为文件名
-    //   // a.download = '学生信息表.xlsx'
-    //   // // 模拟点击a标签
-    //   // a.click()
-    //   // // 释放URL对象
-    //   // URL.revokeObjectURL(url)
-    //   // 定义文件的路径
-    //   const fileName = importFile.files[0].name;
-    //   // 保存文件
-    //   FileSaver.saveAs(blob, fileName);
-    //   ElMessage.success("保存成功")
-    // }).catch(err => {
-    //   ElMessage.error("保存失败", err)
-    // })
-    workbook.xlsx.writeBuffer().then((buffer) => {
-      // 创建一个Blob对象
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-      // 定义文件的名称
-      const fileName = sessionStorage.getItem("fileName");
-      const encodedFileName = encodeURIComponent(fileName); // 对文件名进行编码
-      // 创建一个FormData对象，并将Blob对象作为文件添加进去
-      const formData = new FormData();
-      formData.append('file', blob, encodedFileName);
-      // 调用上传文件的接口
-      uploadExcelFile(formData).then(res => {
-        // console.log(res);
-        if (res.status != 200) {
-          ElMessage.error(res.data.error);
-          return;
-        }
-        // 获取后端传入文件的buffer
-        getExcelFile({ file: fileName }).then(res => {
-          // console.log("res", res);
-          importFile.buffer = res.data.buffer
-        })
-        // 重置分数表单
-        score.value = 0;
-        ElMessage.success(res.data.message + '\xa0' + res.data.fileName);
-      }).catch(error => {
-        ElMessage.error("保存失败", error);
-      });
-      window.onbeforeunload = function (event) {
-        event.returnValue = "我在这写点东西...";
-      };
-    })
-  }).catch(err => {
-    ElMessage.error("读取失败", err)
-  })
-  // }
+
+    // 更改excel文件中的小组工作表中的分数数据
+    let teamWorkSheet = workbook.getWorksheet("team");
+    await changeSorceforExcelData(teamWorkSheet, props.teamId, {
+      teamScore: teamScore.value + score.value,
+      totalTeamScore: teamTotalScoreAll.value + score.value,
+      teamMemberScore: teamMemberScore.value
+    }, score.value, null, props.isStudent, null);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    saveExcel(score, buffer);
+  } catch (error) {
+    ElMessage.error("读取失败", error);
+  }
 }
 
 watchEffect(() => {
-  getTeamMemberScore();
+  teamMembersScore(props.teamId).then(res => { teamMemberScore.value = res })
   getDateTime().then(res => { dateTime.value = res });
   getTeamInfo(props.teamId).then(res => { teamStatus.value = res })
   teamScore.value;
+  teamTotalScoreAll.value = teamScore.value + teamMemberScore.value;
 })
 onMounted(() => { handleChangeValue(selectStudyStatus.value) });
 </script>

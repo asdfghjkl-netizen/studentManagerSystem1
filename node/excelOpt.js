@@ -53,6 +53,14 @@ const parseWorkSheetLong = (dataArray, worksheet, headers, targetArray, startRow
     targetArray.value = dataArray;
     // console.log("data", dataArray);
 }
+
+/**
+ * 公共代码段（遍历工作表的每一行（从第二行开始，因为第一行通常是标题行））
+ * 
+ * @param {Array} dataArray   数据数组
+ * @param {Object} worksheet  工作表对象
+ * @param {Array} targetArray 目标数组
+ */
 const parseWorkSheetShort = (dataArray, worksheet, targetArray) => {
     dataArray = [];
     for (let rowNumber = 1; rowNumber <= worksheet.rowCount; rowNumber++) {

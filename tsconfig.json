@@ -34,7 +34,7 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx"
-, "src/utils/getTableData.js", "src/utils/getTeamMember.ts"  ],
+, "src/utils/getTableData.js", "src/utils/getTeamMember.ts", "src/utils/dataOption/saveExcel.js"  ],
   "exclude": [
     "node_modules"
   ]

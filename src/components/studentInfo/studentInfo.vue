@@ -129,7 +129,7 @@ const getTeamId = ref("");
 
 const props = defineProps({
   studentName: { type: String, default: "" },
-  teamList: [] as any,
+  teamList: { type: Array, default: () => [] },
   isStudent: { type: Boolean, default: true },
 })
 

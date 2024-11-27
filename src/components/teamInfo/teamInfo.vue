@@ -9,7 +9,7 @@
       <div class="stdent-team-source">
         <h2>
           <span style="margin-right: 35px;">小组总分 {{ teamTotalScoreAll }}分</span>
-          <div style="width: 150px; position: absolute; left: 510px; top: 125px;">
+          <div style="width: 200px; position: absolute; left: 510px; top: 125px;">
             <div style="margin-bottom: 10px;">团队得分 {{ teamScore }}分</div>
             <div>成员得分 {{ teamMemberScore }}分</div>
           </div>
@@ -22,7 +22,7 @@
       <tr>
         <td>学习表现：</td>
         <td>
-          <el-select v-model="selectStudyStatus" placeholder="Select" @change="handleChangeValue" style="width: 240px">
+          <el-select v-model="selectStudyStatus" placeholder="Select" @change="handleChangeValue" style="width: 250px">
             <el-option v-for="item in studyStatus" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </td>
@@ -34,7 +34,7 @@
         <td>其他：</td>
         <td>
           <!-- @change="changeOtherStatus" -->
-          <el-input v-model="otherStatus" style="width: 240px" clearable :disabled="selectStudyStatus != 5" />
+          <el-input v-model="otherStatus" style="width: 250px" clearable :disabled="selectStudyStatus != 5" />
         </td>
       </tr>
     </div>
@@ -127,8 +127,6 @@ const handleChangeValue = (index: any) => {
 
 // 提交事件
 const submit = async () => {
-  console.log(" props.isStudent",  props.isStudent);
-  // 定义团队名称
   let teamId = "第" + props.teamId + "组";
   //创建Workbook实例
   const workbook = new ExcelJS.Workbook();
@@ -179,9 +177,9 @@ const submit = async () => {
     }, score.value, null, props.isStudent, null);
 
     const buffer = await workbook.xlsx.writeBuffer();
-    saveExcel(score, buffer);
+    saveExcel({ score, otherStatus }, buffer);
   } catch (error) {
-    ElMessage.error("读取失败", error);
+    ElMessage.error({ message: '读取失败' + error, duration: 1000 });
   }
 }
 

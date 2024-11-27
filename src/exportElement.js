@@ -16,6 +16,7 @@ import {
     ElInput,        // 输入框
     ElInputNumber,  // 数字输入框
     ElPopconfirm,   // 气泡确认框
+    ElIcon,         // 图标
 } from 'element-plus'
 
 export {
@@ -35,4 +36,5 @@ export {
     ElInput,
     ElInputNumber,
     ElPopconfirm,
+    ElIcon,
 };

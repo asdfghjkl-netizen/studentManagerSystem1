@@ -1,6 +1,7 @@
 <template>
   <div class="table-container">
-    <el-table height="200" :default-sort="{ prop: 'dateTime', order: 'descending' }" :data="tableData"
+    <el-table :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ textAlign: 'center' }" empty-text="暂无数据"
+      height="200" :default-sort="{ prop: 'dateTime', order: 'descending' }" :data="tableData"
       style="width: 100%; text-align: center" border>
       <el-table-column prop="id" label="序号" width="55">
         <template #default="scope">
@@ -12,6 +13,7 @@
       <el-table-column prop="score" label="得分" width="80" />
       <el-table-column label="操作" width="100">
         <template #default="scope">
+          <!--  trigger="hover" -->
           <el-popconfirm confirmButtonText="Yes" cancelButtonText="No" :icon="InfoFilled" icon-color="#626AEF"
             title="确定删除此信息？" @confirm="handleContextmenu(scope.row, scope.column, $event)" @cancel="cancelEvent"
             width="auto">
@@ -57,7 +59,7 @@ async function handleContextmenu(row: any, column: any, event: Event) {
   try {
     // 从 buffer中加载数据解析
     await workbook.xlsx.load(importFile.buffer.data);
-    
+
     let worksheet = workbook.getWorksheet(props.studentName);
 
     // 查找并删除所有匹配的行
@@ -71,7 +73,7 @@ async function handleContextmenu(row: any, column: any, event: Event) {
     rowsToDelete.sort((a, b) => b - a).forEach(rowIndex => {
       worksheet.spliceRows(rowIndex, 1);
     });
-    
+
     // 更改excel文件中的小组工作表中的分数数据
     let teamWorkSheet = workbook.getWorksheet("team");
     await changeSorceforExcelData(teamWorkSheet, getTeamId.value, {},

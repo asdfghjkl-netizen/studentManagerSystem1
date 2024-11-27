@@ -208,9 +208,9 @@ const submit = async () => {
     }, score.value, null, props.isStudent, null);
 
     const buffer = await workbook.xlsx.writeBuffer();
-    saveExcel(score, buffer);
+    saveExcel({ score, otherStatus }, buffer);
   } catch (err) {
-    ElMessage.error("读取失败", err);
+    ElMessage.error({ message: '读取失败' + err, duration: 1000 });
   }
 }
 

@@ -96,10 +96,18 @@
   </div>
   <!-- 导入导出按钮 -->
   <div class="btn-group">
-    <el-button type="primary" @click="exportExcel">导出excel</el-button>
-    <!-- <input ref="fileInput" type="file" accept=".xls,.xlsx" class="upload-file" @change="importExcel($event as any)" /> -->
+    <el-button type="primary" @click="exportExcel">
+      <el-icon>
+        <Download />
+      </el-icon>
+      导出excel</el-button>
     <el-upload :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
-      <el-button type="primary">Click to upload</el-button>
+      <el-button type="primary">
+        <el-icon>
+          <Upload />
+        </el-icon>
+        导入excel文件
+      </el-button>
     </el-upload>
   </div>
 
@@ -135,7 +143,7 @@
   </el-dialog>
 
   <!--  弹出的团队卡对话框 -->
-  <el-dialog draggable destroy-on-close v-model="dialogVisible" :title="`第${data.teamId}组学习卡`" width="720"
+  <el-dialog draggable destroy-on-close v-model="dialogVisible" :title="`第${data.teamId}组学习卡`" width="750"
     style="background-color: #f8f6f6">
     <!--  有内容加载  -->
     <div v-if="data.teamId" class="student_info">
@@ -162,14 +170,15 @@
 </template>
 
 <script lang="ts" setup>
-import type { UploadProps } from 'element-plus'
+import type { UploadProps } from 'element-plus';
+import { Upload, Download } from '@element-plus/icons-vue';
 import ExcelJS from "exceljs";
 import StudentTable from "@/components/studentInfo/studentTable.vue";
 import TeamTable from "@/components/teamInfo/teamTable.vue";
 import StudentInfo from "@/components/studentInfo/studentInfo.vue";
 import TeamInfo from "@/components/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
-import { ElMessage } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
 import { getFileList } from "@/utils/api/apiPromiss";
 import { uploadExcelFile } from "@/utils/api/apiPromiss";
@@ -397,8 +406,14 @@ const chlickSeat = (seatId: number) => {
   // data.studentList的id是 data.studentList的数组下标 所以-1
   data.studentName = data.studentList[seatId - 1].stu;
   // 如果选中的位置没有名字，则不执行后面代码
-  if (data.studentName == '**') return false;
-
+  if (data.studentName == '**') {
+    ElNotification.warning({
+      title: "提示",
+      message: "改座位并没有学生，可在此处添加学生信息，或选择其他座位",
+      duration: 2000
+    });
+    return false;
+  }
   dialogVisibleForStu.value = true;
 }
 
@@ -426,8 +441,23 @@ const chlickTeam = (seatId: number) => {
   data.selectTeamList.push(seatId);
   // data.studentList的id是 data.studentList的数组下标 所以-1
   data.teamId = importFile.teamIdList[seatId - 1];
+  // console.log("data.teamId", data.teamId);
   // data.teamId = data.teamList[seatId - 1];
   // 如果选中的位置没有名字，则不执行后面代码
+  for (let i = 0; i < importFile.teamLists.length; i++) {
+    const element = importFile.teamLists[i];
+    // 下标从0开始，所以要加1
+    if (i + 1 == data.teamId) {
+      if (!element.leader || element.leader == "" || element.leader == "**" || element.leader == '"') {
+        ElNotification.warning({
+          title: "提示",
+          message: "此团队没有组长和成员，请先添加！",
+          duration: 2000
+        });
+        return false;
+      }
+    }
+  }
   dialogVisible.value = true;
 }
 

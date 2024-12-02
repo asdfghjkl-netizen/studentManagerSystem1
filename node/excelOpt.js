@@ -136,4 +136,7 @@ function parseExcelFile(workbook) {
     }
 }
 
-module.exports = parseExcelFile;
+module.exports = {
+    parseExcelFile,
+    parseWorkSheetLong
+};

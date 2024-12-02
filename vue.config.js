@@ -193,10 +193,6 @@ module.exports = {
     port: 8033,  // Vue 3 开发服务器的端口  
     hot: true,   // 启用热更新
     open: true,  // 自动打开浏览器
-    watchOptions: {
-      poll: 1000,  // 每秒询问的文件变更
-      aggregateTimeout: 500,  // 防抖时间
-    }, // 配置文件监听
     quiet: true  // 如果使用webpack-dev-server，需要设为true，禁止显示devServer的console信息
   },
 }

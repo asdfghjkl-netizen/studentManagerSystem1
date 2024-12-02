@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { getExcelFile } from "@/utils/api/apiPromiss";
 import { watchEffect } from "vue";
+import { ElMessage } from "element-plus";
 
 // defineStore('userInfo',{})  userInfo就是这个仓库的名称name
 export const importExcelFile = defineStore('excelFile', {
@@ -24,7 +25,7 @@ export const importExcelFile = defineStore('excelFile', {
     actions: {
         // 导入excel 以文件名导入
         importExcel(uploadFile) {
-            console.log("uploadFile", uploadFile);
+            // console.log("uploadFile", uploadFile);
             if (!uploadFile.name) {
                 console.log('No file selected');
                 return;
@@ -47,6 +48,7 @@ export const importExcelFile = defineStore('excelFile', {
                     this.computerRoomSeat = res.data.parsedData.computerRoomSeat;
                     this.students = res.data.parsedData.students;
                     this.buffer = res.data.buffer;
+                    ElMessage.success({ message: res.message, duration: 1000 })
                 })
             })
             console.log("this.buffer", this.buffer);
@@ -84,6 +86,6 @@ export const importExcelFile = defineStore('excelFile', {
         key: "excelFile",
         path: ["students", "classSeat", "computerRoomSeat", "files",
             "teamLists", "ecxelFile", "teamLeaders", "teamIdList",
-            "teamMembers"]
+            "teamMembers", "msg"]
     },
 })

@@ -180,7 +180,7 @@ import TeamInfo from "@/components/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { ElMessage, ElNotification } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
-import { getFileList } from "@/utils/api/apiPromiss";
+import { getFileList, getStudentStatus, getTeamStatus } from "@/utils/api/apiPromiss";
 import { uploadExcelFile } from "@/utils/api/apiPromiss";
 
 const importFile = importExcelFile();
@@ -326,7 +326,6 @@ const importExcel: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
   try {
     importFile.importExcel(uploadFile);
     fileInput.value = importFile.fileName;
-    ElMessage.success("导入成功");
   } catch (error) {
     ElMessage.error(error);
   }
@@ -383,7 +382,6 @@ const exportExcel = () => {
       event.returnValue = "我在这写点东西...";
     };
   });
-
 }
 
 // 学生座位表的选择
@@ -510,11 +508,28 @@ const getImgURL = () => {
   // console.log(myArray);
   reqStudentIMGURL.value = myArray[0]
 }
-
+const stuSta = ref({});
 watchEffect(() => {
   importFile.getTeamList(data.teamLists);
   handleSelectRoom(radio1.value);
   getclassName();
+  const validStudents = data.studentList.filter(student =>
+    student.stu && student.stu !== '**' && student.stu !== '');
+  for (const student of validStudents) {
+    // console.log(student, student.stu);
+    getStudentStatus(student.stu).then(res => {
+      // console.log(res)
+      stuSta.value = res.data;
+    });
+  }
+  for (let i = 0; i < data.teamList.length; i++) {
+    const team = data.teamList[i];
+    console.log("team", team);
+    getTeamStatus(team).then(res => {
+      console.log("teamstatus", res);
+      
+    });
+  }
 })
 onMounted(() => {
   getImgURL()

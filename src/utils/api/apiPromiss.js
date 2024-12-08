@@ -19,17 +19,16 @@ export function getFileList() {
 }
 
 // 读取文件（传入文件名）
-export function getExcelFile(fileName) {
+export function getExcelFile(data) {
     // console.log("fileName", fileName);
     return instance({
         url: 'get-excel-file',
         method: 'post',
-        // data: { file: fileName }
-        data: fileName
+        data
     })
 }
 
-// 获取学生学习数据
+// 存储学生学习数据
 export function getStudentStatus(student) {
     // console.log("fileName", fileName);
     return instance({
@@ -39,7 +38,7 @@ export function getStudentStatus(student) {
     })
 }
 
-// 获取团队学习数据
+// 存储团队学习数据
 export function getTeamStatus(team) {
     // console.log("fileName", fileName);
     return instance({

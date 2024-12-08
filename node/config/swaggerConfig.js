@@ -15,7 +15,10 @@ const swaggerInit = (app, baseUrl) => {
       },
     },
     // 重点，指定 swagger-jsdoc 去哪个路由下收集 swagger 注释
-    apis: [path.join(process.cwd(), '/*.js')],
+    apis: [
+      path.join(process.cwd(), '/*.js'),
+      path.join(process.cwd(), '/node/**/*.js'),
+    ],
   }
   const swaggerSpec = swaggerJSDoc(options)
 

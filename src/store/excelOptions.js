@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { getExcelFile } from "@/utils/api/apiPromiss";
 import { watchEffect } from "vue";
 import { ElMessage } from "element-plus";
+// import { getStudentStatus } from "@/utils/api/apiPromiss";
 
 // defineStore('userInfo',{})  userInfo就是这个仓库的名称name
 export const importExcelFile = defineStore('excelFile', {
@@ -13,11 +14,7 @@ export const importExcelFile = defineStore('excelFile', {
         computerRoomSeat: [], // 获取学生机房座位表的数据
         files: File,          // 获取上传的文件的文件对象
         fileName: '',         // 获取excel文件名
-        buffer: '',           // 获取上传的文件的二进制流
-
-        teamLeaders: [],      // 获取团队负责人
-        teamIdList: [],       // 获取团队id
-        teamMembers: [],      // 获取团队成员
+        // buffer: '',           // 获取上传的文件的二进制流
     }),
     // 计算属性 
     getters: {},
@@ -38,16 +35,22 @@ export const importExcelFile = defineStore('excelFile', {
             // 设置原始文件信息
             this.files = uploadFile.raw;
             // console.log('this.files', this.files);
-            
+
             // 获取学生信息
             watchEffect(() => {
-                getExcelFile({ file: this.fileName }).then(res => {
+                getExcelFile({ fileName: this.fileName }).then(res => {
                     console.log("resFile", res);
-                    this.teamLists = res.data.parsedData.teamLists;
-                    this.classSeat = res.data.parsedData.classSeat;
-                    this.computerRoomSeat = res.data.parsedData.computerRoomSeat;
-                    this.students = res.data.parsedData.students;
-                    this.buffer = res.data.buffer;
+                    this.teamLists = res.data.teamLists;
+                    this.classSeat = res.data.classSeat;
+                    this.computerRoomSeat = res.data.computerRoomSeat;
+                    this.students = res.data.students;
+                    // res.data.students.forEach(student => {
+                    //     // console.log("student", student.stuName);
+                    //     getStudentStatus(student.stuName).then(res => {
+                    //         console.log("student", res)
+                    //     });
+                    // });
+                    // this.buffer = res.data.buffer;
                     ElMessage.success({ message: res.message, duration: 1000 })
                 })
             })
@@ -85,7 +88,6 @@ export const importExcelFile = defineStore('excelFile', {
         storage: localStorage,
         key: "excelFile",
         path: ["students", "classSeat", "computerRoomSeat", "files",
-            "teamLists", "ecxelFile", "teamLeaders", "teamIdList",
-            "teamMembers", "msg"]
+            "teamLists", "ecxelFile", "buffer"]
     },
 })

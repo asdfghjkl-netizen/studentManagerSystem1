@@ -1,17 +1,17 @@
 <template>
   <!--  右边部分  -->
   <div class="student-info-right">
-    <!--  小组情况  -->
+    <!--  小组情况 {{ memberScore }} {{ isLeaderorMember }}-->
     <div class="student-team">
       <div class="stdent-team-name">
         <h1>
-          第{{ getTeamId }}团队{{ isLeaderorMember }}：{{ studentName }}
+          第{{ getTeamId }}团队：{{ studentName }}
         </h1>
       </div>
       <div class="stdent-team-source">
         <h2>
           <span style="margin-right: 40px;">小组得分 {{ totalTeamScore }}分</span>
-          <span>个人贡献 {{ memberScore }}分</span>
+          <span>个人贡献 分</span>
         </h2>
       </div>
     </div>
@@ -53,19 +53,12 @@
 
 <script lang="ts" setup>
 import { getDateTime } from "@/utils/dateTime";
-import { importExcelFile } from "@/store/excelOptions";
-import { onMounted, ref, defineProps, reactive, computed, watch, watchEffect } from "vue";
-import ExcelJS from "exceljs";
-import { getTeamIdforMember } from "@/utils/getTeamMember";
+import { onMounted, ref, defineProps, reactive, watch, watchEffect } from "vue";
+import { addStudentTableData } from "@/utils/api/DataOptions";
 import { ElMessage } from "element-plus";
-import { studentInfo } from "@/utils/dataOption/getTableData";
-import { saveExcel, changeSorceforExcelData } from "@/utils/dataOption/saveExcel";
-import { teamMembersScore, getTeamTotalScore } from "@/utils/dataOption/getScore";
 
 // 小组得分（总）
 const totalTeamScore = ref(0);
-// 创建一个pinia实例, getTeamInfo
-const importFile = importExcelFile();
 // 获取时间数据
 const dateTime = ref("");
 // 定义学生课程状态列表
@@ -123,30 +116,13 @@ const otherStatus = ref("");
 // 提取studyStatus的字符串
 const studyStatusString = ref("");
 // 获取学生学习状态
-const studentStatus = ref([]);
+// const studentStatus = ref([]);
 // 获取学生所在组队id
 const getTeamId = ref("");
-
 const props = defineProps({
   studentName: { type: String, default: "" },
   teamList: { type: Array, default: () => [] },
   isStudent: { type: Boolean, default: true },
-})
-
-// 判断是否为组员或组长
-const isLeaderorMember = computed(() => {
-  const isTeamLeader = ref("");
-  importFile.teamLeaders.includes(props.studentName) ? isTeamLeader.value = "组长" : isTeamLeader.value = "组员"
-  return isTeamLeader.value;
-})
-
-// 计算每个组员总分
-const memberScore = computed(() => {
-  let totalScore = 0;
-  totalScore = studentStatus.value?.reduce((acc, cur) => {
-    return acc + cur.score;
-  }, 0) || 0;
-  return totalScore;
 })
 
 // 课程状态的字符提取
@@ -161,73 +137,34 @@ const handleChangeValue = (index: any) => {
 
 // 提交事件
 const submit = async () => {
-  //创建Workbook实例
-  const workbook = new ExcelJS.Workbook();
-
   try {
-    // 从 buffer中加载数据解析
-    await workbook.xlsx.load(importFile.buffer.data);
-
-    let worksheet = workbook.getWorksheet(props.studentName);
-    // 创建要写入的数据
-    const data = [{
+    const addData = await addStudentTableData({
+      student: props.studentName,
       dateTime: dateTime.value,
-      studyStatus: studyStatusString.value,
-      score: score.value
-    }];
+      score: score.value,
+      studyStatus: studyStatusString.value
+    });
+    console.log("addData", addData);
 
-    // 判断当前学生是否已存在，如果不存在，则创建新的工作表并添加数据；否则在原有工作表中添加数据
-    if (!worksheet) {
-      let stuWorkSheet = workbook.addWorksheet(props.studentName);
-      // 添加表头
-      stuWorkSheet.columns = [
-        { header: "时间", key: "dateTime", width: 25 },
-        { header: props.studentName + '学习表现', key: "studyStatus", width: 20 },
-        { header: "得分", key: "score", width: 10 },
-      ];
-      // 设置表头居中 和 加粗
-      stuWorkSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-      stuWorkSheet.getRow(1).font = { bold: true };
-      // 写入数据
-      stuWorkSheet.addRows(data);
-    } else {
-      // 1. 获取最后一行的行号，
-      let lastRowNumber = worksheet.lastRow.number;
-      // 再根据行号获取最后一行的数据 
-      worksheet.addRow(lastRowNumber + 1).values = [
-        dateTime.value,
-        studyStatusString.value,
-        score.value
-      ];
-    }
-
-    // 更改excel文件中的小组工作表中的分数数据
-    let teamWorkSheet = workbook.getWorksheet("team");
-    await changeSorceforExcelData(teamWorkSheet, getTeamId.value, {
-      totalTeamScore: totalTeamScore.value + score.value
-    }, score.value, null, props.isStudent, null);
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    saveExcel({ score, otherStatus }, buffer);
+    ElMessage.success({ message: '提交成功', duration: 1000 });
   } catch (err) {
     ElMessage.error({ message: '读取失败' + err, duration: 1000 });
   }
 }
 
-watchEffect(() => {
-  getTeamIdforMember(props.studentName).then(res => { getTeamId.value = res })
-  studentInfo(props.studentName).then(res => { studentStatus.value = res })
-  getDateTime().then(res => { dateTime.value = res });
-  // 获取组队信息
-  getTeamTotalScore(getTeamId.value).then(teamTotalScore => {
-    // console.log("resgetTeamTotalScore", teamTotalScore);
-    // 组队成员学习状态
-    teamMembersScore(getTeamId.value).then(teamMembersScore => {
-      // console.log("resgetTeamId", teamMembersScore);
-      totalTeamScore.value = teamMembersScore + teamTotalScore;
-    })
-  })
-})
+watchEffect(() => { })
+
+let timer;
+watch(
+  () => true,
+  () => {
+    getDateTime().then(res => { dateTime.value = res })
+    timer = setInterval(() => {
+      getDateTime().then(res => { dateTime.value = res })
+    }, 1000); // 每秒更新一次
+    return () => { clearInterval(timer) };
+  }, { immediate: true, flush: 'post' }
+)
 onMounted(() => { handleChangeValue(selectStudyStatus.value) });
 </script>
 

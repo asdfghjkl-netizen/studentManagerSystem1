@@ -6,6 +6,7 @@ const swaggerInit = require('./node/config/swaggerConfig');
 const headerConfig = require('./node/config/requestConfig');
 // 引用路由
 const getExcelDataRouter = require('./node/router/getExcelData');
+const getTableDataRouter = require('./node/router/getTableData');
 const optDataRouter = require('./node/router/optionData');
 const saveToExcelRouter = require('./node/router/saveToExcel');
 
@@ -26,8 +27,9 @@ app.use(bodyParser.json());
 swaggerInit(app)
 // 引用路由
 app.use(getExcelDataRouter);
-app.use(optDataRouter);
+app.use(getTableDataRouter);
 app.use(saveToExcelRouter);
+app.use(optDataRouter);
 
 // 允许跨域请求
 app.all('*', function (req, res, next) { headerConfig(req, res, next) });
@@ -35,7 +37,7 @@ app.all('*', function (req, res, next) { headerConfig(req, res, next) });
 // /file-list 获取文件列表接口
 app.get('/file-list', (req, res) => {
   const files = fs.readdirSync(publicPath);
-  // 找出文件名中包含xlsx或者xls的文件X
+  // 找出文件名中包含xlsx或者xls的文件
   const filesList = files.filter(file => file.includes('.xlsx') || file.includes('.xls'));
   console.log('filesList', filesList);
   res.status(200).json({
@@ -47,5 +49,5 @@ app.get('/file-list', (req, res) => {
 
 // 启动服务器
 app.listen(PORT, () => {
-  console.log(`Server is running on ${publicPath} ${path.join(__dirname, './public')} http://localhost:${PORT}`);
+  console.log(`Server is running on ${publicPath} http://localhost:${PORT}`);
 });

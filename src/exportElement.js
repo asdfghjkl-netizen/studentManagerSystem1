@@ -19,7 +19,15 @@ import {
     ElIcon,         // 图标
 } from 'element-plus'
 
+// element-plus 图标
+import {
+    InfoFilled,  // 信息
+    Upload,      // 上传
+    Download,    // 下载
+} from '@element-plus/icons-vue'
+
 export {
+    // 组件
     ElButtonGroup,
     ElButton,
     ElRadioGroup,
@@ -37,4 +45,8 @@ export {
     ElInputNumber,
     ElPopconfirm,
     ElIcon,
+    // 图标
+    InfoFilled,
+    Upload,
+    Download,
 };

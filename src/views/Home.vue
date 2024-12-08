@@ -6,8 +6,6 @@
       <el-radio value="1" size="large" border>班级座位表</el-radio>
       <el-radio value="2" size="large" border style="margin-left: -20px;">机房座位表</el-radio>
     </el-radio-group>
-    <!-- <el-switch v-model="studentRandom" @change="selectStudent" active-text="选择学生" inactive-color="#409EFF"
-        inactive-text="" /> -->
     <!-- 随机学生选择 -->
     <el-button-group>
       <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
@@ -171,7 +169,6 @@
 
 <script lang="ts" setup>
 import type { UploadProps } from 'element-plus';
-import { Upload, Download } from '@element-plus/icons-vue';
 import ExcelJS from "exceljs";
 import StudentTable from "@/components/studentInfo/studentTable.vue";
 import TeamTable from "@/components/teamInfo/teamTable.vue";
@@ -211,11 +208,12 @@ const data = reactive({
   isStudent: true,                 // 判断是否是学生的信息块
   isStudentData: true,             // 判断是否是学生的数据块
 })
+// 过滤掉无效的学生
+let stuSta = ref({});
 
 // 随机选择学生
 const selectStudent = () => {
   try {
-    // 过滤掉无效的学生
     const validStudents = data.studentList.filter(student =>
       student.stu && student.stu !== '**' && student.stu !== '');
     // 获取所有有效的学生索引
@@ -322,10 +320,34 @@ const getclassName = () => {
 
 // 导入excel   event: { target: { files: any } }
 const importExcel: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
-  console.log('uploadFile', uploadFile, uploadFiles);
+  console.log(uploadFile, uploadFiles);
+  importFile.importExcel(uploadFile);
+  fileInput.value = importFile.fileName;
+
+  // 使用 setTimeout 延时 2 秒
+  // const delay = Math.floor(Math.random() * 1000) + 4000; // 随机延时 4 秒
+  setTimeout(() => {
+    ImportFile();
+  }, 4000);
+}
+// 解析文件 -- 发送给后端操作
+const ImportFile = () => {
   try {
-    importFile.importExcel(uploadFile);
-    fileInput.value = importFile.fileName;
+    for (let i = 0; i < data.teamList.length; i++) {
+      const team = data.teamList[i];
+      // console.log("team", team);
+      getTeamStatus(team).then(res => {
+        console.log("teamstatus", res);
+      });
+    }
+    importFile.students.forEach(student => {
+      console.log("student", student.stuName);
+      getStudentStatus(student.stuName).then(res => {
+        console.log("student", res)
+        stuSta.value = res.data;
+        // console.log("stuSta", stuSta);
+      });
+    });
   } catch (error) {
     ElMessage.error(error);
   }
@@ -407,7 +429,7 @@ const chlickSeat = (seatId: number) => {
   if (data.studentName == '**') {
     ElNotification.warning({
       title: "提示",
-      message: "改座位并没有学生，可在此处添加学生信息，或选择其他座位",
+      message: "该座位并没有学生，可在此处添加学生信息，或选择其他座位",
       duration: 2000
     });
     return false;
@@ -438,24 +460,10 @@ const chlickTeam = (seatId: number) => {
     * 则取消被选中的（selectTeamList 的 index 为0的）*/
   data.selectTeamList.push(seatId);
   // data.studentList的id是 data.studentList的数组下标 所以-1
-  data.teamId = importFile.teamIdList[seatId - 1];
+  // data.teamId = importFile.teamIdList[seatId - 1];
   // console.log("data.teamId", data.teamId);
-  // data.teamId = data.teamList[seatId - 1];
-  // 如果选中的位置没有名字，则不执行后面代码
-  for (let i = 0; i < importFile.teamLists.length; i++) {
-    const element = importFile.teamLists[i];
-    // 下标从0开始，所以要加1
-    if (i + 1 == data.teamId) {
-      if (!element.leader || element.leader == "" || element.leader == "**" || element.leader == '"') {
-        ElNotification.warning({
-          title: "提示",
-          message: "此团队没有组长和成员，请先添加！",
-          duration: 2000
-        });
-        return false;
-      }
-    }
-  }
+  data.teamId = data.teamList[seatId - 1];
+
   dialogVisible.value = true;
 }
 
@@ -508,28 +516,11 @@ const getImgURL = () => {
   // console.log(myArray);
   reqStudentIMGURL.value = myArray[0]
 }
-const stuSta = ref({});
+
 watchEffect(() => {
   importFile.getTeamList(data.teamLists);
   handleSelectRoom(radio1.value);
   getclassName();
-  const validStudents = data.studentList.filter(student =>
-    student.stu && student.stu !== '**' && student.stu !== '');
-  for (const student of validStudents) {
-    // console.log(student, student.stu);
-    getStudentStatus(student.stu).then(res => {
-      // console.log(res)
-      stuSta.value = res.data;
-    });
-  }
-  for (let i = 0; i < data.teamList.length; i++) {
-    const team = data.teamList[i];
-    console.log("team", team);
-    getTeamStatus(team).then(res => {
-      console.log("teamstatus", res);
-      
-    });
-  }
 })
 onMounted(() => {
   getImgURL()
@@ -560,10 +551,21 @@ onMounted(() => {
     cursor: pointer;
   }
 
-  .seat.active {
-    background: red;
-    color: #fff;
+  .seat:hover {
+    background: rgba(0, 0, 255, 0.1);
+    border: solid 1px blue;
+    color: #000;
+    box-shadow: 0 0 5px #000;
+    cursor: pointer;
   }
+
+  // .seat.active {
+  //   background: rgba(0, 0, 255, 0.1);
+  //   border: solid 1px blue;
+  //   color: #000;
+  //   box-shadow: 0 0 5px #000;
+  //   cursor: pointer;
+  // }
 
   ::v-deep(.el-col) {
     margin: 0.5rem 0;

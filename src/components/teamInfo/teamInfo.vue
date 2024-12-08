@@ -53,17 +53,10 @@
 </template>
 
 <script lang="ts" setup>
-import { importExcelFile } from "@/store/excelOptions";
-import { onMounted, ref, defineProps, reactive, computed, watch, watchEffect } from "vue";
-import ExcelJS from "exceljs";
+import { onMounted, ref, defineProps, reactive, watch, watchEffect } from "vue";
 import { ElMessage } from "element-plus";
 import { getDateTime } from "@/utils/dateTime";
-import { getTeamInfo } from "@/utils/dataOption/getTableData";
-import { saveExcel, changeSorceforExcelData } from "@/utils/dataOption/saveExcel";
-import { teamMembersScore } from "@/utils/dataOption/getScore";
 
-// 创建一个pinia实例
-const importFile = importExcelFile();
 // 获取时间数据
 const dateTime = ref("");
 // 定义学生课程状态列表
@@ -94,25 +87,16 @@ const otherStatus = ref("");
 // 提取studyStatus的字符串
 const studyStatusString = ref("");
 // 定义团队学习状态
-const teamStatus = ref([]);
+// const teamStatus = ref([]);
 // 获取组分数
 const teamMemberScore = ref(0);
 // 获取小组总分数
 const teamTotalScoreAll = ref(0);
 
-// 接收父组件传递过来的studentName
-const props = defineProps({
+// 接收父组件传递过来的数据  const props = 
+defineProps({
   teamId: { type: String, default: "" },
   isStudent: { type: Boolean, default: false },
-})
-
-// 计算该组团队分
-const teamScore = computed(() => {
-  let totalScore = 0;
-  totalScore = teamStatus.value.reduce((acc, cur) => {
-    return acc + cur.score;
-  }, 0);
-  return totalScore;
 })
 
 // 课程状态的字符提取
@@ -127,69 +111,26 @@ const handleChangeValue = (index: any) => {
 
 // 提交事件
 const submit = async () => {
-  let teamId = "第" + props.teamId + "组";
-  //创建Workbook实例
-  const workbook = new ExcelJS.Workbook();
-
   try {
-    // 从 buffer中加载数据解析
-    await workbook.xlsx.load(importFile.buffer.data);
-
-    let worksheet = workbook.getWorksheet(teamId)
-    // 创建要写入的数据
-    const data = [{
-      dateTime: dateTime.value,
-      studyStatus: studyStatusString.value,
-      score: score.value
-    }];
-
-    // 判断当前学生是否已存在，如果不存在，则创建新的工作表并添加数据；否则在原有工作表中添加数据
-    if (!worksheet) {
-      let stuWorkSheet = workbook.addWorksheet(teamId);
-      // 添加表头
-      stuWorkSheet.columns = [
-        { header: "时间", key: "dateTime", width: 25 },
-        { header: teamId + '学习表现', key: "studyStatus", width: 20 },
-        { header: "得分", key: "score", width: 10 },
-      ];
-      // 设置表头居中 和加粗
-      stuWorkSheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-      stuWorkSheet.getRow(1).font = { bold: true };
-      // 写入数据
-      stuWorkSheet.addRows(data);
-    } if (worksheet) {
-      // 1. 获取最后一行的行号，
-      let lastRowNumber = worksheet.lastRow.number;
-      // 再根据行号获取最后一行的数据
-      worksheet.addRow(lastRowNumber + 1).values = [
-        dateTime.value,
-        studyStatusString.value,
-        score.value
-      ];
-    }
-
-    // 更改excel文件中的小组工作表中的分数数据
-    let teamWorkSheet = workbook.getWorksheet("team");
-    await changeSorceforExcelData(teamWorkSheet, props.teamId, {
-      teamScore: teamScore.value + score.value,
-      totalTeamScore: teamTotalScoreAll.value + score.value,
-      teamMemberScore: teamMemberScore.value
-    }, score.value, null, props.isStudent, null);
-
-    const buffer = await workbook.xlsx.writeBuffer();
-    saveExcel({ score, otherStatus }, buffer);
+    ElMessage.success({ message: '提交成功', duration: 1000 });
   } catch (error) {
     ElMessage.error({ message: '读取失败' + error, duration: 1000 });
   }
 }
 
-watchEffect(() => {
-  teamMembersScore(props.teamId).then(res => { teamMemberScore.value = res })
-  getDateTime().then(res => { dateTime.value = res });
-  getTeamInfo(props.teamId).then(res => { teamStatus.value = res })
-  teamScore.value;
-  teamTotalScoreAll.value = teamScore.value + teamMemberScore.value;
-})
+watchEffect(() => {})
+
+let timer;
+watch(
+  () => true,
+  () => {
+    getDateTime().then(res => { dateTime.value = res })
+    timer = setInterval(() => {
+      getDateTime().then(res => { dateTime.value = res })
+    }, 1000); // 每秒更新一次
+    return () => { clearInterval(timer) };
+  }, { immediate: true, flush: 'post' }
+)
 onMounted(() => { handleChangeValue(selectStudyStatus.value) });
 </script>
 

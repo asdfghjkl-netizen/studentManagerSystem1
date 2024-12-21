@@ -7,9 +7,15 @@
       <el-radio value="2" size="large" border style="margin-left: -20px;">机房座位表</el-radio>
     </el-radio-group>
     <!-- 随机学生选择 -->
-    <el-button-group>
+    <el-button-group style="margin-right: 30px;">
       <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
       <el-button type="info" plain @click="data.selectList.splice(0)">取消选择</el-button>
+    </el-button-group>
+    <!-- 成绩分数选择 -->
+    <el-button-group>
+      <el-button type="success" plain>期中</el-button>
+      <el-button type="success" plain>期末</el-button>
+      <el-button type="success" plain>平时分</el-button>
     </el-button-group>
   </div>
 
@@ -36,8 +42,8 @@
       <el-col :span="2">
         <el-row v-for="item in teamList['1']" :key="item">
           <el-col :span="20">
-            <div :class="['seat', data.selectTeamList.indexOf(item) > -1 ? 'active' : '']" @click="addTeam(item)">
-              <h3 style="color: red;">{{ item }}组</h3>
+            <div class="seat" @click="addTeam(item)">
+              <h3 style="color: red;">第{{ item }}组</h3>
             </div>
           </el-col>
         </el-row>
@@ -45,9 +51,9 @@
       <el-col :span="7" style="margin-left: -15px;">
         <el-row :gutter="20">
           <el-col :span="6" v-for="item in list['0']" :key="item">
-            <div :class="['seat', data.selectList.indexOf(item) > -1 ? 'active' : '']" @click="add(item)">
-              <h3 :style="{ color: importFile.teamLeaders.includes(data.stuSeat[item - 1].stu) ? 'blue' : '' }"
-                v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
+            <!-- :class="['seat', data.selectList.indexOf(item) > -1 ? 'active' : '']" -->
+            <div class="seat" @click="add(item)">
+              <h3 v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
               <h3 v-else></h3>
             </div>
           </el-col>
@@ -61,8 +67,9 @@
       <el-col :span="2">
         <el-row v-for="item in teamList['0']" :key="item">
           <el-col :span="20">
-            <div :class="['seat', data.selectTeamList.indexOf(item) > -1 ? 'active' : '']" @click="addTeam(item)">
-              <h3 style="color: red;">{{ item }}组</h3>
+            <!-- :class="['seat', data.selectTeamList.indexOf(item) > -1 ? 'active' : '']" -->
+            <div class="seat" @click="addTeam(item)">
+              <h3 style="color: red;">第{{ item }}组</h3>
             </div>
           </el-col>
         </el-row>
@@ -70,9 +77,9 @@
       <el-col :span="10" style="margin-left: -15px;">
         <el-row :gutter="20">
           <el-col :span="4" v-for="item in list['1']" :key="item">
-            <div :class="['seat', data.selectList.indexOf(item) > -1 ? 'active' : '']" @click="add(item)">
-              <h3 :style="{ color: importFile.teamLeaders.includes(data.stuSeat[item - 1].stu) ? 'blue' : '' }"
-                v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
+            <!-- :class="['seat', data.selectList.indexOf(item) > -1 ? 'active' : '']" -->
+            <div class="seat" @click="add(item)">
+              <h3 v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
               <h3 v-else></h3>
             </div>
           </el-col>
@@ -116,20 +123,16 @@
       destroy-on-close==>当关闭 Dialog 时，销毁其中的元素
     -->
   <el-dialog draggable destroy-on-close v-model="dialogVisibleForStu" :title="`${data.studentName}的学习卡`" width="720"
-    style="background-color: #f8f6f6">
-    <!--  有内容加载  -->
+    style="background-color: #f8f6f6; ">
+    <!--  有内容加载 height: 85%; -->
     <div v-if="data.studentName" class="student_info">
       <div class="top">
-        <div class="stu-img">
-          <el-image :src="require(`/public/images/${reqStudentIMGURL}/${data.studentName}.jpg`)" :alt="data.studentName"
-            style="height: 315px;" class="img" />
-        </div>
-        <StudentInfo :student-name="data.studentName" :team-list="data.teamList" :is-student="data.isStudent" />
+        <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL" />
       </div>
       <!--  下部表格部分:team-leaders="data.teamLeaders"   -->
-      <div class="student-info-bottom">
-        <StudentTable :student-name="data.studentName" :is-student-data="data.isStudentData" />
-      </div>
+      <!-- <div class="student-info-bottom">
+        <StudentTable :student-name="data.studentName" />
+      </div> -->  
     </div>
     <!--  无内容加载  -->
     <span v-else>无法加载该地区图片和信息</span>
@@ -141,26 +144,23 @@
   </el-dialog>
 
   <!--  弹出的团队卡对话框 -->
-  <el-dialog draggable destroy-on-close v-model="dialogVisible" :title="`第${data.teamId}组学习卡`" width="750"
+  <el-dialog draggable destroy-on-close v-model="dialogVisibleForTeam" :title="`第${data.teamId}组学习卡`" width="750"
     style="background-color: #f8f6f6">
     <!--  有内容加载  -->
     <div v-if="data.teamId" class="student_info">
       <div class="top">
-        <div class="stu-img">
-          <el-image :src="require('../../public/images/image/team.jpg')" style="height: 250px;" class="img" />
-        </div>
-        <TeamInfo :team-id="data.teamId" :is-student="data.isStudent = false" />
+        <TeamInfo :team-id="data.teamId" />
       </div>
       <!--  下部表格部分  -->
-      <div class="student-info-bottom">
-        <TeamTable :team-id="data.teamId" :is-student-data="data.isStudentData = false" />
-      </div>
+      <!-- <div class="student-info-bottom">
+        <TeamTable :team-id="data.teamId" />
+      </div> -->
     </div>
     <!--  无内容加载  -->
     <span v-else>无法加载该地区图片和信息</span>
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="primary" @click="dialogVisible = false">确定</el-button>
+        <el-button type="primary" @click="dialogVisibleForTeam = false">确定</el-button>
       </div>
     </template>
   </el-dialog>
@@ -170,14 +170,15 @@
 <script lang="ts" setup>
 import type { UploadProps } from 'element-plus';
 import ExcelJS from "exceljs";
-import StudentTable from "@/components/studentInfo/studentTable.vue";
-import TeamTable from "@/components/teamInfo/teamTable.vue";
+// import StudentTable from "@/components/studentInfo/studentTable.vue";
+// import TeamTable from "@/components/teamInfo/teamTable.vue";
 import StudentInfo from "@/components/studentInfo/studentInfo.vue";
 import TeamInfo from "@/components/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { ElMessage, ElNotification } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
-import { getFileList, getStudentStatus, getTeamStatus } from "@/utils/api/apiPromiss";
+import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
+import { getFileList } from "@/utils/api/apiPromiss";
 import { uploadExcelFile } from "@/utils/api/apiPromiss";
 
 const importFile = importExcelFile();
@@ -186,16 +187,17 @@ const fileInput = ref("");
 const radio1 = ref("1");
 // 定义学生卡对话框的状态
 const dialogVisibleForStu = ref(false)
-const dialogVisible = ref(false)
+const dialogVisibleForTeam = ref(false)
 // 获取图片路径
-const reqStudentIMGURL = ref([]);
+const reqStudentIMGURL = ref([]) as any;
+const rows = 7;     // 行数
+const cols = 10;    // 列数
 const data = reactive({
   stuSeat: [] as any[],              // 获取学生的数据==》studentList的对象
-  // 模拟后台返回的座位表
-  seatList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-    21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-    41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-    61, 62, 63, 64, 65, 66, 67, 68, 69, 70],
+  //  变量的值动态生成一个 7 行 10 列的二维数组，并且座位编号也会按照顺序排列。
+  seatList: Array.from({ length: rows }, (_, rowIndex) =>
+    Array.from({ length: cols }, (_, colIndex) => rowIndex * cols + colIndex + 1)
+  ) as any[][],
   // 模拟后台返回的团队列表getExcelFile
   teamList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
   studentList: {} as any,          // 将seatList和stuSeat合并成新的对象
@@ -204,16 +206,52 @@ const data = reactive({
   selectTeamList: [] as number[],  // 获取所选团队的id
   studentName: '' as string,       // 获取学生姓名
   teamId: '' as any,               // 获取团队id
-  teamLists: importFile.teamLists, // 获取团队列表 
-  isStudent: true,                 // 判断是否是学生的信息块
-  isStudentData: true,             // 判断是否是学生的数据块
 })
-// 过滤掉无效的学生
-let stuSta = ref({});
+
+// （座位表）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
+const list = computed(() => {
+  let arr = [[] as number[], [] as number[]];  // 定义二维数组的变位表
+
+  data.seatList.forEach(row => {
+    row.forEach(item => {
+      // 第一、二列添加到一个数组
+      if (item % 10 == 1 || item % 10 == 2 || item % 10 == 3 || item % 10 == 4) {
+        arr['0'].push(item);
+      } else {
+        // 中间列
+        arr['1'].push(item);
+      }
+    });
+  });
+
+  return arr;
+})
+
+// （组位）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
+const teamList = computed(() => {
+  let arr = [[] as number[], [] as number[]]  // 定义二维数组的变位表
+
+  for (const key in data.teamList) {
+    let item = data.teamList[key]
+    // 第一、二列添加到一个数组
+    if (item % 2 == 0) {
+      arr['0'].push(item)
+      // 第七、八列添加打一个数组, ==7位列数减一(根据自己需求来)
+    } else {
+      // 中间列
+      arr['1'].push(item);
+    }
+  }
+  // 在循环结束后对两个数组进行倒序
+  arr['0'].reverse();
+  arr['1'].reverse();
+  return arr
+})
 
 // 随机选择学生
 const selectStudent = () => {
   try {
+    data.selectList = [];
     const validStudents = data.studentList.filter(student =>
       student.stu && student.stu !== '**' && student.stu !== '');
     // 获取所有有效的学生索引
@@ -244,15 +282,7 @@ const selectStudent = () => {
     // 获取随机选择的座位id，用于标注
     // 如果已选座位列表中已存在该座位，则删除该座位，否则直接添加
     const seatId = randomStudent.seatId;
-    if (data.selectList.indexOf(seatId) > -1) {
-      let index = data.selectList.indexOf(seatId);
-      data.selectList.splice(index, 1);
-    } else if (data.selectList.length > 0) {
-      data.selectList.splice(0);
-      data.selectList.push(seatId);
-    } else {
-      data.selectList.push(seatId);
-    }
+    data.selectList.push(seatId);
     // console.log("randomStudent", randomIndex, randomStudent, data.selectedStuIndices);
     // 弹出学生信息对话框
     dialogVisibleForStu.value = true;
@@ -261,45 +291,6 @@ const selectStudent = () => {
     throw new Error('Failed to select random student');
   }
 }
-
-// （座位表）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
-const list = computed(() => {
-  let arr = [[] as number[], [] as number[]]  // 定义二维数组的变位表
-
-  for (const key in data.seatList) {
-    let item = data.seatList[key]
-    // 第一、二列添加到一个数组
-    if (item % 10 == 1 || item % 10 == 2 || item % 10 == 3 || item % 10 == 4) {
-      arr['0'].push(item)
-      // 第七、八列添加打一个数组, ==7位列数减一(根据自己需求来)
-    } else {
-      // 中间列
-      arr['1'].push(item)
-    }
-  }
-  return arr
-})
-
-// （组位）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
-const teamList = computed(() => {
-  let arr = [[] as number[], [] as number[]]  // 定义二维数组的变位表
-
-  for (const key in data.teamList) {
-    let item = data.teamList[key]
-    // 第一、二列添加到一个数组
-    if (item % 2 == 0) {
-      arr['0'].push(item)
-      // 第七、八列添加打一个数组, ==7位列数减一(根据自己需求来)
-    } else {
-      // 中间列
-      arr['1'].push(item);
-    }
-  }
-  // 在循环结束后对两个数组进行倒序
-  arr['0'].reverse();
-  arr['1'].reverse();
-  return arr
-})
 
 // 获取班级名称
 const className = ref("");
@@ -324,8 +315,6 @@ const importExcel: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
   importFile.importExcel(uploadFile);
   fileInput.value = importFile.fileName;
 
-  // 使用 setTimeout 延时 2 秒
-  // const delay = Math.floor(Math.random() * 1000) + 4000; // 随机延时 4 秒
   setTimeout(() => {
     ImportFile();
   }, 4000);
@@ -336,16 +325,14 @@ const ImportFile = () => {
     for (let i = 0; i < data.teamList.length; i++) {
       const team = data.teamList[i];
       // console.log("team", team);
-      getTeamStatus(team).then(res => {
-        console.log("teamstatus", res);
+      pushTeamStatusToRedis(team).then(res => {
+        console.log(res);
       });
     }
     importFile.students.forEach(student => {
-      console.log("student", student.stuName);
-      getStudentStatus(student.stuName).then(res => {
-        console.log("student", res)
-        stuSta.value = res.data;
-        // console.log("stuSta", stuSta);
+      // console.log("student", student.stuName);
+      pushStudentStatusToRedis(student.stuName).then(res => {
+        console.log(res)
       });
     });
   } catch (error) {
@@ -406,25 +393,39 @@ const exportExcel = () => {
   });
 }
 
-// 学生座位表的选择
+// 学生座位表的选择(二维数组写法)
 const handleSelectRoom = (event: any) => {
   radio1.value = event;
 
+  // 扁平化 seatList
+  const flatSeatList = data.seatList.flat();
+  // 扁平化 classSeat
+  const classSeatList = importFile.classSeat.flat();
+  // 扁平化 classSeat
+  const computerRoomSeat = importFile.computerRoomSeat.flat();
+
   if (radio1.value == "1") {
-    data.studentList = data.seatList.map((seatId, stu) => ({ seatId, stu: importFile.classSeat[stu] }));
+    data.studentList = flatSeatList.map((seatId, index) => ({
+      seatId,
+      stu: classSeatList[index] !== undefined ? classSeatList[index] : null // 确保不会超出范围
+    }));
   } else {
-    data.studentList = data.seatList.map((seatId, stu) => ({ seatId, stu: importFile.computerRoomSeat[stu] }));
+    data.studentList = flatSeatList.map((seatId, index) => ({
+      seatId,
+      stu: computerRoomSeat[index] !== undefined ? computerRoomSeat[index] : null // 确保不会超出范围
+    }));
   }
   data.stuSeat = data.studentList;
 }
 
-// 点击座位的代码复用
-const chlickSeat = (seatId: number) => {
+// 选择座位表
+const add = (id: number) => {
+  data.selectList = [];
   /** 如果已经有一个被选择（selectList 的 length 大于1），
     * 则取消被选中的（selectList 的 index 为0的）*/
-  data.selectList.push(seatId);
+  data.selectList.push(id);
   // data.studentList的id是 data.studentList的数组下标 所以-1
-  data.studentName = data.studentList[seatId - 1].stu;
+  data.studentName = data.studentList[id - 1].stu;
   // 如果选中的位置没有名字，则不执行后面代码
   if (data.studentName == '**') {
     ElNotification.warning({
@@ -437,52 +438,18 @@ const chlickSeat = (seatId: number) => {
   dialogVisibleForStu.value = true;
 }
 
-// 选择座位表
-const add = (id: number) => {
-  // 已选则删除，否则添加
-  if (data.selectList.indexOf(id) > -1) {
-    let index = data.selectList.indexOf(id);
-    data.selectList.splice(index, 1);
-  }
-  // 如果有选项，则清空后再添加
-  else if (data.selectList.length > 0) {
-    data.selectList.splice(0);
-    chlickSeat(id);
-  }
-  // 否则直接添加
-  else {
-    chlickSeat(id);
-  }
-}
-
-const chlickTeam = (seatId: number) => {
+// 选择组队列表
+const addTeam = (id: number) => {
+  data.selectTeamList = [];
   /** 如果已经有一个被选择（selectTeamList 的 length 大于1），
     * 则取消被选中的（selectTeamList 的 index 为0的）*/
-  data.selectTeamList.push(seatId);
+  data.selectTeamList.push(id);
   // data.studentList的id是 data.studentList的数组下标 所以-1
   // data.teamId = importFile.teamIdList[seatId - 1];
   // console.log("data.teamId", data.teamId);
-  data.teamId = data.teamList[seatId - 1];
+  data.teamId = data.teamList[id - 1];
 
-  dialogVisible.value = true;
-}
-
-// 选择组队列表
-const addTeam = (id: number) => {
-  // 已选则删除，否则添加
-  if (data.selectTeamList.indexOf(id) > -1) {
-    let index = data.selectTeamList.indexOf(id);
-    data.selectTeamList.splice(index, 1);
-  }
-  // 如果有选项，则清空后再添加
-  else if (data.selectTeamList.length > 0) {
-    data.selectTeamList.splice(0);
-    chlickTeam(id);
-  }
-  // 否则直接添加
-  else {
-    chlickTeam(id);
-  }
+  dialogVisibleForTeam.value = true;
 }
 
 // 搜索图片路径
@@ -518,7 +485,6 @@ const getImgURL = () => {
 }
 
 watchEffect(() => {
-  importFile.getTeamList(data.teamLists);
   handleSelectRoom(radio1.value);
   getclassName();
 })
@@ -590,18 +556,20 @@ onMounted(() => {
 
 .student_info {
   .top {
-    display: flex;
-    align-items: center;
+    // display: flex;
+    // align-items: center;
     margin-bottom: 2rem;
 
-    .stu-img {
-      background-color: white;
+    // .stu-img {
+    //   position: relative;
+    //   top: -100px;
+    //   background-color: white;
 
-      .img {
-        border-radius: 5px;
-        margin: 15px 30px;
-      }
-    }
+    //   .img {
+    //     border-radius: 5px;
+    //     margin: 15px 30px;
+    //   }
+    // }
   }
 }
 </style>

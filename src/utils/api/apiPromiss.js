@@ -27,23 +27,3 @@ export function getExcelFile(data) {
         data
     })
 }
-
-// 存储学生学习数据
-export function getStudentStatus(student) {
-    // console.log("fileName", fileName);
-    return instance({
-        url: 'get-excel-file/student',
-        method: 'post',
-        data: { student }
-    })
-}
-
-// 存储团队学习数据
-export function getTeamStatus(team) {
-    // console.log("fileName", fileName);
-    return instance({
-        url: 'get-excel-file/team',
-        method: 'post',
-        data: { team }
-    })
-}

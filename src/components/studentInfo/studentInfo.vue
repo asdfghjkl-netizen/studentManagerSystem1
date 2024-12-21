@@ -1,8 +1,12 @@
 <template>
   <!--  右边部分  -->
-  <div class="student-info-right">
-    <!--  小组情况 {{ memberScore }} {{ isLeaderorMember }}-->
-    <div class="student-team">
+  <tr class="student-info-right">
+    <td class="stu-img">
+      <el-image :src="require(`../../../public/images/${reqStudentImgUrl}/${studentName}.jpg`)" :alt="studentName"
+        style="height: 315px;" class="img" />
+    </td>
+    <td class="student-team">
+      <!--  小组情况  -->
       <div class="stdent-team-name">
         <h1>
           第{{ getTeamId }}团队：{{ studentName }}
@@ -10,57 +14,90 @@
       </div>
       <div class="stdent-team-source">
         <h2>
-          <span style="margin-right: 40px;">小组得分 {{ totalTeamScore }}分</span>
-          <span>个人贡献 分</span>
+          <span style="margin-right: 40px;">小组得分:{{ totalTeamScore }}分</span>
+          <span>个人贡献:{{ memberScore }}分</span>
         </h2>
       </div>
-    </div>
-    <div class="datetime datetime-title">今日日期：<span class="datetime">{{ dateTime }}</span></div>
-    <!--  学习表现  -->
-    <div class="study">
-      <tr>
-        <td>学习表现：</td>
-        <td>
-          <el-select v-model="selectStudyStatus" placeholder="Select" @change="handleChangeValue" style="width: 240px">
-            <el-option v-for="item in studyStatus" :key="item.value" :label="item.label" :value="item.value" />
-          </el-select>
-        </td>
-      </tr>
-    </div>
-    <!--  其他  -->
-    <div class="other" style="margin-left: 36px;">
-      <tr>
-        <td>其他：</td>
-        <td>
-          <!-- @change="changeOtherStatus" -->
-          <el-input v-model="otherStatus" style="width: 240px" clearable :disabled="selectStudyStatus != 14" />
-        </td>
-      </tr>
-    </div>
-    <!--  得分  -->
-    <div class="source" style="margin-left: 36px;">
-      <tr>
-        <td>得分：</td>
-        <td>
-          <el-input-number v-model="score" />
-          <span class="fen">分</span>
-        </td>
-      </tr>
-    </div>
-    <el-button type="primary" style="width: 100%;" @click.prevent="submit">提交</el-button>
+      <div class="datetime datetime-title">今日日期：<span class="datetime">{{ dateTime }}</span></div>
+      <!--  学习表现  -->
+      <div class="study">
+  <tr>
+    <td>学习表现：</td>
+    <td>
+      <el-select v-model="selectStudyStatus" placeholder="Select" @change="handleChangeValue" style="width: 240px">
+        <el-option v-for="item in studyStatus" :key="item.value" :label="item.label" :value="item.value" />
+      </el-select>
+    </td>
+  </tr>
+  </div>
+  <!--  其他  -->
+  <div class="other" style="margin-left: 36px;">
+    <tr>
+      <td>其他：</td>
+      <td>
+        <!-- @change="changeOtherStatus" -->
+        <el-input v-model="otherStatus" style="width: 240px" clearable :disabled="selectStudyStatus != 14" />
+      </td>
+    </tr>
+  </div>
+  <!--  得分  -->
+  <div class="source" style="margin-left: 36px;">
+    <tr>
+      <td>得分：</td>
+      <td>
+        <el-input-number v-model="score" />
+        <span class="fen">分</span>
+      </td>
+    </tr>
+  </div>
+  <el-button type="primary" style="width: 100%;" @click.prevent="submit">提交</el-button>
+  </td>
+  </tr>
+
+  <div class="table-container" style="position: relative; top: 20px;">
+    <el-table :header-cell-style="{ 'text-align': 'center' }" :cell-style="{ textAlign: 'center' }" empty-text="暂无数据"
+      height="200" :default-sort="{ prop: 'dateTime', order: 'descending' }" :data="tableData"
+      style="width: 100%; text-align: center" border>
+      <el-table-column prop="id" label="序号" width="55">
+        <template #default="scope">
+          {{ scope.$index + 1 }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="dateTime" label="日期" width="180" />
+      <el-table-column prop="studyStatus" :label="`${studentName}学习表现`" width="200" />
+      <el-table-column prop="score" label="得分" width="80" />
+      <el-table-column label="操作" width="100">
+        <template #default="scope">
+          <!--  trigger="hover":icon="InfoFilled" -->
+          <el-popconfirm confirmButtonText="Yes" cancelButtonText="No" icon-color="#626AEF" title="确定删除此信息？"
+            @confirm="handleContextmenu(scope.row, scope.column, $event)" @cancel="cancelEvent" width="auto">
+            <el-icon>
+              <InfoFilled />
+            </el-icon>
+            <template #reference>
+              <el-button type="primary" size="small">删除</el-button>
+            </template>
+          </el-popconfirm>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { getDateTime } from "@/utils/dateTime";
-import { onMounted, ref, defineProps, reactive, watch, watchEffect } from "vue";
-import { addStudentTableData } from "@/utils/api/DataOptions";
+import { onMounted, ref, defineProps, reactive, watch } from "vue";
+import { addStudentTableData, removeStudentTableData, getStudentTableData } from "@/utils/api/DataOptions";
 import { ElMessage } from "element-plus";
+import { getTeamNum } from "@/utils/dataOption/teamOpt";
 
+const memberScore = ref(0);
 // 小组得分（总）
 const totalTeamScore = ref(0);
 // 获取时间数据
 const dateTime = ref("");
+// 获取学生学习状态数据列表
+const tableData = ref([]);
 // 定义学生课程状态列表
 const studyStatus = reactive([
   {
@@ -113,17 +150,23 @@ const selectStudyStatus = ref(1);
 const score = ref(0);
 // 定义字符输入框输入的数据
 const otherStatus = ref("");
-// 提取studyStatus的字符串
+// 提取studyStatus的字符串(为studyStatus的label或otherStatus)
 const studyStatusString = ref("");
-// 获取学生学习状态
-// const studentStatus = ref([]);
 // 获取学生所在组队id
 const getTeamId = ref("");
 const props = defineProps({
   studentName: { type: String, default: "" },
-  teamList: { type: Array, default: () => [] },
-  isStudent: { type: Boolean, default: true },
+  reqStudentImgUrl: { type: String, default: "" },
 })
+
+// 获取学生数据(封装),==》 信息引用
+const getStudentData = (student: string) => {
+  getStudentTableData(student).then((res: any) => {
+    // console.log("studentData", res);
+    tableData.value = res.data;
+    memberScore.value = res.totalScore;
+  })
+}
 
 // 课程状态的字符提取
 const handleChangeValue = (index: any) => {
@@ -138,21 +181,43 @@ const handleChangeValue = (index: any) => {
 // 提交事件
 const submit = async () => {
   try {
-    const addData = await addStudentTableData({
+    const addData: any = await addStudentTableData({
       student: props.studentName,
       dateTime: dateTime.value,
       score: score.value,
-      studyStatus: studyStatusString.value
+      studyStatus: studyStatusString.value,
+      teamId: getTeamId.value,
     });
-    console.log("addData", addData);
-
-    ElMessage.success({ message: '提交成功', duration: 1000 });
+    // console.log("addData", addData);
+    if (addData.code == 200) {
+      ElMessage.success({ message: addData.msg, duration: 1000 });
+      score.value = 0;
+      otherStatus.value = "";
+      getStudentData(props.studentName)
+    }
   } catch (err) {
     ElMessage.error({ message: '读取失败' + err, duration: 1000 });
   }
 }
 
-watchEffect(() => { })
+// 右键表格菜单
+function handleContextmenu(row: any, column: any, event: Event) {
+  console.log(row, row.score, column, event);
+  removeStudentTableData({
+    student: props.studentName,
+    dateTime: row.dateTime,
+    score: row.score,
+  }).then((res: any) => {
+    console.log(res);
+    if (res.code == 200) {
+      ElMessage.success({ message: res.message, duration: 1000 });
+      getStudentData(props.studentName)
+    }
+  }).catch(error => {
+    ElMessage.error({ message: '删除失败' + error, duration: 1000 });
+  });
+}
+function cancelEvent() { ElMessage.info({ message: '操作取消', duration: 1000 }) }
 
 let timer;
 watch(
@@ -165,13 +230,31 @@ watch(
     return () => { clearInterval(timer) };
   }, { immediate: true, flush: 'post' }
 )
-onMounted(() => { handleChangeValue(selectStudyStatus.value) });
+onMounted(() => {
+  handleChangeValue(selectStudyStatus.value);
+  getTeamNum(props.studentName).then(res => { getTeamId.value = res });
+  getStudentData(props.studentName);
+});
 </script>
 
 <style scoped lang="scss">
+.stu-img {
+  background-color: white;
+
+  .img {
+    border-radius: 5px;
+    margin: 15px 30px;
+  }
+}
+
+.student-team {
+  float: right;
+  margin-left: 20px;
+}
+
 .student-info-right {
-  padding-left: 20px;
-  margin-bottom: 20px;
+  // padding-left: 20px;
+  margin-bottom: 50px;
 
   .datetime-title {
     font-size: 18px;
@@ -204,5 +287,13 @@ onMounted(() => { handleChangeValue(selectStudyStatus.value) });
 
 .stdent-team-source h2 {
   font-weight: 500;
+}
+
+.table-container {
+  position: relative;
+  right: 15px;
+  margin-top: 30px;
+  margin: auto;
+  width: 89%;
 }
 </style>

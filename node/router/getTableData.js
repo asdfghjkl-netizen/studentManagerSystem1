@@ -8,47 +8,87 @@ const getTableDataRouter = express.Router();
 // 允许跨域请求
 getTableDataRouter.all('*', function (req, res, next) { headerConfig(req, res, next) });
 
-// /table/student  post  获取学生学习信息
+/**
+ * @route POST /table/student
+ * @summary 获取学生学习信息
+ * @description 获取学生学习信息，并将解析后的数据存入 Redis。
+ * @param {String} studentName - 学生姓名
+ * @returns {Object} - 响应对象
+ */
 getTableDataRouter.post('/table/student', (req, res) => {
-    const studentName = req.body.student;
-    // console.log('studentName', studentName);
-    redisClient.get(studentName, (err, data) => {
+    const student = req.body.student;
+    // 查询Redis中key为stuStudyStatus:${student}的数据
+    redisClient.lrange(`stuStudyStatus:${student}`, 0, -1, (err, data) => {
         if (err) {
             console.error('Error retrieving data from Redis:', err);
             res.status(500).json({ error: 'Internal Server Error' });
         }
+        // console.log("data", data);
+        let dataList = [];
+        data.forEach(item => {
+            dataList.push(JSON.parse(item));
+        });
+
+        // 计算出学生的总分
+        let totalScore = 0;
+        dataList.forEach(item => {
+            totalScore += item.score;
+        });
+
         res.status(200).json({
-            data: JSON.parse(data),
+            totalScore: totalScore,
+            data: dataList,
             code: 200,
-            message: `获取${studentName}信息成功`
+            message: `获取${student}信息成功`
         });
     });
 });
 
-// /table/team  post  获取团队学习信息
+/**
+ * @route POST /table/team
+ * @summary 获取团队学习信息
+ * @description 获取团队学习信息，并将解析后的数据存入 Redis。
+ * @param {String} team 团队号
+ * @returns {Object} - 响应对象
+ */
 getTableDataRouter.post('/table/team', (req, res) => {
     const team = req.body.team;
     const teamName = team + "组";
-    // console.log('teamName', teamName);
-    redisClient.get(teamName, (err, data) => {
+    // 查询Redis中key为stuStudyStatus:${teamName}的数据
+    redisClient.lrange(`teamStudyStatus:${teamName}`, 0, -1, (err, data) => {
         if (err) {
             console.error('Error retrieving data from Redis:', err);
             res.status(500).json({ error: 'Internal Server Error' });
         }
+        // console.log("data", data);
+        let dataList = [];
+        data.forEach(item => {
+            dataList.push(JSON.parse(item));
+        });
         res.status(200).json({
-            data: JSON.parse(data),
+            data: dataList,
             code: 200,
-            message: `获取${teamName}信息成功`
+            message: `获取第${teamName}信息成功`
         });
     });
 });
 
-// /dialog/student/score  post  获取学生学习分数
+/**
+ * @route POST /dialog/student/score
+ * @summary 获取学生学习分数
+ * @description 在前端的dialog对话框中获取学生学习分数
+ * @returns {Object} - 响应对象
+ */
 getTableDataRouter.post('/dialog/student/score', (req, res) => {
 
 });
 
-// /dialog/team/score  post  获取团队学习分数
+/**
+ * @route POST /dialog/team/score
+ * @summary 获取团队学习分数
+ * @description 在前端的dialog对话框中获取团队学习分数
+ * @returns {Object} - 响应对象
+ */
 getTableDataRouter.post('/dialog/team/score', (req, res) => {
 
 });

@@ -16,7 +16,9 @@
           <!--  trigger="hover":icon="InfoFilled" -->
           <el-popconfirm confirmButtonText="Yes" cancelButtonText="No" icon-color="#626AEF" title="确定删除此信息？"
             @confirm="handleContextmenu(scope.row, scope.column, $event)" @cancel="cancelEvent" width="auto">
-            <el-icon><InfoFilled /></el-icon>
+            <el-icon>
+              <InfoFilled />
+            </el-icon>
             <template #reference>
               <el-button type="primary" size="small">删除</el-button>
             </template>
@@ -30,9 +32,10 @@
 <script lang="ts" setup>
 import { defineProps, ref, watchEffect } from "vue";
 import { ElMessage } from "element-plus";
-import { getStudentTableData, removeStudentTableData } from "@/utils/api/DataOptions";
+import { removeStudentTableData } from "@/utils/api/DataOptions";
+import { getStudentData } from "@/utils/dataOption/getAPIData";
 
-// 接收父组件传递过来的studentName
+// 接收父组件传递过来的studentName getStudentTableData, 
 const props = defineProps({
   studentName: { type: String, default: "" },
   isStudentData: { type: Boolean, default: true }
@@ -48,7 +51,13 @@ async function handleContextmenu(row: any, column: any, event: Event) {
     dateTime: row.dateTime,
     score: row.score,
   }).then((res: any) => {
-    ElMessage.success({ message: res.msg, duration: 1000 });
+    // console.log(res);
+    if (res.code == 200) {
+      ElMessage.success({ message: res.msg, duration: 1000 });
+      getStudentData(props.studentName).then(res => {
+        tableData.value = res.tableData
+      })
+    }
   }).catch(error => {
     ElMessage.error({ message: '删除失败' + error, duration: 1000 });
   });
@@ -56,11 +65,10 @@ async function handleContextmenu(row: any, column: any, event: Event) {
 function cancelEvent() { ElMessage.info({ message: '操作取消', duration: 1000 }) }
 
 watchEffect(() => {
-  getStudentTableData(props.studentName).then(res => {
-    // console.log("resstudentName", res);
-    tableData.value = res.data
+  getStudentData(props.studentName).then(res => {
+    tableData.value = res.tableData
   })
-  tableData.value;
+  tableData.value
 })
 </script>
 

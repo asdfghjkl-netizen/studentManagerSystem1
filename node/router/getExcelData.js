@@ -6,6 +6,7 @@ const { parseExcelFile, parseWorkSheetLong, processRow } = require('../tools/exc
 const redisClient = require('../config/redisConfig');
 const { ref } = require('vue');
 const headerConfig = require('../config/requestConfig');
+const { MyException } = require('../Exception/myException');
 
 // 创建路由实例
 const getExcelDataRouter = express.Router();
@@ -90,6 +91,10 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
 getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
     const student = req.body.student;
     // console.log("student", student);
+    const key = `stuStudyStatus:${student}`;
+    
+    // 清空redis列表数据
+    if (redisClient.exists(key)) redisClient.del(key);
 
     // 获取 excel-data 数据，并拿到里面的 buffer 字段
     redisClient.get('buffer', async (err, data) => {
@@ -106,16 +111,15 @@ getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
             const workbook = new ExcelJS.Workbook();
             await workbook.xlsx.load(buffer);
             const parsedData = parseStudentData(workbook, student);
-            // console.log('parsedData', parsedData);
 
-            parsedData.forEach(item => {
-                const hashKey = `studyData:${student}`;
-                redisClient.hmset(hashKey, item);
+            // 通过redis列表 存储数据
+            parsedData.forEach((item) => {
+                redisClient.lpush(key, JSON.stringify(item));
             });
             res.status(200).json();
         } catch (error) {
-            console.error('Error parsing Excel data:', error);
             res.status(500).json({ error: 'Failed to parse Excel data' });
+            throw new MyException("Failed to parse Excel data");
         }
     });
 });
@@ -130,11 +134,14 @@ getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
 getExcelDataRouter.post('/get-excel-file/team', async (req, res) => {
     const team = req.body.team;
     const teamNameForExcel = team + "组";
+    const key = `teamStudyStatus:${teamNameForExcel}`;  // 组号作为key
+    // 清空redis列表数据
+    if (redisClient.exists(key)) redisClient.del(key);
 
     // 获取 excel-data 数据，并拿到里面的 buffer 字段
     redisClient.get('buffer', async (err, data) => {
         if (err) {
-            console.error('Error retrieving data from Redis:', err);
+            // console.error('Error retrieving data from Redis:', err);
             res.status(500).json({ error: 'Internal Server Error' });
         }
         const getData = JSON.parse(data);
@@ -144,10 +151,9 @@ getExcelDataRouter.post('/get-excel-file/team', async (req, res) => {
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
         const parsedData = parseTeamData(workbook, teamNameForExcel);
-
-        parsedData.forEach(item => {
-            const hashKey = teamNameForExcel;
-            redisClient.hmset(hashKey, item);
+        
+        parsedData.forEach((item) => {
+            redisClient.lpush(key, JSON.stringify(item));
         });
         res.status(200).json();
     });

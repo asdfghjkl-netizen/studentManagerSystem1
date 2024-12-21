@@ -10,9 +10,9 @@
 
 ### 	students:  hash
 
-### 	stuStudyData:  hash
+### 	stuStudyData:  list
 
-### 	teamStudyData:   hash
+### 	teamStudyData:   list
 
 
 

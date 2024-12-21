@@ -2,7 +2,6 @@ import { defineStore } from "pinia";
 import { getExcelFile } from "@/utils/api/apiPromiss";
 import { watchEffect } from "vue";
 import { ElMessage } from "element-plus";
-// import { getStudentStatus } from "@/utils/api/apiPromiss";
 
 // defineStore('userInfo',{})  userInfo就是这个仓库的名称name
 export const importExcelFile = defineStore('excelFile', {
@@ -14,7 +13,6 @@ export const importExcelFile = defineStore('excelFile', {
         computerRoomSeat: [], // 获取学生机房座位表的数据
         files: File,          // 获取上传的文件的文件对象
         fileName: '',         // 获取excel文件名
-        // buffer: '',           // 获取上传的文件的二进制流
     }),
     // 计算属性 
     getters: {},
@@ -40,45 +38,15 @@ export const importExcelFile = defineStore('excelFile', {
             watchEffect(() => {
                 getExcelFile({ fileName: this.fileName }).then(res => {
                     console.log("resFile", res);
-                    this.teamLists = res.data.teamLists;
-                    this.classSeat = res.data.classSeat;
-                    this.computerRoomSeat = res.data.computerRoomSeat;
-                    this.students = res.data.students;
-                    // res.data.students.forEach(student => {
-                    //     // console.log("student", student.stuName);
-                    //     getStudentStatus(student.stuName).then(res => {
-                    //         console.log("student", res)
-                    //     });
-                    // });
-                    // this.buffer = res.data.buffer;
+                    this.teamLists = res.data.teamLists;  // 团队信息
+                    this.classSeat = res.data.classSeat;  // 教室坐位信息
+                    this.computerRoomSeat = res.data.computerRoomSeat;  // 计算机教室坐位信息
+                    this.students = res.data.students;  // 学生信息
+                    // this.buffer = res.data.buffer;   // 文件buffer
                     ElMessage.success({ message: res.message, duration: 1000 })
                 })
             })
-            console.log("this.buffer", this.buffer);
-        },
-        // 获取importFile.teamLists的数据
-        getTeamList(teamLists) {
-            // 定义定时器
-            let timerId = null;
-            teamLists = this.teamLists;
-            // console.log(teamLists);
-            this.teamLeaders = [];
-            this.teamIdList = [];
-            this.teamMembers = [];
-            // 先转换成数组
-            teamLists.forEach((item) => {
-                // console.log(item, item.leader);
-                this.teamLeaders.push(item.leader);
-                this.teamIdList.push(item.teamId);
-                this.teamMembers.push(item.member);
-            })
-            timerId = setTimeout(() => {
-                this.getTeamList(teamLists)
-            }, 1000);
-            if (timerId) {
-                clearTimeout(timerId);
-                timerId = null;
-            }
+            // console.log("this.buffer", this.buffer);
         },
     },
 

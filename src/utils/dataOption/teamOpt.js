@@ -1,9 +1,9 @@
 import { importExcelFile } from "@/store/excelOptions";
+import { getTeamListFromBackend } from "@/utils/api/DataOptions";
 import { ref } from "vue";
 
+// 得到组号的方法
 const teamId = ref('');
-
-// 得到组号
 export const getTeamNum = async (student) => {
     const importFile = importExcelFile();
     const teamList = importFile.teamLists;
@@ -15,4 +15,21 @@ export const getTeamNum = async (student) => {
         }
     })
     return teamId.value;
+}
+
+// 获取组信息(整合)
+let student = ref([]);
+// 从后端获取组信息
+export const getTeamList = async (teamId) => {
+    await getTeamListFromBackend(teamId).then((res) => {
+        student.value = [];
+        console.log("teamList", res, res.teamData);
+        for (const item in res.teamData) {
+            if (Object.prototype.hasOwnProperty.call(res.teamData, item)) {
+                student.value.push(res.teamData[item]);
+                // console.log("student", student);
+            }
+        }
+    })
+    return student.value;
 }

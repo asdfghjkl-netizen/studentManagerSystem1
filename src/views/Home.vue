@@ -169,9 +169,6 @@
 
 <script lang="ts" setup>
 import type { UploadProps } from 'element-plus';
-import ExcelJS from "exceljs";
-// import StudentTable from "@/components/studentInfo/studentTable.vue";
-// import TeamTable from "@/components/teamInfo/teamTable.vue";
 import StudentInfo from "@/components/studentInfo/studentInfo.vue";
 import TeamInfo from "@/components/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
@@ -179,12 +176,13 @@ import { ElMessage, ElNotification } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
 import { getFileList } from "@/utils/api/apiPromiss";
-import { uploadExcelFile } from "@/utils/api/apiPromiss";
 
-const importFile = importExcelFile();
+const importFile = importExcelFile() as any;
 const fileInput = ref("");
 // 学生座位表选择数据，默认为1---》班级座位表
 const radio1 = ref("1");
+// 获取班级名称
+const className = ref("");
 // 定义学生卡对话框的状态
 const dialogVisibleForStu = ref(false)
 const dialogVisibleForTeam = ref(false)
@@ -283,7 +281,6 @@ const selectStudent = () => {
     // 如果已选座位列表中已存在该座位，则删除该座位，否则直接添加
     const seatId = randomStudent.seatId;
     data.selectList.push(seatId);
-    // console.log("randomStudent", randomIndex, randomStudent, data.selectedStuIndices);
     // 弹出学生信息对话框
     dialogVisibleForStu.value = true;
   } catch (error) {
@@ -291,9 +288,6 @@ const selectStudent = () => {
     throw new Error('Failed to select random student');
   }
 }
-
-// 获取班级名称
-const className = ref("");
 
 // 截取文件名
 const getclassName = () => {
@@ -341,57 +335,7 @@ const ImportFile = () => {
 }
 
 // 导出excel文件(测试阶段)
-const exportExcel = () => {
-  // 创建工作簿
-  const workbook = new ExcelJS.Workbook();
-  // 添加工作表，名为sheet1
-  const sheet1 = workbook.addWorksheet("sheet1");
-  // 添加表头列数据
-  sheet1.columns = [
-    { header: "姓名", key: "name", width: 20 },
-    { header: "年龄", key: "age", width: 10 },
-    { header: "身高", key: "height", width: 10 },
-    { header: "体重", key: "weight", width: 10 },
-  ];
-  // 添加内容列数据
-  sheet1.addRow({ sort: 1, name: "张三", age: 18, height: 175, weight: 74 });
-  sheet1.addRow({ sort: 2, name: "李四", age: 22, height: 177, weight: 88 });
-  sheet1.addRow({ sort: 3, name: "王五", age: 53, height: 155, weight: 62 });
-  // 读取行数据
-  sheet1.getRow(1).eachCell((cell, rowIdx) => {
-    console.log("行数据", cell.value, rowIdx);
-  });
-  // 读取列数据,可以通过键(name)，字母(B)和基于id(1)的列号访问单个列
-  sheet1.getColumn("name").eachCell((cell, rowIdx) => {
-    console.log("列数据", cell.value, rowIdx);
-  });
-  // 保存文件
-  workbook.xlsx.writeBuffer().then(buffer => {
-    // 创建一个Blob对象
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-    // 定义文件的名称sessionStorage.getItem("fileName")
-    const fileName = "123.xlsx";
-    const encodedFileName = encodeURIComponent(fileName); // 对文件名进行编码
-    // 创建一个FormData对象，并将Blob对象作为文件添加进去
-    const formData = new FormData();
-    formData.append('file', blob, encodedFileName);
-    // 调用上传文件的接口
-    uploadExcelFile(formData).then(res => {
-      // console.log(res);
-      if (res.status != 200) {
-        ElMessage.error(res.data.error);
-        return;
-      }
-      ElMessage.success(res.data.message + '\xa0' + res.data.fileName);
-    }).catch(error => {
-      ElMessage.error("保存失败", error);
-    });
-    // 监听页面刷新
-    window.onbeforeunload = function (event) {
-      event.returnValue = "我在这写点东西...";
-    };
-  });
-}
+const exportExcel = () => {}
 
 // 学生座位表的选择(二维数组写法)
 const handleSelectRoom = (event: any) => {

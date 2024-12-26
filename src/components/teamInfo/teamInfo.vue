@@ -13,7 +13,7 @@
         <h2>
           <span style="margin-right: 35px;">小组总分 {{ teamTotalScoreAll }}分</span>
           <div style="width: 200px; position: absolute; left: 510px; top: 125px;">
-            <div style="margin-bottom: 10px;">团队得分 {{ }}分</div>
+            <div style="margin-bottom: 10px;">团队得分 {{ teamScore }}分</div>
             <div>成员得分 {{ teamMemberScore }}分</div>
           </div>
         </h2>
@@ -88,7 +88,8 @@
 import { onMounted, ref, defineProps, reactive, watch } from "vue";
 import { ElMessage } from "element-plus";
 import { getDateTime } from "@/utils/dateTime";
-import { getTeamTableData } from "@/utils/api/DataOptions";
+import { addTeamTableData, getTeamTableData, removeTeamTableData } from "@/utils/api/DataOptions";
+import { getTeamList } from "@/utils/dataOption/teamOpt";
 
 // 获取时间数据
 const dateTime = ref("");
@@ -121,22 +122,44 @@ const tableData = ref([]);
 const otherStatus = ref("");
 // 提取studyStatus的字符串
 const studyStatusString = ref("");
-// 获取组分数
+// 获取组成员分数
 const teamMemberScore = ref(0);
+// 获取小组分数
+const teamScore = ref(0);
 // 获取小组总分数
 const teamTotalScoreAll = ref(0);
 
 // 接收父组件传递过来的数据  
 const props = defineProps({
   teamId: { type: String, default: "" },
-  isStudent: { type: Boolean, default: false },
 })
 
 // 获取团队数据(封装),==》 信息引用
 const getTeamData = (teamId: any) => {
   getTeamTableData(teamId).then((res: any) => {
-    // console.log("studentData", res);
+    // console.log("teamData", res);
     tableData.value = res.data;
+    teamScore.value = res.totalScore;
+  })
+  // TODO 给totalTeamScore去重
+  getTeamList(teamId).then((res: any) => {
+    console.log("teamData", res);
+    // 创建一个 Set 来存储所有团队的小组总分
+    const teamTotalScore = new Set();
+    // 获取二级目录
+    res.forEach((key: any) => {
+      // 添加到 Set 中以去重
+      teamTotalScore.add(key.totalScore);
+      // console.log("studyStatus", key.studyStatus);
+      teamMemberScore.value += key.studyStatus;
+    })
+    // console.log(teamTotalScore);
+    // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
+    if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
+      teamTotalScoreAll.value = 0;
+      throw new Error("团队数据异常");
+    }
+    teamTotalScoreAll.value = teamTotalScore.values().next().value;
   })
 }
 
@@ -153,8 +176,19 @@ const handleChangeValue = (index: any) => {
 // 提交事件
 const submit = async () => {
   try {
-    getTeamData(props.teamId)
-    ElMessage.success({ message: '提交成功', duration: 1000 });
+    const addData: any = await addTeamTableData({
+      dateTime: dateTime.value,
+      score: score.value,
+      studyStatus: studyStatusString.value,
+      teamId: props.teamId,
+    });
+    console.log("addData", addData);
+    if (addData.code == 200) {
+      ElMessage.success({ message: addData.msg, duration: 1000 });
+      score.value = 0;
+      otherStatus.value = "";
+      getTeamData(props.teamId)
+    }
   } catch (error) {
     ElMessage.error({ message: '读取失败' + error, duration: 1000 });
   }
@@ -163,6 +197,17 @@ const submit = async () => {
 // 右键表格菜单
 async function handleContextmenu(row: any, column: any, event: Event) {
   console.log(row, column, event, props.teamId);
+  removeTeamTableData({
+    teamId: props.teamId,
+    dateTime: row.dateTime,
+    score: row.score,
+  }).then((res: any) => {
+    console.log("removeTeam", res);
+    if (res.code == 200) {
+      ElMessage.success({ message: res.message, duration: 1000 });
+      getTeamData(props.teamId);
+    }
+  })
   ElMessage.success({ message: '成功删除', duration: 1000 });
 }
 function cancelEvent() { ElMessage.info({ message: '操作取消', duration: 1000 }) }

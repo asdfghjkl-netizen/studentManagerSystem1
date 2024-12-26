@@ -89,7 +89,7 @@ import { getDateTime } from "@/utils/dateTime";
 import { onMounted, ref, defineProps, reactive, watch } from "vue";
 import { addStudentTableData, removeStudentTableData, getStudentTableData } from "@/utils/api/DataOptions";
 import { ElMessage } from "element-plus";
-import { getTeamNum } from "@/utils/dataOption/teamOpt";
+import { getTeamNum, getTeamList } from "@/utils/dataOption/teamOpt";
 
 const memberScore = ref(0);
 // 小组得分（总）
@@ -168,6 +168,27 @@ const getStudentData = (student: string) => {
   })
 }
 
+// TODO 给totalTeamScore去重  获取团队列表数据(封装),==》 信息引用 
+const getTeamData = (teamId: any) => {
+  getTeamList(teamId).then((res: any) => {
+    console.log("teamData", res);
+    // 创建一个 Set 来存储所有团队的小组总分
+    const teamTotalScore = new Set();
+    // 获取二级目录
+    res.forEach((key: any) => {
+      // 添加到 Set 中以去重
+      teamTotalScore.add(key.totalScore);
+    })
+    // console.log(teamTotalScore);
+    // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
+    if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
+      totalTeamScore.value = 0;
+      throw new Error("团队数据异常");
+    }
+    totalTeamScore.value = teamTotalScore.values().next().value;
+  })
+}
+
 // 课程状态的字符提取
 const handleChangeValue = (index: any) => {
   // 如果选着的状态为 14：其他 ， 课程状态应为字符输入框输入的数据
@@ -194,6 +215,7 @@ const submit = async () => {
       score.value = 0;
       otherStatus.value = "";
       getStudentData(props.studentName)
+      getTeamData(getTeamId.value)
     }
   } catch (err) {
     ElMessage.error({ message: '读取失败' + err, duration: 1000 });
@@ -207,11 +229,13 @@ function handleContextmenu(row: any, column: any, event: Event) {
     student: props.studentName,
     dateTime: row.dateTime,
     score: row.score,
+    teamId: getTeamId.value,
   }).then((res: any) => {
     console.log(res);
     if (res.code == 200) {
       ElMessage.success({ message: res.message, duration: 1000 });
       getStudentData(props.studentName)
+      getTeamData(getTeamId.value)
     }
   }).catch(error => {
     ElMessage.error({ message: '删除失败' + error, duration: 1000 });
@@ -232,7 +256,10 @@ watch(
 )
 onMounted(() => {
   handleChangeValue(selectStudyStatus.value);
-  getTeamNum(props.studentName).then(res => { getTeamId.value = res });
+  getTeamNum(props.studentName).then((res) => {
+    getTeamId.value = res
+    getTeamData(res)
+  });
   getStudentData(props.studentName);
 });
 </script>

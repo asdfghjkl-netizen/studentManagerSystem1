@@ -13,6 +13,7 @@ export const importExcelFile = defineStore('excelFile', {
         computerRoomSeat: [], // 获取学生机房座位表的数据
         files: File,          // 获取上传的文件的文件对象
         fileName: '',         // 获取excel文件名
+        filePath: '',         // 获取excel文件路径
     }),
     // 计算属性 
     getters: {},
@@ -38,6 +39,11 @@ export const importExcelFile = defineStore('excelFile', {
             watchEffect(() => {
                 getExcelFile({ fileName: this.fileName }).then(res => {
                     console.log("resFile", res);
+                    if (res.code != 200) {
+                        ElMessage.error("获取文件失败");
+                        return;
+                    }
+                    this.filePath = res.filePath;    // 文件路径
                     this.teamLists = res.data.teamLists;  // 团队信息
                     this.classSeat = res.data.classSeat;  // 教室坐位信息
                     this.computerRoomSeat = res.data.computerRoomSeat;  // 计算机教室坐位信息

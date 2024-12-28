@@ -6,7 +6,7 @@ const { parseExcelFile, parseWorkSheetLong, processRow } = require('../tools/exc
 const redisClient = require('../config/redisConfig');
 const { ref } = require('vue');
 const headerConfig = require('../config/requestConfig');
-const { MyException } = require('../Exception/myException');
+const { findFilePath } = require('../tools/fileOption');
 
 // 创建路由实例
 const getExcelDataRouter = express.Router();
@@ -34,14 +34,23 @@ getExcelDataRouter.all('*', function (req, res, next) { headerConfig(req, res, n
 getExcelDataRouter.post('/get-excel-file', async (req, res) => {
     // 获取前端传入的文件名，包装成json对象
     const { fileName } = req.body;
-    // console.log('fileName', fileName);
 
     if (!fileName) {
         res.status(400).json({ error: 'No file name provided' });
+        return;
     }
 
-    const filePath = path.join(publicPath, fileName);
+    // 获取文件路径
+    const filePath = await findFilePath(publicPath, fileName);
+    if (!filePath || filePath == null) {
+        res.status(404).json({ error: 'File not found' });
+        return;
+    }
     console.log('filePath', filePath);
+
+    // 定义一个字符串变量，用于获取截取的文件路径
+    const filePathStr = filePath.split(fileName)[0];
+    console.log('filePathStr', filePathStr);
 
     // 异步读取文件
     try {
@@ -72,6 +81,7 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
             redisClient.hset(key, team.stuName, JSON.stringify(teamInfo));
         });
         res.status(200).json({
+            filePath: filePathStr,
             data: parsedData,
             code: 200,
             message: '上传成功'
@@ -92,7 +102,7 @@ getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
     const student = req.body.student;
     // console.log("student", student);
     const key = `stuStudyStatus:${student}`;
-    
+
     // 清空redis列表数据
     if (redisClient.exists(key)) redisClient.del(key);
 
@@ -119,7 +129,6 @@ getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
             res.status(200).json();
         } catch (error) {
             res.status(500).json({ error: 'Failed to parse Excel data' });
-            throw new MyException("Failed to parse Excel data");
         }
     });
 });
@@ -151,7 +160,7 @@ getExcelDataRouter.post('/get-excel-file/team', async (req, res) => {
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
         const parsedData = parseTeamData(workbook, teamNameForExcel);
-        
+
         parsedData.forEach((item) => {
             redisClient.lpush(key, JSON.stringify(item));
         });

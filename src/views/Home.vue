@@ -106,7 +106,7 @@
         <Download />
       </el-icon>
       导出excel</el-button>
-    <el-upload :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
+    <el-upload :limit="1" :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
       <el-button type="primary">
         <el-icon>
           <Upload />

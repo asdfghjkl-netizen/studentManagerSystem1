@@ -86,7 +86,7 @@
 
 <script lang="ts" setup>
 import { onMounted, ref, defineProps, reactive, watch } from "vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { getDateTime } from "@/utils/dateTime";
 import { addTeamTableData, getTeamTableData, removeTeamTableData } from "@/utils/api/DataOptions";
 import { getTeamList } from "@/utils/dataOption/teamOpt";
@@ -207,8 +207,9 @@ async function handleContextmenu(row: any, column: any, event: Event) {
       ElMessage.success({ message: res.message, duration: 1000 });
       getTeamData(props.teamId);
     }
-  })
-  ElMessage.success({ message: '成功删除', duration: 1000 });
+  }).catch(error => {
+    ElNotification.error({ message: '删除失败' + error, duration: 1000 });
+  });
 }
 function cancelEvent() { ElMessage.info({ message: '操作取消', duration: 1000 }) }
 

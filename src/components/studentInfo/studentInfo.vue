@@ -88,7 +88,7 @@
 import { getDateTime } from "@/utils/dateTime";
 import { onMounted, ref, defineProps, reactive, watch } from "vue";
 import { addStudentTableData, removeStudentTableData, getStudentTableData } from "@/utils/api/DataOptions";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElNotification } from "element-plus";
 import { getTeamNum, getTeamList } from "@/utils/dataOption/teamOpt";
 
 const memberScore = ref(0);
@@ -163,8 +163,10 @@ const props = defineProps({
 const getStudentData = (student: string) => {
   getStudentTableData(student).then((res: any) => {
     // console.log("studentData", res);
-    tableData.value = res.data;
-    memberScore.value = res.totalScore;
+    if (res.code === 200) {
+      tableData.value = res.data;
+      memberScore.value = res.totalScore;
+    }
   })
 }
 
@@ -238,7 +240,7 @@ function handleContextmenu(row: any, column: any, event: Event) {
       getTeamData(getTeamId.value)
     }
   }).catch(error => {
-    ElMessage.error({ message: '删除失败' + error, duration: 1000 });
+    ElNotification.error({ message: '删除失败' + error, duration: 1000 });
   });
 }
 function cancelEvent() { ElMessage.info({ message: '操作取消', duration: 1000 }) }

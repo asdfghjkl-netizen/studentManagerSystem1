@@ -4,7 +4,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: () => import('@/views/Home.vue')
+    component: () => import(/* webpackChunkName: "home" */'@/views/Home.vue')
   }, {
     path: '/',
     redirect: '/',
@@ -12,7 +12,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(),
+  history: createWebHashHistory(process.env.BASE_URL),
   routes,
 })
 

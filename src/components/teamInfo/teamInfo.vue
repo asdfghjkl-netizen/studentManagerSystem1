@@ -21,37 +21,27 @@
       <div class="datetime datetime-title">今日日期：<span class="datetime">{{ dateTime }}</span></div>
       <!--  学习表现  -->
       <div class="study">
-  <tr>
-    <td>学习表现：</td>
-    <td>
-      <el-select v-model="selectStudyStatus" placeholder="Select" @change="handleChangeValue" style="width: 250px">
-        <el-option v-for="item in studyStatus" :key="item.value" :label="item.label" :value="item.value" />
-      </el-select>
+        <InfoTitle title="学习表现">
+          <el-select v-model="selectStudyStatus" placeholder="Select" @change="handleChangeValue" style="width: 250px">
+            <el-option v-for="item in studyStatus" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </InfoTitle>
+      </div>
+      <!--  其他  -->
+      <div class="other" style="margin-left: 36px;">
+        <InfoTitle title="其他">
+          <el-input v-model="otherStatus" style="width: 250px" clearable :disabled="selectStudyStatus != 5" />
+        </InfoTitle>
+      </div>
+      <!--  得分  -->
+      <div class="source" style="margin-left: 36px;">
+        <InfoTitle title="得分">
+          <el-input-number v-model="score" />
+          <span class="fen">分</span>
+        </InfoTitle>
+      </div>
+      <el-button type="primary" style="width: 100%;" @click.prevent="submit">提交</el-button>
     </td>
-  </tr>
-  </div>
-  <!--  其他  -->
-  <div class="other" style="margin-left: 36px;">
-    <tr>
-      <td>其他：</td>
-      <td>
-        <!-- @change="changeOtherStatus" -->
-        <el-input v-model="otherStatus" style="width: 250px" clearable :disabled="selectStudyStatus != 5" />
-      </td>
-    </tr>
-  </div>
-  <!--  得分  -->
-  <div class="source" style="margin-left: 36px;">
-    <tr>
-      <td>得分：</td>
-      <td>
-        <el-input-number v-model="score" />
-        <span class="fen">分</span>
-      </td>
-    </tr>
-  </div>
-  <el-button type="primary" style="width: 100%;" @click.prevent="submit">提交</el-button>
-  </td>
   </tr>
 
   <div class="table-container" style="position: relative; top: 20px;">
@@ -85,8 +75,10 @@
 </template>
 
 <script lang="ts" setup>
+import InfoTitle from "@/components/InfoTitle.vue";
+import { InfoFilled } from "@element-plus/icons-vue";
 import { onMounted, ref, defineProps, reactive, watch } from "vue";
-import { ElMessage, ElNotification } from "element-plus";
+import { ElMessage } from "element-plus";
 import { getDateTime } from "@/utils/dateTime";
 import { addTeamTableData, getTeamTableData, removeTeamTableData } from "@/utils/api/DataOptions";
 import { getTeamList } from "@/utils/dataOption/teamOpt";
@@ -208,7 +200,7 @@ async function handleContextmenu(row: any, column: any, event: Event) {
       getTeamData(props.teamId);
     }
   }).catch(error => {
-    ElNotification.error({ message: '删除失败' + error, duration: 1000 });
+    ElMessage.error({ message: '删除失败' + error, duration: 1000 });
   });
 }
 function cancelEvent() { ElMessage.info({ message: '操作取消', duration: 1000 }) }

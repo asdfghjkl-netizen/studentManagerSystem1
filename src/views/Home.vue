@@ -26,8 +26,11 @@
         <div class="grid-content ep-bg-purple" />
       </el-col>
       <el-col :span="16">
-        <div class="grid-content ep-bg-purple" style="text-align: center;font-size: 30px;font-family: '楷体';">
+        <div v-if="className" class="grid-content ep-bg-purple"
+          style="text-align: center;font-size: 30px;font-family: '楷体';">
           {{ className }}上课座位表</div>
+        <div v-else class="grid-content ep-bg-purple" style="text-align: center;font-size: 30px;font-family: '楷体';">
+          上课座位表(请选择班级)</div>
       </el-col>
       <el-col :span="4">
         <div class="grid-content ep-bg-purple" />
@@ -132,7 +135,7 @@
       <!--  下部表格部分:team-leaders="data.teamLeaders"   -->
       <!-- <div class="student-info-bottom">
         <StudentTable :student-name="data.studentName" />
-      </div> -->  
+      </div> -->
     </div>
     <!--  无内容加载  -->
     <span v-else>无法加载该地区图片和信息</span>
@@ -168,11 +171,13 @@
 </template>
 
 <script lang="ts" setup>
+import { createElNotification } from "@/utils/dataOption/noticeOpt";
+import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
 import StudentInfo from "@/components/studentInfo/studentInfo.vue";
 import TeamInfo from "@/components/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
-import { ElMessage, ElNotification } from "element-plus";
+import { ElMessage } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
 import { getFileList } from "@/utils/api/apiPromiss";
@@ -184,17 +189,17 @@ const radio1 = ref("1");
 // 获取班级名称
 const className = ref("");
 // 定义学生卡对话框的状态
-const dialogVisibleForStu = ref(false)
-const dialogVisibleForTeam = ref(false)
+const dialogVisibleForStu = ref(false);
+const dialogVisibleForTeam = ref(false);
 // 获取图片路径
 const reqStudentIMGURL = ref([]) as any;
-const rows = 7;     // 行数
-const cols = 10;    // 列数
+const rows = ref(7);     // 行数
+const cols = ref(10);    // 列数
 const data = reactive({
   stuSeat: [] as any[],              // 获取学生的数据==》studentList的对象
   //  变量的值动态生成一个 7 行 10 列的二维数组，并且座位编号也会按照顺序排列。
-  seatList: Array.from({ length: rows }, (_, rowIndex) =>
-    Array.from({ length: cols }, (_, colIndex) => rowIndex * cols + colIndex + 1)
+  seatList: Array.from({ length: rows.value }, (_, rowIndex) =>
+    Array.from({ length: cols.value }, (_, colIndex) => rowIndex * cols.value + colIndex + 1)
   ) as any[][],
   // 模拟后台返回的团队列表getExcelFile
   teamList: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
@@ -307,9 +312,9 @@ const getclassName = () => {
 const importExcel: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
   console.log(uploadFile, uploadFiles);
   importFile.importExcel(uploadFile);
-  fileInput.value = importFile.fileName;
 
   setTimeout(() => {
+    fileInput.value = importFile.fileName;
     ImportFile();
   }, 4000);
 }
@@ -335,7 +340,9 @@ const ImportFile = () => {
 }
 
 // 导出excel文件(测试阶段)
-const exportExcel = () => {}
+const exportExcel = () => {
+  ElMessage.success({ message: '导出成功', duration: 1000 });
+}
 
 // 学生座位表的选择(二维数组写法)
 const handleSelectRoom = (event: any) => {
@@ -347,16 +354,22 @@ const handleSelectRoom = (event: any) => {
   const classSeatList = importFile.classSeat.flat();
   // 扁平化 classSeat
   const computerRoomSeat = importFile.computerRoomSeat.flat();
+  // 判断是否为空，如果为空，则返回
+  if (classSeatList.length == 0 || computerRoomSeat.length == 0) return;
 
   if (radio1.value == "1") {
     data.studentList = flatSeatList.map((seatId, index) => ({
       seatId,
-      stu: classSeatList[index] !== undefined ? classSeatList[index] : null // 确保不会超出范围
+      stu: classSeatList[index] !== undefined
+        ? (classSeatList[index] === '**' ? '' : classSeatList[index])
+        : null  // 确保不会超出范围
     }));
   } else {
     data.studentList = flatSeatList.map((seatId, index) => ({
       seatId,
-      stu: computerRoomSeat[index] !== undefined ? computerRoomSeat[index] : null // 确保不会超出范围
+      stu: computerRoomSeat[index] !== undefined
+        ? (computerRoomSeat[index] === '**' ? '' : computerRoomSeat[index])
+        : null   // 确保不会超出范围
     }));
   }
   data.stuSeat = data.studentList;
@@ -368,15 +381,17 @@ const add = (id: number) => {
   /** 如果已经有一个被选择（selectList 的 length 大于1），
     * 则取消被选中的（selectList 的 index 为0的）*/
   data.selectList.push(id);
+  // console.log("data.studentList", data.studentList);
+  // 如果data.studentList为空，则弹出错误提示
+  if (Object.keys(data.studentList).length === 0) {
+    createElNotification('错误', '请先导入数据！', 'error', 2000)
+    return false;
+  }
   // data.studentList的id是 data.studentList的数组下标 所以-1
   data.studentName = data.studentList[id - 1].stu;
   // 如果选中的位置没有名字，则不执行后面代码
-  if (data.studentName == '**') {
-    ElNotification.warning({
-      title: "提示",
-      message: "该座位并没有学生，可在此处添加学生信息，或选择其他座位",
-      duration: 2000
-    });
+  if (data.studentName == '') {
+    createElNotification('提示', '该座位并没有学生，可在此处添加学生信息，或选择其他座位', 'warning', 2000)
     return false;
   }
   dialogVisibleForStu.value = true;

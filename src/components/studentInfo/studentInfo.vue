@@ -2,7 +2,7 @@
   <!--  右边部分  -->
   <tr class="student-info-right">
     <td class="stu-img">
-      <el-image :src="require(`../../../public/images/${reqStudentImgUrl}/${studentName}.jpg`)" :alt="studentName"
+      <el-image :src="`${envImagePath}/${reqStudentImgUrl}/${studentName}.jpg`" :alt="studentName"
         style="height: 315px;" class="img" />
     </td>
     <td class="student-team">
@@ -149,6 +149,7 @@ const getTeamId = ref("");
 const props = defineProps({
   studentName: { type: String, default: "" },
   reqStudentImgUrl: { type: String, default: "" },
+  envImagePath: { type: String, default: "" },
 })
 
 // 获取学生数据(封装),==》 信息引用
@@ -255,6 +256,7 @@ onMounted(() => {
     getTeamData(res)
   });
   getStudentData(props.studentName);
+  // console.log("envImagePath", props.envImagePath);
 });
 </script>
 

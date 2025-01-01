@@ -2,7 +2,7 @@
   <!--  右边部分  -->
   <tr class="student-info-right">
     <td class="stu-img">
-      <el-image :src="require('../../../public/images/image/team.jpg')" style="height: 250px;" class="img" />
+      <el-image :src="`${envImagePath}/image/team.jpg`" style="height: 250px;" class="img" />
     </td>
     <td class="student-team">
       <!--  小组情况  -->
@@ -120,10 +120,10 @@ const teamMemberScore = ref(0);
 const teamScore = ref(0);
 // 获取小组总分数
 const teamTotalScoreAll = ref(0);
-
 // 接收父组件传递过来的数据  
 const props = defineProps({
   teamId: { type: String, default: "" },
+  envImagePath: { type: String, default: "" },
 })
 
 // 获取团队数据(封装),==》 信息引用

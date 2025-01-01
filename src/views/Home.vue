@@ -130,12 +130,9 @@
     <!--  有内容加载 height: 85%; -->
     <div v-if="data.studentName" class="student_info">
       <div class="top">
-        <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL" />
+        <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL"
+          :env-image-path="data.envImagePath" />
       </div>
-      <!--  下部表格部分:team-leaders="data.teamLeaders"   -->
-      <!-- <div class="student-info-bottom">
-        <StudentTable :student-name="data.studentName" />
-      </div> -->
     </div>
     <!--  无内容加载  -->
     <span v-else>无法加载该地区图片和信息</span>
@@ -152,12 +149,8 @@
     <!--  有内容加载  -->
     <div v-if="data.teamId" class="student_info">
       <div class="top">
-        <TeamInfo :team-id="data.teamId" />
+        <TeamInfo :team-id="data.teamId" :env-image-path="data.envImagePath" />
       </div>
-      <!--  下部表格部分  -->
-      <!-- <div class="student-info-bottom">
-        <TeamTable :team-id="data.teamId" />
-      </div> -->
     </div>
     <!--  无内容加载  -->
     <span v-else>无法加载该地区图片和信息</span>
@@ -209,6 +202,7 @@ const data = reactive({
   selectTeamList: [] as number[],  // 获取所选团队的id
   studentName: '' as string,       // 获取学生姓名
   teamId: '' as any,               // 获取团队id
+  envImagePath: process.env.VUE_APP_IMAGE_PATH, // 获取环境图片路径
 })
 
 // （座位表）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)

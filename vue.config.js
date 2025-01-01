@@ -65,16 +65,18 @@ module.exports = {
         };
       });
 
-    // 配置静态资源处理
-    config.module
-      .rule('images')
-      .test(/\.(png|jpe?g|gif|svg)(\?.*)?$/)
-      .use('url-loader')
-      .loader('url-loader')
-      .options({
-        limit: 10000, // 小于10k的图片会被转成base64编码
-        name: 'assets/imgs/[name].[hash:7].[ext]'
-      });
+    // // 配置静态资源处理
+    // config.module
+    //   .rule('images')
+    //   .test(/\.(png|jpe?g|gif|svg)(\?.*)?$/)
+    //   .use('url-loader')
+    //   .loader('url-loader')
+    //   .options({
+    //     limit: 10000, // 小于10k的图片会被转成base64编码
+    //     name: 'assets/imgs/[name].[ext]'
+    //   });
+    // 移除图片处理规则
+    config.module.rules.delete('images');
 
     // 配置拆分包
     config.optimization.splitChunks({
@@ -134,7 +136,7 @@ module.exports = {
         new ForkTsCheckerWebpackPlugin(),  // 检查类型错误
         new FriendlyErrorsWebpackPlugin({
           ignore: ['WARNING', 'warning'],  // 忽略警告
-          additionalTransformers: [ filterWarnings ]
+          additionalTransformers: [filterWarnings]
         }), // 显示打包错误
       );
     }
@@ -146,7 +148,7 @@ module.exports = {
         new WebpackBar(),  // 配置打包进度条
         new FriendlyErrorsWebpackPlugin({
           ignore: ['WARNING', 'warning'],  // 忽略警告
-          additionalTransformers: [ filterWarnings ]
+          additionalTransformers: [filterWarnings]
         }), // 显示打包错误
       );
 
@@ -216,11 +218,11 @@ async function setTerserOptions(config) {
   return new Promise((resolve, reject) => {
     try {
       // 移除console
-      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true;
+      // config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true;
       // 移除debugger
       config.optimization.minimizer[0].options.terserOptions.compress.drop_debugger = true;
       // 移除console.log
-      config.optimization.minimizer[0].options.terserOptions.compress.pure_funcs = ['console.log'];
+      // config.optimization.minimizer[0].options.terserOptions.compress.pure_funcs = ['console.log'];
       // 移除无用的 getter
       config.optimization.minimizer[0].options.terserOptions.compress.pure_getters = true;
       // 移除无用的 setter

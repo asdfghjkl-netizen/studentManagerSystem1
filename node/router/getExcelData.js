@@ -1,19 +1,14 @@
 const express = require('express');
 const fsPromises = require('fs').promises;
-const path = require('path');
 const ExcelJS = require('exceljs');
 const { parseExcelFile, parseWorkSheetLong, processRow } = require('../tools/excelOpt');
 const redisClient = require('../config/redisConfig');
 const { ref } = require('vue');
-const headerConfig = require('../config/requestConfig');
 const { findFilePath } = require('../tools/fileOption');
+const { publicPath, headerConfig } = require('../config/publicConfig');
 
 // 创建路由实例
 const getExcelDataRouter = express.Router();
-// 获取当前执行目录
-const currentDir = process.cwd();
-// 使用获取 public 目录的路径
-const publicPath = path.join(currentDir, 'public');
 // 定义一个映射对象
 const valueMapping = {
     日期: 'dateTime',

@@ -21,9 +21,9 @@ export const getTeamNum = async (student) => {
 let student = ref([]);
 // 从后端获取组信息
 export const getTeamList = async (teamId) => {
+    student.value = [];
     await getTeamListFromBackend(teamId).then((res) => {
-        student.value = [];
-        console.log("teamList", res, res.teamData);
+        // console.log("teamList", res, res.teamData);
         for (const item in res.teamData) {
             if (Object.prototype.hasOwnProperty.call(res.teamData, item)) {
                 student.value.push(res.teamData[item]);

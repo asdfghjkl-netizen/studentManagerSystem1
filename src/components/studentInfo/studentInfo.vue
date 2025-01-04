@@ -9,7 +9,7 @@
       <!--  小组情况  -->
       <div class="stdent-team-name">
         <h1>
-          第{{ getTeamId }}团队：{{ studentName }}
+          第{{ getTeamId }}团队{{ isLeaderOrMember }}：{{ studentName }}
         </h1>
       </div>
       <div class="stdent-team-source">
@@ -88,6 +88,8 @@ const memberScore = ref(0);
 const totalTeamScore = ref(0);
 // 获取时间数据
 const dateTime = ref("");
+// 获取学生组员状态
+const isLeaderOrMember = ref("");
 // 获取学生学习状态数据列表
 const tableData = ref([]);
 // 定义学生课程状态列表
@@ -173,6 +175,9 @@ const getTeamData = (teamId: any) => {
     res.forEach((key: any) => {
       // 添加到 Set 中以去重
       teamTotalScore.add(key.totalScore);
+      if (key.stuName == props.studentName) {
+        isLeaderOrMember.value = key.isLeader == 0 ? "组员" : "组长";
+      }
     })
     // console.log(teamTotalScore);
     // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
@@ -256,7 +261,6 @@ onMounted(() => {
     getTeamData(res)
   });
   getStudentData(props.studentName);
-  // console.log("envImagePath", props.envImagePath);
 });
 </script>
 

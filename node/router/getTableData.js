@@ -1,6 +1,6 @@
 const express = require('express');
 const redisClient = require('../config/redisConfig');
-const headerConfig = require('../config/requestConfig');
+const { headerConfig } = require('../config/publicConfig');
 
 // 创建路由实例
 const getTableDataRouter = express.Router();

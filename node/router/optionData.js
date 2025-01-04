@@ -1,5 +1,5 @@
 const express = require('express');
-const headerConfig = require('../config/requestConfig');
+const { headerConfig } = require('../config/publicConfig');
 const redisClient = require('../config/redisConfig');
 
 // 创建路由实例

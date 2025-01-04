@@ -27,3 +27,13 @@ export function getExcelFile(data) {
         data
     })
 }
+
+// 写入并保存文件的接口获取
+export function downloadExcelFile(data) {
+    return instance({
+        url: 'download-excel',
+        method: 'post',
+        data,
+        headers: { "Content-Type": "multipart/form-data" },
+    })
+}

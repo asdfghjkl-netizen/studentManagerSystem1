@@ -1,22 +1,33 @@
 <template>
   <!-- 选择区域 -->
   <div style="position: absolute; margin-top: -10px; margin-left: 10px;">
-    <!-- 座位表选择 -->
-    <el-radio-group v-model="radio1" @change="handleSelectRoom($event as any)" style="margin-right: 30px;">
+    <!-- 座位表选择 style="margin-right: 30px;" -->
+    <el-radio-group v-model="radio1" @change="handleSelectRoom($event as any)">
       <el-radio value="1" size="large" border>班级座位表</el-radio>
       <el-radio value="2" size="large" border style="margin-left: -20px;">机房座位表</el-radio>
     </el-radio-group>
+    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
     <!-- 随机学生选择 -->
-    <el-button-group style="margin-right: 30px;">
+    <el-button-group>
       <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
       <el-button type="info" plain @click="data.selectList.splice(0)">取消选择</el-button>
     </el-button-group>
+    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
     <!-- 成绩分数选择 -->
     <el-button-group>
       <el-button type="success" plain>期中</el-button>
       <el-button type="success" plain>期末</el-button>
       <el-button type="success" plain>平时分</el-button>
     </el-button-group>
+    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
+    <!-- 点击进入管理界面 -->
+    <el-tooltip placement="top" :visible="visible">
+      <template #content>
+        <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
+      </template>
+      <el-button type="success" plain @click="handleToManage" @mouseenter="visible = true"
+        @mouseleave="visible = false">进入管理界面</el-button>
+    </el-tooltip>
   </div>
 
   <!-- 内容区域 -->
@@ -54,9 +65,9 @@
       <el-col :span="7" style="margin-left: -15px;">
         <el-row :gutter="20">
           <el-col :span="6" v-for="item in list['0']" :key="item">
-            <!-- :class="['seat', data.selectList.indexOf(item) > -1 ? 'active' : '']" -->
             <div class="seat" @click="add(item)">
-              <h3 v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
+              <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }"
+                v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
               <h3 v-else></h3>
             </div>
           </el-col>
@@ -80,9 +91,9 @@
       <el-col :span="10" style="margin-left: -15px;">
         <el-row :gutter="20">
           <el-col :span="4" v-for="item in list['1']" :key="item">
-            <!-- :class="['seat', data.selectList.indexOf(item) > -1 ? 'active' : '']" -->
             <div class="seat" @click="add(item)">
-              <h3 v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
+              <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }"
+                v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
               <h3 v-else></h3>
             </div>
           </el-col>
@@ -169,12 +180,15 @@ import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
 import StudentInfo from "@/components/studentInfo/studentInfo.vue";
 import TeamInfo from "@/components/teamInfo/teamInfo.vue";
-import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
+import { reactive, computed, ref, onMounted, watchEffect, watch } from 'vue';
 import { ElMessage } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
 import { getFileList } from "@/utils/api/apiPromiss";
+import { getTeamList } from "@/utils/dataOption/teamOpt";
+import router from "@/router";
 
+const visible = ref(false)  // 显示导入文件弹窗
 const importFile = importExcelFile() as any;
 const fileInput = ref("");
 // 学生座位表选择数据，默认为1---》班级座位表
@@ -186,6 +200,8 @@ const dialogVisibleForStu = ref(false);
 const dialogVisibleForTeam = ref(false);
 // 获取图片路径
 const reqStudentIMGURL = ref([]) as any;
+// 获取学生组员状态(全体学生)
+// const isLeader = ref([]);
 const rows = ref(7);     // 行数
 const cols = ref(10);    // 列数
 const data = reactive({
@@ -202,7 +218,10 @@ const data = reactive({
   selectTeamList: [] as number[],  // 获取所选团队的id
   studentName: '' as string,       // 获取学生姓名
   teamId: '' as any,               // 获取团队id
+  filePath: importFile.filePath,   // 获取文件路径(用于获取文件名路径，并写入保存文件)
   envImagePath: process.env.VUE_APP_IMAGE_PATH, // 获取环境图片路径
+  // studentNameList: importFile.students.map(item => item.stuName),
+  studentRoles: {} as { [key: string]: string }, // 新增字段，用于存储学生角色信息
 })
 
 // （座位表）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
@@ -306,8 +325,9 @@ const getclassName = () => {
 const importExcel: UploadProps['onChange'] = (uploadFile, uploadFiles) => {
   console.log(uploadFile, uploadFiles);
   importFile.importExcel(uploadFile);
-
+  getStudentTeamStatu();
   setTimeout(() => {
+    getStudentTeamStatu();
     fileInput.value = importFile.fileName;
     ImportFile();
   }, 4000);
@@ -437,14 +457,50 @@ const getImgURL = () => {
   reqStudentIMGURL.value = myArray[0]
 }
 
+// 获取成员团队状态
+let teamListData: any = ref([]);
+const getStudentTeamStatu = () => {
+  // const lastElement = data.teamList.length;
+  data.teamList.forEach(async (team) => {
+    const res = await getTeamList(team);
+    // console.log("res", res);
+    await teamListData.value.push(res);
+  })
+  // console.log("teamListwai", teamListData.value);
+  // 遍历每个团队的数据
+  teamListData.value.forEach((teamData: any) => {
+    teamData.forEach((member: any) => {
+      // 假设 member 对象包含 stuName 和 isLeader 字段
+      data.studentRoles[member.stuName] = member.isLeader === 0 ? '成员' : '组长';
+    });
+  });
+  // console.log("data.studentRoles", data.studentRoles);
+}
+let timer: any;
+watch(
+  () => true,
+  () => {
+    getStudentTeamStatu()
+    timer = setInterval(() => {
+      getStudentTeamStatu()
+    }, 1000); // 每秒更新一次
+    return () => { clearInterval(timer) };
+  }, { immediate: true, flush: 'post' }
+)
 watchEffect(() => {
   handleSelectRoom(radio1.value);
   getclassName();
+  // getStudentTeamStatu();
 })
 onMounted(() => {
   getImgURL()
   getFileList().then(res => { console.log(res) })
 })
+
+const handleToManage = () => {
+  // TODO 判断是否有权限
+  router.push("/manage");
+}
 </script>
 
 <style lang="scss" scoped>

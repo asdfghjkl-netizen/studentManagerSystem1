@@ -1,6 +1,6 @@
 const express = require('express');
 // const multer = require('multer');
-const headerConfig = require('../config/requestConfig');
+const { headerConfig } = require('../config/publicConfig');
 
 // 创建路由实例
 const addExcelRouter = express.Router();

@@ -218,11 +218,11 @@ async function setTerserOptions(config) {
   return new Promise((resolve, reject) => {
     try {
       // 移除console
-      // config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true;
+      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true;
       // 移除debugger
       config.optimization.minimizer[0].options.terserOptions.compress.drop_debugger = true;
       // 移除console.log
-      // config.optimization.minimizer[0].options.terserOptions.compress.pure_funcs = ['console.log'];
+      config.optimization.minimizer[0].options.terserOptions.compress.pure_funcs = ['console.log'];
       // 移除无用的 getter
       config.optimization.minimizer[0].options.terserOptions.compress.pure_getters = true;
       // 移除无用的 setter

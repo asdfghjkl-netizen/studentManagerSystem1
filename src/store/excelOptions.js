@@ -61,7 +61,7 @@ export const importExcelFile = defineStore('excelFile', {
         enabled: true,
         storage: localStorage,
         key: "excelFile",
-        path: ["students", "classSeat", "computerRoomSeat", "files",
-            "teamLists", "ecxelFile", "buffer"]
+        path: ["teamLists", "students", "classSeat", "files",
+            "computerRoomSeat", "fileName", "filePath"]
     },
 })

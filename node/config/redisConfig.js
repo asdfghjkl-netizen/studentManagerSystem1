@@ -1,9 +1,7 @@
 const redis = require('redis');
 const path = require('path');
+const { currentDir } = require('./publicConfig')
 const { exec } = require('child_process');
-
-// 获取当前执行目录
-const currentDir = process.cwd();
 
 // 使用 exec 运行 .bat 文件，并处理结果
 function startRedisServer() {

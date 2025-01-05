@@ -1,25 +1,25 @@
 <template>
   <!-- 选择区域 -->
   <div style="position: absolute; margin-top: -10px; margin-left: 10px;">
-    <!-- 座位表选择 style="margin-right: 30px;" -->
+    <!-- 座位表选择 -->
     <el-radio-group v-model="radio1" @change="handleSelectRoom($event as any)">
       <el-radio value="1" size="large" border>班级座位表</el-radio>
       <el-radio value="2" size="large" border style="margin-left: -20px;">机房座位表</el-radio>
     </el-radio-group>
-    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
+    <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
     <!-- 随机学生选择 -->
     <el-button-group>
       <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
       <el-button type="info" plain @click="data.selectList.splice(0)">取消选择</el-button>
     </el-button-group>
-    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
+    <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
     <!-- 成绩分数选择 -->
     <el-button-group>
       <el-button type="success" plain>期中</el-button>
       <el-button type="success" plain>期末</el-button>
       <el-button type="success" plain>平时分</el-button>
     </el-button-group>
-    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
+    <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
     <!-- 点击进入管理界面 -->
     <el-tooltip placement="top" :visible="visible">
       <template #content>
@@ -28,6 +28,7 @@
       <el-button type="success" plain @click="handleToManage" @mouseenter="visible = true"
         @mouseleave="visible = false">进入管理界面</el-button>
     </el-tooltip>
+    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
   </div>
 
   <!-- 内容区域 -->
@@ -113,6 +114,7 @@
       </el-col>
     </el-row>
   </div>
+
   <!-- 导入导出按钮 -->
   <div class="btn-group">
     <el-button type="primary" @click="exportExcel">
@@ -171,15 +173,14 @@
       </div>
     </template>
   </el-dialog>
-
 </template>
 
 <script lang="ts" setup>
 import { createElNotification } from "@/utils/dataOption/noticeOpt";
 import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
-import StudentInfo from "@/components/studentInfo/studentInfo.vue";
-import TeamInfo from "@/components/teamInfo/teamInfo.vue";
+import StudentInfo from "@/views/Home/studentInfo/studentInfo.vue";
+import TeamInfo from "@/views/Home/teamInfo/teamInfo.vue";
 import { reactive, computed, ref, onMounted, watchEffect, watch } from 'vue';
 import { ElMessage } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
@@ -193,15 +194,12 @@ const importFile = importExcelFile() as any;
 const fileInput = ref("");
 // 学生座位表选择数据，默认为1---》班级座位表
 const radio1 = ref("1");
-// 获取班级名称
-const className = ref("");
+const className = ref("");   // 获取班级名称
 // 定义学生卡对话框的状态
 const dialogVisibleForStu = ref(false);
 const dialogVisibleForTeam = ref(false);
 // 获取图片路径
 const reqStudentIMGURL = ref([]) as any;
-// 获取学生组员状态(全体学生)
-// const isLeader = ref([]);
 const rows = ref(7);     // 行数
 const cols = ref(10);    // 列数
 const data = reactive({
@@ -263,6 +261,12 @@ const teamList = computed(() => {
   arr['1'].reverse();
   return arr
 })
+
+// 点击进入管理页面（管理员用户使用）
+const handleToManage = () => {
+  // TODO 判断是否有权限
+  router.push("/manage");
+}
 
 // 随机选择学生
 const selectStudent = () => {
@@ -476,6 +480,7 @@ const getStudentTeamStatu = () => {
   });
   // console.log("data.studentRoles", data.studentRoles);
 }
+
 let timer: any;
 watch(
   () => true,
@@ -496,11 +501,6 @@ onMounted(() => {
   getImgURL()
   getFileList().then(res => { console.log(res) })
 })
-
-const handleToManage = () => {
-  // TODO 判断是否有权限
-  router.push("/manage");
-}
 </script>
 
 <style lang="scss" scoped>

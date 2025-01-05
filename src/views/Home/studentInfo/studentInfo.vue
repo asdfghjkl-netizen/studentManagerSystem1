@@ -181,10 +181,10 @@ const getTeamData = (teamId: any) => {
     })
     // console.log(teamTotalScore);
     // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
-    if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
-      totalTeamScore.value = 0;
-      throw new Error("团队数据异常");
-    }
+    // if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
+    //   totalTeamScore.value = 0;
+    //   throw new Error("团队数据异常");
+    // }
     totalTeamScore.value = teamTotalScore.values().next().value;
   })
 }

@@ -135,7 +135,7 @@ const getTeamData = (teamId: any) => {
   })
   // TODO 给totalTeamScore去重
   getTeamList(teamId).then((res: any) => {
-    console.log("teamData", res);
+    // console.log("teamData", res);
     // 创建一个 Set 来存储所有团队的小组总分
     const teamTotalScore = new Set();
     // 获取二级目录
@@ -145,7 +145,7 @@ const getTeamData = (teamId: any) => {
       // console.log("studyStatus", key.studyStatus);
       teamMemberScore.value += key.studyStatus;
     })
-    // console.log(teamTotalScore);
+    console.log(teamTotalScore);
     // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
     if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
       teamTotalScoreAll.value = 0;

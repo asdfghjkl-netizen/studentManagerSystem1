@@ -25,6 +25,17 @@ new Promise(resolve => setTimeout(resolve, 100));
 const redisClient = redis.createClient({
   host: process.env.REDIS_HOST || '127.0.0.1',
   port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+  retry_strategy: options => {
+    if (options.error && options.error.code === 'ECONNREFUSED') {
+      // 当连接被拒绝时，尝试重新连接
+      return 1000; // 重新连接的延迟时间（毫秒）
+    }
+    if (options.total_retry_time > 1000 * 60 * 60) {
+      // 当重试时间超过一个小时时，停止重试
+      return undefined;
+    }
+    return Math.min(options.attempt * 100, 3000);
+  }
 });
 
 // 监听错误信息
@@ -47,6 +58,10 @@ redisClient.on('end', () => {
 
 redisClient.on('reconnecting', () => {
   console.log('Redis client reconnecting');
+});
+
+redisClient.on('close', () => {
+  console.log('Redis client closed');
 });
 
 module.exports = redisClient;

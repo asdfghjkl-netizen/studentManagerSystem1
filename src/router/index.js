@@ -9,15 +9,21 @@ const routes = [
     path: '/manage',
     name: 'manage',
     component: () => import(/* webpackChunkName: "manage" */'@/views/Manager/Manage.vue')
-  }, {
-    path: '/',
-    redirect: '/',
   },
 ];
 
 const router = createRouter({
   history: createWebHashHistory(process.env.BASE_URL),
   routes,
+})
+
+// 路由守卫 -》 快速跳转到首页next
+router.beforeEach((to, from) => {
+  if (from.name === null || from.name === undefined) {
+    return to.path === '/'
+  } else {
+    return true;
+  }
 })
 
 export default router;

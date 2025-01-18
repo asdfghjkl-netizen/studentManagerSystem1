@@ -4,7 +4,7 @@
     <!-- 座位表选择 -->
     <el-radio-group v-model="radio1" @change="handleSelectRoom($event as any)">
       <el-radio value="1" size="large" border>班级座位表</el-radio>
-      <el-radio value="2" size="large" border style="margin-left: -20px;">机房座位表</el-radio>
+      <el-radio value="2" size="large" border style="margin-left: -30px;">机房座位表</el-radio>
     </el-radio-group>
     <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
     <!-- 随机学生选择 -->
@@ -218,7 +218,6 @@ const data = reactive({
   teamId: '' as any,               // 获取团队id
   filePath: importFile.filePath,   // 获取文件路径(用于获取文件名路径，并写入保存文件)
   envImagePath: process.env.VUE_APP_IMAGE_PATH, // 获取环境图片路径
-  // studentNameList: importFile.students.map(item => item.stuName),
   studentRoles: {} as { [key: string]: string }, // 新增字段，用于存储学生角色信息
 })
 

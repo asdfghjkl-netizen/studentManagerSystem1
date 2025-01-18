@@ -2,13 +2,15 @@ const express = require('express');
 const fsPromises = require('fs').promises;
 const ExcelJS = require('exceljs');
 const { parseExcelFile, parseWorkSheetLong, processRow } = require('../tools/excelOpt');
-const redisClient = require('../config/redisConfig');
 const { ref } = require('vue');
 const { findFilePath } = require('../tools/fileOption');
 const { publicPath, headerConfig } = require('../config/publicConfig');
+const { RedisOpt } = require('../tools/redisOpt'); 
 
 // 创建路由实例
 const getExcelDataRouter = express.Router();
+const { set, get, del, exists, hset, lpush, hmset } = new RedisOpt();  
+const bufferKey = 'buffer';  // 存取 Buffer 的 Redis 缓存的键名
 // 定义一个映射对象
 const valueMapping = {
     日期: 'dateTime',
@@ -29,12 +31,6 @@ getExcelDataRouter.all('*', function (req, res, next) { headerConfig(req, res, n
 getExcelDataRouter.post('/get-excel-file', async (req, res) => {
     // 获取前端传入的文件名，包装成json对象
     const { fileName } = req.body;
-
-    if (!fileName) {
-        res.status(400).json({ error: 'No file name provided' });
-        return;
-    }
-
     // 获取文件路径
     const filePath = await findFilePath(publicPath, fileName);
     if (!filePath || filePath == null) {
@@ -52,7 +48,7 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
         // 读取文件内容
         const buffer = await fsPromises.readFile(filePath);
         // 将二进制数据保存到 Redis
-        redisClient.set('buffer', JSON.stringify(buffer))
+        await set(bufferKey, buffer);
         // console.log('buffer', buffer);
         // 创建 Workbook 实例
         const workbook = new ExcelJS.Workbook();
@@ -61,19 +57,19 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
         const parsedData = parseExcelFile(workbook);
 
         // 存储 students 数据到 Redis  hmset模式
-        parsedData.students.forEach(student => {
+        parsedData.students.forEach(async (student) => {
             const key = `students:${student.stuName}`;
-            redisClient.hmset(key, student);
+            await hmset(key, student);
         });
         // 存储 classSeat 数据到 Redis    hmset模式
         pushStudentData("classSeat", parsedData.classSeat)
         // 存储 computerRoomSeat 数据到 Redis   hmset模式
         pushStudentData("computerRoomSeat", parsedData.computerRoomSeat)
         // 存储 teamLists 数据到 Redis  hset模式
-        parsedData.teamLists.forEach(team => {
+        parsedData.teamLists.forEach(async (team) => {
             const key = `team:${team.teamId}`;
             const { teamId, ...teamInfo } = team;
-            redisClient.hset(key, team.stuName, JSON.stringify(teamInfo));
+            await hset(key, team.stuName, JSON.stringify(teamInfo));
         });
         res.status(200).json({
             filePath: filePathStr,
@@ -97,35 +93,24 @@ getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
     const student = req.body.student;
     // console.log("student", student);
     const key = `stuStudyStatus:${student}`;
-
     // 清空redis列表数据
-    if (redisClient.exists(key)) redisClient.del(key);
-
+    if (exists(key)) del(key);
     // 获取 excel-data 数据，并拿到里面的 buffer 字段
-    redisClient.get('buffer', async (err, data) => {
-        if (err) {
-            console.error('Error retrieving data from Redis:', err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-        const getData = JSON.parse(data);
-        const buffer = getData.data; // 解析 JSON 字符串
-        // console.log("buffer", buffer);
+    const datasss = await get(bufferKey);
+    const buffer = datasss.data; // 解析 JSON 字符串
+    // console.log("buffer", buffer);
+    try {
+        // 创建 Workbook 实例
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        const parsedData = parseStudentData(workbook, student);
 
-        try {
-            // 创建 Workbook 实例
-            const workbook = new ExcelJS.Workbook();
-            await workbook.xlsx.load(buffer);
-            const parsedData = parseStudentData(workbook, student);
-
-            // 通过redis列表 存储数据
-            parsedData.forEach((item) => {
-                redisClient.lpush(key, JSON.stringify(item));
-            });
-            res.status(200).json();
-        } catch (error) {
-            res.status(500).json({ error: 'Failed to parse Excel data' });
-        }
-    });
+        // 通过redis列表 存储数据
+        parsedData.forEach(async (item) => await lpush(key, item));
+        res.status(200).json();
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to parse Excel data' });
+    }
 });
 
 /**
@@ -140,27 +125,22 @@ getExcelDataRouter.post('/get-excel-file/team', async (req, res) => {
     const teamNameForExcel = team + "组";
     const key = `teamStudyStatus:${teamNameForExcel}`;  // 组号作为key
     // 清空redis列表数据
-    if (redisClient.exists(key)) redisClient.del(key);
-
+    if (exists(key)) del(key);
     // 获取 excel-data 数据，并拿到里面的 buffer 字段
-    redisClient.get('buffer', async (err, data) => {
-        if (err) {
-            // console.error('Error retrieving data from Redis:', err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        }
-        const getData = JSON.parse(data);
-        const buffer = getData.data; // 解析 JSON 字符串
-
+    const datasss = await get(bufferKey);
+    const buffer = datasss.data; // 解析 JSON 字符串
+    // console.log("buffer", buffer);
+    try {
         // 创建 Workbook 实例
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
         const parsedData = parseTeamData(workbook, teamNameForExcel);
 
-        parsedData.forEach((item) => {
-            redisClient.lpush(key, JSON.stringify(item));
-        });
+        parsedData.forEach(async (item) => await lpush(key, item));
         res.status(200).json();
-    });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to parse Excel data' });
+    }
 });
 
 // 解析获取学生信息
@@ -197,19 +177,15 @@ function parseTeamData(workbook, teamName) {
 function pushStudentData(nick, seat) {
     // console.log('parseStudentData', nick, seat);
     let seatKey;
-    if (nick == 'classSeat') {
-        seatKey = "class_seat";
-    }
-    if (nick == 'computerRoomSeat') {
-        seatKey = "computerRoom_seat";
-    }
-    seat.forEach((row, rowIndex) => {
+    if (nick == 'classSeat') seatKey = "class_seat";
+    if (nick == 'computerRoomSeat') seatKey = "computerRoom_seat";
+    seat.forEach(async (row, rowIndex) => {
         const key = `${seatKey}:${rowIndex}`;
         const hashFields = {};
         row.forEach((student, colIndex) => {
             hashFields[`col${colIndex}`] = student;
         });
-        redisClient.hmset(key, hashFields);
+        await hmset(key, hashFields);
     });
 }
 

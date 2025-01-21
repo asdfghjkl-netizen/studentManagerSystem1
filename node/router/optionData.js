@@ -12,7 +12,6 @@ optDataRouter.all('*', function (req, res, next) { headerConfig(req, res, next) 
 // /table/student/add   添加学生信息数据
 optDataRouter.post('/table/student/add', async (req, res) => {
     const { student, studyStatus, dateTime, score, teamId } = req.body;
-    // console.log('req.body', student, studyStatus, dateTime, score, teamId);
     const key = `stuStudyStatus:${student}`;
     const addData = { dateTime, score, studyStatus };
     let pushData = rpush(key, addData);
@@ -22,17 +21,17 @@ optDataRouter.post('/table/student/add', async (req, res) => {
     }
 
     // TODO 修改Redis中key为team下的团队里的学生数据
-    const resetStuData = await hgetall(`team:${teamId}`);
-    // console.log('resetStuData', resetStuData);
+    const resetStuDataforAdd = await hgetall(`team:${teamId}`);
+    // console.log('resetStuData', resetStuDataforAdd);
     // 将每个学生的字符串数据转换为 JSON 对象
     const teamData = {};
-    for (const stu in resetStuData) {
+    for (const stu in resetStuDataforAdd) {
         try {
-            teamData[stu] = JSON.parse(resetStuData[stu]);
+            teamData[stu] = JSON.parse(resetStuDataforAdd[stu]);
 
             // TODO 修改整个团队数据
             teamData[stu].totalScore += score;
-            await hset(`team:${teamId}`, stu, teamData[stu]);
+            hset(`team:${teamId}`, stu, teamData[stu]);
         } catch (parseErr) {
             console.error(`Error parsing data for student ${student}:`, parseErr);
             res.status(500).json({ error: 'Error parsing data for student ${student}' });
@@ -48,7 +47,7 @@ optDataRouter.post('/table/student/add', async (req, res) => {
     teamData[student].studyStatus += score;
 
     // 修改单个学生的hash数据
-    await hset(`team:${teamId}`, student, teamData[student]);
+    hset(`team:${teamId}`, student, teamData[student]);
     res.status(200).json({
         code: 200,
         msg: `添加第${student}信息成功`,
@@ -59,29 +58,28 @@ optDataRouter.post('/table/student/add', async (req, res) => {
 optDataRouter.post('/table/team/add', async (req, res) => {
     const { teamId, studyStatus, dateTime, score } = req.body;
     const teamNameForExcel = teamId + "组";
-
     const key = `teamStudyStatus:${teamNameForExcel}`;
     const addData = { dateTime, score, studyStatus };
     let pushData = rpush(key, addData);
     if (!pushData) {
-        res.send({ code: 500, msg: `添加第${teamNameForExcel}信息失败` })
+        res.status(500).send({ msg: `添加第${teamNameForExcel}信息失败` })
         return;
     }
 
     // TODO 修改Redis中key为team下的团队里的学生数据
-    const resetTeamData = await hgetall(`team:${teamId}`);
-    // console.log('resetTeamData', resetTeamData);
+    const resetTeamDataforAdd = await hgetall(`team:${teamId}`);
+    console.log('resetTeamDataforAdd', resetTeamDataforAdd);
     // 将每个团队的字符串数据转换为 JSON 对象
     const teamData = {};
-    for (const stu in resetTeamData) {
+    for (const stu in resetTeamDataforAdd) {
         try {
-            teamData[stu] = JSON.parse(resetTeamData[stu]);
+            teamData[stu] = JSON.parse(resetTeamDataforAdd[stu]);
 
             // TODO 修改整个团队数据
             teamData[stu].totalScore += score;
 
             // 修改改hash的所有数据
-            await hset(`team:${teamId}`, stu, teamData[stu]);
+            hset(`team:${teamId}`, stu, teamData[stu]);
         } catch (parseErr) {
             console.error(`Error parsing data for team ${teamNameForExcel}:`, parseErr);
             res.status(500).json({ error: `Error parsing data for team ${teamNameForExcel}` });
@@ -100,28 +98,28 @@ optDataRouter.post('/table/student/remove', async (req, res) => {
     // 获取前端传入的数据
     const { student, dateTime, score, teamId } = req.body;
     // console.log('req.body', student, dateTime, score, teamId);
-    const getStuData = await lrange(`stuStudyStatus:${student}`);
+    const getStuDataforRem = await lrange(`stuStudyStatus:${student}`);
     // console.log('getStuData', getStuData);
 
     // 解析每个条目并检查 dateTime
-    const itemsToRemove = getStuData.filter(item => JSON.parse(item).dateTime === dateTime);
+    const itemsToRemove = getStuDataforRem.filter(item => JSON.parse(item).dateTime === dateTime);
 
     // 移除每个需要移除的条目
     itemsToRemove.forEach(async (item) => {
         lremove(`stuStudyStatus:${student}`, 0, item);
 
         // TODO 修改Redis中key为team下的团队里的学生数据
-        const resetStuData = await hgetall(`team:${teamId}`);
+        const resetStuDataforRem = await hgetall(`team:${teamId}`);
         // console.log('resetStuData', resetStuData);
         // 将每个学生的字符串数据转换为 JSON 对象
         const teamData = {};
-        for (const stu in resetStuData) {
+        for (const stu in resetStuDataforRem) {
             try {
-                teamData[stu] = JSON.parse(resetStuData[stu]);
+                teamData[stu] = JSON.parse(resetStuDataforRem[stu]);
 
                 // TODO 修改整个团队数据
                 teamData[stu].totalScore -= score;
-                await hset(`team:${teamId}`, stu, teamData[stu]);
+                hset(`team:${teamId}`, stu, teamData[stu]);
             } catch (parseErr) {
                 console.error(`Error parsing data for student ${student}:`, parseErr);
                 res.status(500).json({ error: 'Error parsing data for student ${student}' });
@@ -137,7 +135,7 @@ optDataRouter.post('/table/student/remove', async (req, res) => {
         teamData[student].studyStatus -= score;
 
         // 修改单个学生的hash数据
-        await hset(`team:${teamId}`, student, teamData[student]);
+        hset(`team:${teamId}`, student, teamData[student]);
 
         res.status(200).json({
             code: 200,
@@ -152,29 +150,29 @@ optDataRouter.post('/table/team/remove', async (req, res) => {
     const teamNameForExcel = teamId + "组";
     const key = `teamStudyStatus:${teamNameForExcel}`;
 
-    const getStuData = await lrange(key);
+    const getTeamDataforRem = await lrange(key);
     // console.log('getStuData', getStuData);
     // 解析每个条目并检查 dateTime
-    const itemsToRemove = getStuData.filter(item => JSON.parse(item).dateTime === dateTime);
+    const itemsToRemove = getTeamDataforRem.filter(item => JSON.parse(item).dateTime === dateTime);
 
     // 移除每个需要移除的条目
     itemsToRemove.forEach(async (item) => {
         lremove(key, 0, item);
 
         // TODO 修改Redis中key为team下的团队里的学生数据
-        const resetTeamData = await hgetall(`team:${teamId}`);
+        const resetTeamDataforRem = await hgetall(`team:${teamId}`);
         // console.log('resetTeamData', resetTeamData);
         // 将每个团队的字符串数据转换为 JSON 对象
         const teamData = {};
-        for (const stu in resetTeamData) {
+        for (const stu in resetTeamDataforRem) {
             try {
-                teamData[stu] = JSON.parse(resetTeamData[stu]);
+                teamData[stu] = JSON.parse(resetTeamDataforRem[stu]);
 
                 // TODO 修改整个团队数据
                 teamData[stu].totalScore -= score;
 
                 // 修改改hash的所有数据
-                await hset(`team:${teamId}`, stu, teamData[stu]);
+                hset(`team:${teamId}`, stu, teamData[stu]);
             } catch (parseErr) {
                 console.error(`Error parsing data for team ${teamNameForExcel}:`, parseErr);
                 res.status(500).json({ error: `Error parsing data for team ${teamNameForExcel}` });

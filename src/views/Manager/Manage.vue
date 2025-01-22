@@ -1,10 +1,10 @@
 <template>
-  <div aria-label="A complete example of page header">
+  <div class="container-demo common-layout">
     <el-page-header @back="handleToLast">
       <template #breadcrumb>
         <el-breadcrumb separator="/">
           <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-          <el-breadcrumb-item :to="{ path: '/' }">座位表</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/seatData' }">座位表</el-breadcrumb-item>
           <el-breadcrumb-item>此位置</el-breadcrumb-item>
         </el-breadcrumb>
       </template>
@@ -27,10 +27,23 @@
       </template>
     </el-page-header>
     <el-divider />
+
+    <el-container class="layout-container-demo">
+      <el-aside width="200px">
+        <MenuData />
+      </el-aside>
+      <el-container>
+        <el-header></el-header>
+        <el-main>
+          <router-view />
+        </el-main>
+      </el-container>
+    </el-container>
   </div>
 </template>
 
 <script setup lang="ts">
+import MenuData from './Layout/Aside/Menu.vue';
 import router from '@/router';
 
 // 返回上一个页面
@@ -40,8 +53,76 @@ const handleToLast = () => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.el-divider--horizontal {
+  margin: 15px 0;
+}
+
 .el-breadcrumb__inner {
   cursor: pointer;
+}
+
+.el-breadcrumb {
+  font-size: 16px;
+}
+
+.common-layout {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 15px;
+}
+
+.el-container {
+  height: 100%;
+}
+
+.layout-container-demo,
+.container-demo {
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.layout-container-demo .el-header {
+  position: relative;
+  background-color: var(--el-color-primary-light-7);
+  color: var(--el-text-color-primary);
+}
+
+.layout-container-demo .el-aside {
+  color: var(--el-text-color-primary);
+  background: var(--el-color-primary-light-8);
+}
+
+.layout-container-demo .el-menu {
+  border-right: none;
+}
+
+.layout-container-demo .el-main {
+  padding: 0;
+}
+
+.layout-container-demo .toolbar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  right: 20px;
+}
+
+.page-scroll {
+  height: 100%;
+}
+
+.page-scroll .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
+
+.el-aside::-webkit-scrollbar,
+.el-main::-webkit-scrollbar {
+  display: none;
 }
 </style>

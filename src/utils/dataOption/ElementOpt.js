@@ -1,4 +1,6 @@
 import { ElNotification } from "element-plus";
+import { en, zhCn } from 'element-plus/es/locale';
+import { computed, ref } from 'vue';
 
 /**
  * 创建一个Element Plus Notification 通知限制一次弹出次数为3
@@ -7,7 +9,7 @@ import { ElNotification } from "element-plus";
  * @param {string} type - 通知类型（可选：'success', 'warning', 'info', 'error'）
  * @param {number} duration - 通知显示时间（毫秒）
  */
-export const createElNotification = (() => {
+const createElNotification = (() => {
     let notificationCount = 0;  // 记录当前显示的通知数量
     const maxNotifications = 3; // 最大通知数量
 
@@ -25,3 +27,12 @@ export const createElNotification = (() => {
         }
     };
 })();
+
+const language = ref('zh-cn'); // 设置语言包
+const locale = computed(() => (language.value === 'zh-cn' ? zhCn : en));
+
+export {
+    createElNotification,
+    language,
+    locale
+}

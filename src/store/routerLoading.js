@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 
 export const useLoadingStore = defineStore('loading', {
   state: () => ({
-    isLoading: false,
+    isLoading: false,     // 是否加载中
   }),
     actions: {
     // 设置加载状态

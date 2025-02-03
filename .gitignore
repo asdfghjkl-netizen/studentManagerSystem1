@@ -3,6 +3,7 @@ node_modules
 /dist
 /api-doc
 /Vue3-Seat-Admin
+/copy
 
 # local env files
 .env.local

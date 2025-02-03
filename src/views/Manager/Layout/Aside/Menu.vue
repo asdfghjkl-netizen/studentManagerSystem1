@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-scrollbar>
-      <el-menu :default-openeds="['1', '3']">
+      <el-menu :default-openeds="['4']">
         <el-sub-menu index="1">
           <template #title>
             <el-icon>
@@ -59,11 +59,9 @@
         </el-sub-menu>
         <el-sub-menu index="4">
           <template #title>
-            <el-icon><icon-menu /></el-icon>测试配置
+            <el-icon><Tools /></el-icon>测试配置
           </template>
-          <el-menu-item-group>
-            <el-menu-item index="4-1">表格测试</el-menu-item>
-          </el-menu-item-group>
+          <el-menu-item index="4-1">表格测试</el-menu-item>
         </el-sub-menu>
       </el-menu>
     </el-scrollbar>
@@ -71,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { Menu as IconMenu, Message, Setting } from '@element-plus/icons-vue'
+import { Menu as IconMenu, Message, Setting, Tools } from '@element-plus/icons-vue';
 </script>
 
-<style scoped></style>
+<style lang="scss" scoped></style>

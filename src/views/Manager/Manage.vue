@@ -1,5 +1,5 @@
 <template>
-  <div class="container-demo common-layout">
+  <div class="common-layout">
     <el-page-header @back="handleToLast">
       <template #breadcrumb>
         <el-breadcrumb separator="/">
@@ -28,32 +28,54 @@
     </el-page-header>
     <el-divider />
 
-    <el-container class="layout-container-demo">
-      <el-aside width="200px">
-        <MenuData />
-      </el-aside>
+    <div ref="container" class="layout-container-demo">
       <el-container>
-        <el-header></el-header>
-        <el-main>
-          <router-view />
-        </el-main>
+        <el-aside width="210px">
+          <MenuData />
+        </el-aside>
+        <el-container>
+          <el-header>
+            <div class="toolbar">
+              <!-- 收起菜单按钮 -->
+              <el-button type="primary" class="mr-2" @click="handleCollapse">
+                <el-icon>
+                  <Menu />
+                </el-icon>
+              </el-button>
+            </div>
+          </el-header>
+          <el-main>
+            <router-view />
+          </el-main>
+        </el-container>
       </el-container>
-    </el-container>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Menu } from '@element-plus/icons-vue';
 import MenuData from './Layout/Aside/Menu.vue';
 import router from '@/router';
 
 // 返回上一个页面
 const handleToLast = () => {
-  // console.log('handleToLast',window.history );
   window.history.length > 1 ? router.go(-1) : router.push('/');
 }
+
+// 收起菜单
+const handleCollapse = () => { }
 </script>
 
 <style lang="scss" scoped>
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 .el-divider--horizontal {
   margin: 15px 0;
 }
@@ -67,12 +89,12 @@ const handleToLast = () => {
 }
 
 .common-layout {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh - 2.5vh;
+  padding: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .el-container {
@@ -103,6 +125,8 @@ const handleToLast = () => {
 
 .layout-container-demo .el-main {
   padding: 0;
+  overflow-y: auto;
+  /* 允许内容内部滚动 */
 }
 
 .layout-container-demo .toolbar {

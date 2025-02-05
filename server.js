@@ -4,11 +4,11 @@ const swaggerInit = require('./node/config/swaggerConfig');
 const { getFilePath } = require('./node/tools/fileOption');
 const { publicPath, PORT, headerConfig } = require('./node/config/publicConfig');
 // 引用路由
-const getExcelDataRouter = require('./node/router/getExcelData');
-const getTableDataRouter = require('./node/router/getTableData');
-const saveToExcelRouter = require('./node/router/saveToExcel');
-const addExcelRouter = require('./node/router/addExcelFile');
-const optDataRouter = require('./node/router/optionData');
+const getExcelDataRouter = require('./node/router/seatDataOpt/getExcelData');
+const getTableDataRouter = require('./node/router/seatDataOpt/getTableData');
+const saveToExcelRouter = require('./node/router/seatDataOpt/saveToExcel');
+const optDataRouter = require('./node/router/seatDataOpt/optionData');
+const addExcelRouter = require('./node/router/indexOpt/addExcelFile');
 
 // 创建 express 应用程序
 const app = express();

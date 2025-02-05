@@ -1,38 +1,40 @@
 <template>
-  <!-- 选择区域 -->
-  <div style="position: absolute; margin-top: -10px; margin-left: 10px;">
-    <!-- 座位表选择 -->
-    <el-radio-group v-model="radio1" @change="handleSelectRoom($event as any)">
-      <el-radio value="1" size="large" border>班级座位表</el-radio>
-      <el-radio value="2" size="large" border style="margin-left: -30px;">机房座位表</el-radio>
-    </el-radio-group>
-    <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
-    <!-- 随机学生选择 -->
-    <el-button-group>
-      <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
-      <el-button type="info" plain @click="data.selectList.splice(0)">取消选择</el-button>
-    </el-button-group>
-    <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
-    <!-- 成绩分数选择 -->
-    <el-button-group>
-      <el-button type="success" plain>期中</el-button>
-      <el-button type="success" plain>期末</el-button>
-      <el-button type="success" plain>平时分</el-button>
-    </el-button-group>
-    <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
-    <!-- 点击进入管理界面 -->
-    <el-tooltip placement="top" :visible="visible">
-      <template #content>
-        <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
-      </template>
-      <el-button type="success" plain @click="handleToManage" @mouseenter="visible = true"
-        @mouseleave="visible = false">进入管理界面</el-button>
-    </el-tooltip>
-    <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
-  </div>
-
-  <!-- 内容区域 -->
+  <!-- 主体内容区域 -->
   <div class="alarm">
+    <!-- 选择区域 -->
+    <div class="select-area">
+      <!-- 座位表选择 -->
+      <el-radio-group v-model="radio1" @change="handleSelectRoom($event as any)">
+        <el-radio value="1" size="large" border>班级座位表</el-radio>
+        <el-radio value="2" size="large" border style="margin-left: -30px;">机房座位表</el-radio>
+      </el-radio-group>
+      <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
+      <!-- 随机学生选择 -->
+      <el-button-group>
+        <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
+        <el-button type="info" plain @click="data.selectList.splice(0)">取消选择</el-button>
+      </el-button-group>
+      <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
+      <!-- 成绩分数选择 -->
+      <el-button-group>
+        <el-button type="success" plain>期中</el-button>
+        <el-button type="success" plain>期末</el-button>
+        <el-button type="success" plain>平时分</el-button>
+      </el-button-group>
+      <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
+      <!-- 点击进入管理界面 -->
+      <el-tooltip placement="top" :visible="visible">
+        <template #content>
+          <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
+        </template>
+        <el-button type="success" plain @click="handleToManage" @mouseenter="visible = true"
+          @mouseleave="visible = false">进入管理界面</el-button>
+      </el-tooltip>
+      <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
+    </div>
+    <el-divider class="divider" direction="horizontal" border-style="solid" />
+
+    <!-- 座位表 -->
     <el-row :gutter="20">
       <el-col :span="4">
         <div class="grid-content ep-bg-purple" />
@@ -113,23 +115,24 @@
         <div class="grid-content ep-bg-purple" />
       </el-col>
     </el-row>
-  </div>
 
-  <!-- 导入导出按钮 -->
-  <div class="btn-group">
-    <el-button type="primary" @click="exportExcel">
-      <el-icon>
-        <Download />
-      </el-icon>
-      导出excel</el-button>
-    <el-upload :limit="1" :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
-      <el-button type="primary">
+    <!-- 导入导出按钮区域 -->
+    <el-divider class="divider divider-bottom" direction="horizontal" border-style="solid" />
+    <div class="btn-group">
+      <el-button type="primary" @click="exportExcel">
         <el-icon>
-          <Upload />
+          <Download />
         </el-icon>
-        导入excel文件
-      </el-button>
-    </el-upload>
+        导出excel</el-button>
+      <el-upload :limit="1" :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
+        <el-button type="primary">
+          <el-icon>
+            <Upload />
+          </el-icon>
+          导入excel文件
+        </el-button>
+      </el-upload>
+    </div>
   </div>
 
   <!--  
@@ -190,20 +193,18 @@ import router from "@/router";
 const visible = ref(false)  // 显示导入文件弹窗
 const importFile: any = importExcelFile();
 const fileInput = ref("");
-// 学生座位表选择数据，默认为1---》班级座位表
-const radio1 = ref("1");
-const className = ref("");   // 获取班级名称
-// 定义学生卡对话框的状态
-const dialogVisibleForStu = ref(false);
+const radio1 = ref("1");  // 学生座位表选择数据，默认为1---》班级座位表
+const className = ref("");  // 获取班级名称
+const dialogVisibleForStu = ref(false);  // 定义学生卡对话框的状态
 const dialogVisibleForTeam = ref(false);
 // 获取成员团队状态
 let teamListData = ref([]);
 // 获取图片路径
 const reqStudentIMGURL = ref<any>([]);
-const rows = ref(7);     // 行数
-const cols = ref(10);    // 列数
+const rows = ref(7);  // 行数
+const cols = ref(10);  // 列数
 const data = reactive({
-  stuSeat: [] as any[],              // 获取学生的数据==》studentList的对象
+  stuSeat: [] as any[],            // 获取学生的数据==》studentList的对象
   //  变量的值动态生成一个 7 行 10 列的二维数组，并且座位编号也会按照顺序排列。
   seatList: Array.from({ length: rows.value }, (_, rowIndex) =>
     Array.from({ length: cols.value }, (_, colIndex) => rowIndex * cols.value + colIndex + 1)
@@ -220,9 +221,8 @@ const data = reactive({
   envImagePath: process.env.VUE_APP_IMAGE_PATH, // 获取环境图片路径
   // 新增字段，用于存储学生角色信息  {} as { [key: string]: string }
   studentRoles: importFile.studentRoles,
-})
+});
 
-// （座位表）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
 const list = computed(() => {
   let arr = [[] as number[], [] as number[]];  // 定义二维数组的变位表
 
@@ -237,9 +237,8 @@ const list = computed(() => {
       }
     });
   });
-
   return arr;
-})
+});
 
 // （组位）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
 const teamList = computed(() => {
@@ -259,14 +258,14 @@ const teamList = computed(() => {
   // 在循环结束后对两个数组进行倒序
   arr['0'].reverse();
   arr['1'].reverse();
-  return arr
-})
+  return arr;
+});
 
 // 点击进入管理页面（管理员用户使用）
 const handleToManage = () => {
   // TODO 判断是否有权限
   router.push("/manage");
-}
+};
 
 // 随机选择学生
 const selectStudent = () => {
@@ -309,7 +308,7 @@ const selectStudent = () => {
     ElMessage.error('Error selecting random student:', error);
     throw new Error('Failed to select random student');
   }
-}
+};
 
 // 截取文件名
 const getclassName = () => {
@@ -318,12 +317,12 @@ const getclassName = () => {
   const dotIndex = filename.indexOf('.');
   // 截取从开头到 '.' 之前的部分
   const classNamefront = filename.substring(0, dotIndex);
-  // 如果需要进一步截取到“班”为止
-  // 找到 '班' 的位置，并加上1确保包含“班”字
+  /* 如果需要进一步截取到"班"为止
+   找到 '班' 的位置，并加上1确保包含"班"字 */
   const classEndIndex = classNamefront.indexOf('班') + 1;
   className.value = classNamefront.substring(0, classEndIndex);
   // console.log(className.value);
-}
+};
 
 // 导入excel   event: { target: { files: any } }
 const importExcel: UploadProps['onChange'] = async (uploadFile, uploadFiles) => {
@@ -336,8 +335,7 @@ const importExcel: UploadProps['onChange'] = async (uploadFile, uploadFiles) => 
     fileInput.value = importFile.fileName;
     ImportFile();
   }, 4000);
-}
-// 解析文件 -- 发送给后端操作
+};
 const ImportFile = () => {
   try {
     for (let i = 0; i < data.teamList.length; i++) {
@@ -350,18 +348,18 @@ const ImportFile = () => {
     importFile.students.forEach(student => {
       // console.log("student", student.stuName);
       pushStudentStatusToRedis(student.stuName).then(res => {
-        console.log(res)
+        console.log(res);
       });
     });
   } catch (error) {
     ElMessage.error(error);
   }
-}
+};
 
 // 导出excel文件(测试阶段)
 const exportExcel = () => {
   ElMessage.success({ message: '导出成功', duration: 1000 });
-}
+};
 
 // 学生座位表的选择(二维数组写法)
 const handleSelectRoom = (event: any) => {
@@ -392,7 +390,7 @@ const handleSelectRoom = (event: any) => {
     }));
   }
   data.stuSeat = data.studentList;
-}
+};
 
 // 选择座位表
 const add = (id: number) => {
@@ -403,18 +401,18 @@ const add = (id: number) => {
   // console.log("data.studentList", data.studentList);
   // 如果data.studentList为空，则弹出错误提示
   if (Object.keys(data.studentList).length === 0) {
-    createElNotification('错误', '请先导入数据！', 'error', 2000)
+    createElNotification('错误', '请先导入数据！', 'error', 2000);
     return false;
   }
   // data.studentList的id是 data.studentList的数组下标 所以-1
   data.studentName = data.studentList[id - 1].stu;
   // 如果选中的位置没有名字，则不执行后面代码
   if (data.studentName == '') {
-    createElNotification('提示', '该座位并没有学生，可在此处添加学生信息，或选择其他座位', 'warning', 2000)
+    createElNotification('提示', '该座位并没有学生，可在此处添加学生信息，或选择其他座位', 'warning', 2000);
     return false;
   }
   dialogVisibleForStu.value = true;
-}
+};
 
 // 选择组队列表
 const addTeam = (id: number) => {
@@ -428,7 +426,7 @@ const addTeam = (id: number) => {
   data.teamId = data.teamList[id - 1];
 
   dialogVisibleForTeam.value = true;
-}
+};
 
 // 搜索图片路径
 const getImgURL = () => {
@@ -449,27 +447,42 @@ const getImgURL = () => {
     // console.log(secondLevelDir);
     // 添加到 Set 中以去重
     secondLevelDirs.add(secondLevelDir);
-  })
-  // console.log(secondLevelDirs);
-
-  // 提取二级目录的Set对象并转换成数组
+  });
+  // 把 Set 转换为数组
   const myArray = [];
   for (const secondLevelDirsString of secondLevelDirs) {
     //  在这里，secondLevelDirsString 已经是字符串了，所以我们直接将其添加到数组中
     myArray.push(secondLevelDirsString);
   }
-  // console.log(myArray);
-  reqStudentIMGURL.value = myArray[0]
-}
+
+  reqStudentIMGURL.value = myArray[0];
+};
 
 watchEffect(() => {
   handleSelectRoom(radio1.value);
   getclassName();
-})
-onMounted(() => { getImgURL() })
+});
+onMounted(() => { getImgURL(); });
 </script>
 
 <style lang="scss" scoped>
+.divider {
+  margin: 0 0 10px 0;
+
+  &-bottom {
+    margin: 20px 0 0 0;
+  }
+}
+
+.select-area {
+  margin-top: -30px;
+  margin-left: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .alarm {
   padding: 2rem;
   margin: 2rem;
@@ -515,8 +528,10 @@ onMounted(() => { getImgURL() })
 
 .btn-group {
   display: flex;
-  justify-content: space-around;
+  // justify-content: space-around;
+  justify-content: flex-start;
   margin-top: 2rem;
+  margin-left: 20px;
   width: 30%;
   height: 70px;
 }
@@ -531,20 +546,11 @@ onMounted(() => { getImgURL() })
 
 .student_info {
   .top {
-    // display: flex;
-    // align-items: center;
     margin-bottom: 2rem;
-
-    // .stu-img {
-    //   position: relative;
-    //   top: -100px;
-    //   background-color: white;
-
-    //   .img {
-    //     border-radius: 5px;
-    //     margin: 15px 30px;
-    //   }
-    // }
   }
+}
+
+.upload-container {
+  margin-left: 100px;
 }
 </style>

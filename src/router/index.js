@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from "vue-router";
-import { useLoadingStore } from '@/store/routerLoading';
+import { useRouterStore } from '@/store/routerOptions';
 
 const routes = [
   {     // 首页
@@ -15,13 +15,24 @@ const routes = [
     name: 'manage',
     component: () => import(/* webpackChunkName: "manage" */'@/views/Manager/Manage.vue'),
     children: [
-      {  // 测试表格页
+      {  // 测试页
         path: 'test',
         name: 'test',
-        component: () => import(/* webpackChunkName: "test" */'@/components/test/TableData.vue'),
+        children: [
+          {  // 测试页 -》 测试表格页
+            path: 'table',
+            name: 'test-table',
+            component: () => import(/* webpackChunkName: "test-table" */'@/components/test/TableData.vue'),
+          },
+          // {  // 测试页 -》 测试表格页
+          //   path: 'table1',
+          //   name: 'test-table1',
+          //   component: () => import(/* webpackChunkName: "test-table" */'@/components/test/table.vue'),
+          // },
+        ],
       },
     ],
-    redirect: '/manage/test',
+    redirect: '/manage/test/table', // 默认重定向到 /manage/test/table useRouterStore().activeIndex
   },
 ];
 
@@ -32,7 +43,7 @@ const router = createRouter({
 
 // 路由守卫 -》 快速跳转到首页next  
 router.beforeEach((to, from, next) => {
-  const loadingStore = useLoadingStore();
+  const loadingStore = useRouterStore();
   loadingStore.setLoading(true);
 
   // 移除重定向到首页的逻辑
@@ -46,7 +57,7 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach((to, from) => {
   console.log(to, from);
-  const loadingStore = useLoadingStore();
+  const loadingStore = useRouterStore();
   loadingStore.setLoading(false);
 });
 

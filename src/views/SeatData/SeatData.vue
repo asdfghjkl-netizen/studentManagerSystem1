@@ -23,13 +23,11 @@
       </el-button-group>
       <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
       <!-- 点击进入管理界面 -->
-      <el-tooltip placement="top" :visible="visible">
+      <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleToManage">
         <template #content>
           <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
-        </template>
-        <el-button type="success" plain @click="handleToManage" @mouseenter="visible = true"
-          @mouseleave="visible = false">进入管理界面</el-button>
-      </el-tooltip>
+        </template>进入管理界面
+      </TooltipButton>
       <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
     </div>
     <el-divider class="divider" direction="horizontal" border-style="solid" />
@@ -179,6 +177,7 @@
 </template>
 
 <script lang="ts" setup>
+import TooltipButton from '@/components/TooltipButton.vue';
 import { createElNotification } from "@/utils/dataOption/ElementOpt";
 import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
@@ -190,7 +189,6 @@ import { importExcelFile } from "@/store/excelOptions";
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
 import router from "@/router";
 
-const visible = ref(false)  // 显示导入文件弹窗
 const importFile: any = importExcelFile();
 const fileInput = ref("");
 const radio1 = ref("1");  // 学生座位表选择数据，默认为1---》班级座位表
@@ -407,6 +405,7 @@ const add = (id: number) => {
   // data.studentList的id是 data.studentList的数组下标 所以-1
   data.studentName = data.studentList[id - 1].stu;
   // 如果选中的位置没有名字，则不执行后面代码
+
   if (data.studentName == '') {
     createElNotification('提示', '该座位并没有学生，可在此处添加学生信息，或选择其他座位', 'warning', 2000);
     return false;

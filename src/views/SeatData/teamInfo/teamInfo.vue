@@ -12,7 +12,7 @@
       <div class="stdent-team-source">
         <h2>
           <span style="margin-right: 35px;">小组总分 {{ teamTotalScoreAll }}分</span>
-          <div style="width: 200px; position: absolute; left: 510px; top: 125px;">
+          <div style="width: 200px; position: absolute; left: 510px; top: 100px;">
             <div style="margin-bottom: 10px;">团队得分 {{ teamScore }}分</div>
             <div>成员得分 {{ teamMemberScore }}分</div>
           </div>
@@ -270,6 +270,7 @@ onMounted(() => {
 
 .stdent-team-source h2 {
   font-weight: 500;
+  margin-top: 15px;
 }
 
 .stu-img {

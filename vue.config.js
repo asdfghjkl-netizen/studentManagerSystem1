@@ -5,7 +5,6 @@ const WebpackBar = require('webpackbar');                  // 显示打包进度
 const CopyWebpackPlugin = require('copy-webpack-plugin');  // 复制文件
 const customParser = require('./webpack/custom-parser');   // 自定义解析器
 const OnBuildPlugin = require('on-build-webpack');         // 添加构建完成回调
-const prettier = require('prettier');                      // 格式化代码
 const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin'); // 显示打包错误
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin'); // 检查类型错误
 // 打包分析
@@ -15,9 +14,15 @@ const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
  * 引入配置文件 webpack/config.js  "node-sass": "^4.14.1"
  * @type {String} outputDir    输出目录 
  * @type {Array}  patterns     复制文件列表
+ * @type {Function} formatFiles 格式化文件
+ * @type {Function} filterWarnings 过滤警告
+ * @type {Function} setTerserOptions 设置 Terser 选项
  * */
-const { outputDir, patterns } = require('./webpack/config');
-
+const {
+  outputDir,
+  patterns,
+  formatFiles, filterWarnings, setTerserOptions
+} = require('./webpack/config');
 const assetsDir = 'assets';
 
 // 配置 webpack
@@ -26,10 +31,16 @@ module.exports = {
   publicPath: './',            // 配置根目录
   outputDir: process.env.VUE_APP_OUTPUT_DIR,  // 输出目录
   assetsDir,                   // 设置静态资源输出目录
-  runtimeCompiler: undefined,  // 是否启用运行时编译
+  runtimeCompiler: true,  // 是否启用运行时编译
   productionSourceMap: false,  // 是否生成 sourceMap 文件
   parallel: undefined,         // 允许并发打包线程数
-  css: undefined,              // 配置 css-loader loader
+  css: {    // 配置 css-loader loader
+    loaderOptions: {
+      scss: {
+        additionalData: `@use "@/assets/styles/common.scss" as *;`
+      }
+    }
+  },
 
   // 配置 webpack-chain 
   chainWebpack: config => {
@@ -197,61 +208,4 @@ module.exports = {
     open: true,  // 自动打开浏览器
     quiet: true  // 如果使用webpack-dev-server，需要设为true，禁止显示devServer的console信息
   },
-}
-
-// 通用文件格式化函数
-async function formatFiles(files, extension, parser) {
-  await Promise.all(files.map(async (file) => {
-    // console.log(`Processing ${extension} file: ${file}`);
-    try {
-      const content = fs.readFileSync(file, 'utf-8');
-      const formattedContent = await prettier.format(content, { parser });
-      fs.writeFileSync(file, formattedContent, 'utf-8');
-    } catch (error) {
-      console.error(`Error processing ${extension} file ${file}:`, error);
-    }
-  }));
-}
-
-// 异步设置 Terser 选项
-async function setTerserOptions(config) {
-  return new Promise((resolve, reject) => {
-    try {
-      // 移除console
-      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true;
-      // 移除debugger
-      config.optimization.minimizer[0].options.terserOptions.compress.drop_debugger = true;
-      // 移除console.log
-      config.optimization.minimizer[0].options.terserOptions.compress.pure_funcs = ['console.log'];
-      // 移除无用的 getter
-      config.optimization.minimizer[0].options.terserOptions.compress.pure_getters = true;
-      // 移除无用的 setter
-      config.optimization.minimizer[0].options.terserOptions.compress.keep_fargs = false;
-      resolve();
-    } catch (error) {
-      reject(error);
-    }
-  });
-}
-
-// 过滤警告的函数
-function filterWarnings(error) {
-  if (error.severity === 'warning') {
-    const warningMessagesToIgnore = [
-      '<tr> cannot be child of <div>',
-      'Another warning message to ignore',
-      'Yet another warning message to ignore',
-      "Compiled with  warnings",
-      // 可以继续添加更多的警告信息
-      "warning",
-      "eprecation Warning",
-      "WARNING",
-      "Deprecation Warning",
-    ];
-
-    if (warningMessagesToIgnore.some(warningMessage => error.message.includes(warningMessage))) {
-      return null; // 过滤掉匹配的警告
-    }
-  }
-  return error; // 返回其他类型的错误
 }

@@ -60,7 +60,6 @@ const handleSelect = (index: string) => {
 
   // 检查路由是否存在
   const resolved = router.resolve({ path: index });
-  console.log('resolved', resolved, resolved.matched.length); 
   if (resolved.matched.length > 0) {
     router.push(index);
     // 更新 Pinia store 中的 activeIndex
@@ -73,8 +72,7 @@ const handleSelect = (index: string) => {
   }
 };
 
-
-// 组件挂载时初始化 activeIndex
+// 组件挂载时初始化
 onMounted(() => {
   if (!menuStore.activeIndex) {
     menuStore.setActiveIndex('/manage/test/table');

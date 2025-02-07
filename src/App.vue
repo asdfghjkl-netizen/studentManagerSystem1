@@ -1,6 +1,6 @@
 <template>
   <!-- 在 @/utils/dataOption/ElementOpt 有 :locale="locale" 的配置项 -->
-  <el-config-provider :locale="locale" :message="config" :button="btn">
+  <el-config-provider :locale="configStore.locale" :message="config" :button="btn">
     <router-view />
   </el-config-provider>
 </template>
@@ -9,8 +9,9 @@
 import { ElConfigProvider } from 'element-plus';
 import { reactive, onMounted } from 'vue';
 import { getFileList } from "@/utils/api/apiPromiss";
-import { locale } from '@/utils/dataOption/ElementOpt';
+import { useConfig } from '@/store/config';
 
+const configStore: any = useConfig();
 // 设置提示信息
 const config = reactive({
   max: 2,

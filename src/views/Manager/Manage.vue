@@ -335,19 +335,10 @@ const handleClose = (tag: TagItem) => {
   }
 }
 
-// 全局样式
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
 .common-layout {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 2.5vh);
+  height: 100vh;
   overflow: hidden;
   box-sizing: border-box;
 }

@@ -277,6 +277,9 @@ onMounted(() => {
 .student-team {
   float: right;
   margin-left: 20px;
+  // position: relative;
+  // top: -30px;
+  padding: 10px 10px 10px 0px;
 }
 
 .student-info-right {
@@ -288,19 +291,26 @@ onMounted(() => {
     margin-bottom: 15px;
   }
 
+  .datetime {
+    white-space: nowrap;
+  }
+
   .study {
     font-size: 18px;
     margin-bottom: 15px;
+    white-space: nowrap; // 添加此行
   }
 
   .other {
     font-size: 18px;
     margin-bottom: 15px;
+    white-space: nowrap; // 添加此行
   }
 
   .source {
     font-size: 18px;
     margin-bottom: 15px;
+    white-space: nowrap; // 添加此行
 
     .fen {
       margin-left: 5px;
@@ -310,11 +320,14 @@ onMounted(() => {
 
 .stdent-team-name h1 {
   font-weight: 500;
+  padding: 0px 10px 10px 0px;
 }
 
 .stdent-team-source h2 {
   font-weight: 500;
+  padding: 0px 10px 10px 0px;
 }
+
 
 .table-container {
   position: relative;

@@ -1,7 +1,9 @@
+const defaultGateway = require('default-gateway'); // 获取默认网关
 const prettier = require('prettier');    // 格式化代码
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
 // 获取所有以 server 开头的文件
 const serverFiles = glob.sync('server*', { cwd: path.join(__dirname, '..') });
@@ -67,7 +69,7 @@ module.exports = {
  * @param {Array} files 文件路径数组
  * @param {String} extension 文件扩展名
  * @param {String} parser 解析器
- */ 
+ */
 async function formatFiles(files, extension, parser) {
   await Promise.all(files.map(async (file) => {
     // console.log(`Processing ${extension} file: ${file}`);

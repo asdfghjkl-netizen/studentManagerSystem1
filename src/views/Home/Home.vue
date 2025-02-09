@@ -12,7 +12,7 @@
             </el-select>
           </div>
           <div class="buttons">
-            <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleManage">
+            <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleToManage">
               <template #content>
                 <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
               </template>设置管理
@@ -34,13 +34,12 @@
 </template>
 
 <script setup lang="ts">
+import { handleManage } from '@/utils/dataOption/routerOpt';
 import TooltipButton from '@/components/TooltipButton.vue';
-import { useMenuStore } from '@/store/menu';
 import { useConfig } from "@/store/config";
 import router from '@/router';
 import { ref } from 'vue';
 
-const menuStore = useMenuStore();
 const config: any = useConfig();
 const music = ref(true);   // 音乐开关
 const selectedClass = ref(''); // 选择班级
@@ -54,16 +53,7 @@ const changeLang = (event: any) => config.changeGlobalLang(event);
 const handleToSeat = () => router.push("/seatData");
 
 // 跳转管理员界面
-const handleManage = () => {
-  // TODO 判断是否有权限
-
-  // 判断 activeIndex 是否为空
-  if (menuStore.activeIndex === "") {
-    router.push("/manage");  // 默认管理界面
-  } else {
-    router.push(menuStore.activeIndex);  // 有 activeIndex 则跳转到 activeIndex
-  }
-}
+const handleToManage = () => handleManage();
 
 // 点击期中考
 const handleMidExam = () => {

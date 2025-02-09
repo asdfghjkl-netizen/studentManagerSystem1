@@ -68,7 +68,7 @@ optDataRouter.post('/table/team/add', async (req, res) => {
 
     // TODO 修改Redis中key为team下的团队里的学生数据
     const resetTeamDataforAdd = await hgetall(`team:${teamId}`);
-    console.log('resetTeamDataforAdd', resetTeamDataforAdd);
+    // console.log('resetTeamDataforAdd', resetTeamDataforAdd);
     // 将每个团队的字符串数据转换为 JSON 对象
     const teamData = {};
     for (const stu in resetTeamDataforAdd) {

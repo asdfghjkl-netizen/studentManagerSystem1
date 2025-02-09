@@ -69,7 +69,7 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
         parsedData.teamLists.forEach(async (team) => {
             const key = `team:${team.teamId}`;
             const { teamId, ...teamInfo } = team;
-            await hset(key, team.stuName, JSON.stringify(teamInfo));
+            await hset(key, team.stuName, teamInfo);
         });
         res.status(200).json({
             filePath: filePathStr,
@@ -99,6 +99,7 @@ getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
     const datasss = await get(bufferKey);
     const buffer = datasss.data; // 解析 JSON 字符串
     // console.log("buffer", buffer);
+
     try {
         // 创建 Workbook 实例
         const workbook = new ExcelJS.Workbook();

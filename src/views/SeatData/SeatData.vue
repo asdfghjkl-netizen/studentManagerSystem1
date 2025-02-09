@@ -177,6 +177,7 @@
 </template>
 
 <script lang="ts" setup>
+import { handleManage } from '@/utils/dataOption/routerOpt';
 import TooltipButton from '@/components/TooltipButton.vue';
 import { createElNotification } from "@/utils/dataOption/ElementOpt";
 import { Download, Upload } from '@element-plus/icons-vue';
@@ -187,7 +188,6 @@ import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { ElMessage } from "element-plus";
 import { importExcelFile } from "@/store/excelOptions";
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
-import router from "@/router";
 
 const importFile: any = importExcelFile();
 const fileInput = ref("");
@@ -240,13 +240,13 @@ const list = computed(() => {
 
 // （组位）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
 const teamList = computed(() => {
-  let arr = [[] as number[], [] as number[]]  // 定义二维数组的变位表
+  let arr = [[] as number[], [] as number[]];  // 定义二维数组的变位表
 
   for (const key in data.teamList) {
-    let item = data.teamList[key]
+    let item = data.teamList[key];
     // 第一、二列添加到一个数组
     if (item % 2 == 0) {
-      arr['0'].push(item)
+      arr['0'].push(item);
       // 第七、八列添加打一个数组, ==7位列数减一(根据自己需求来)
     } else {
       // 中间列
@@ -260,10 +260,7 @@ const teamList = computed(() => {
 });
 
 // 点击进入管理页面（管理员用户使用）
-const handleToManage = () => {
-  // TODO 判断是否有权限
-  router.push("/manage");
-};
+const handleToManage = () => handleManage();
 
 // 随机选择学生
 const selectStudent = () => {

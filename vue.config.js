@@ -10,8 +10,9 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin'); //
 // 打包分析
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
+const { setEnvironmentVariables } = require('./configureIP');
 /**
- * 引入配置文件 webpack/config.js  "node-sass": "^4.14.1"
+ * 引入配置文件 webpack/config.js
  * @type {String} outputDir    输出目录 
  * @type {Array}  patterns     复制文件列表
  * @type {Function} formatFiles 格式化文件
@@ -23,7 +24,9 @@ const {
   patterns,
   formatFiles, filterWarnings, setTerserOptions
 } = require('./webpack/config');
-const assetsDir = 'assets';
+
+const assetsDir = 'assets'; // 静态资源输出目录
+setEnvironmentVariables();
 
 // 配置 webpack
 module.exports = {
@@ -87,7 +90,15 @@ module.exports = {
     //     name: 'assets/imgs/[name].[ext]'
     //   });
     // 移除图片处理规则
-    config.module.rules.delete('images');
+    // config.module.rules.delete('images');
+
+    // 添加忽略图片文件的规则
+    config.module
+      .rule('images')
+      .test(/\.(png|jpe?g|gif|svg)(\?.*)?$/)
+      .use('ignore-loader')
+      .loader('ignore-loader')
+      .end();
 
     // 配置拆分包
     config.optimization.splitChunks({
@@ -128,6 +139,7 @@ module.exports = {
     config.plugin('html').tap(args => {
       args[0].title = 'Vue3-Seat-Admin'; // 设置页面标题
       args[0].template = path.resolve(__dirname, 'public/index.html');
+      args[0].favicon = path.resolve(__dirname, 'public/favicon.ico');
       return args;
     });
 
@@ -135,7 +147,7 @@ module.exports = {
     config.plugin('webpack-bundle-analyzer').use(BundleAnalyzerPlugin, [{
       analyzerMode: 'static', // 生成报告文件
       reportFilename: 'report.html', // 报告文件名
-      openAnalyzer: false, // 不自动打开浏览器
+      openAnalyzer: false, // 是否自动打开浏览器
     }]);
   },
 
@@ -146,8 +158,36 @@ module.exports = {
       config.plugins.push(
         new ForkTsCheckerWebpackPlugin(),  // 检查类型错误
         new FriendlyErrorsWebpackPlugin({
+          // 忽略所有警告
+          onErrors: (severity, errors) => {
+            if (severity !== 'warning') return;
+            // console.log("errors", errors);
+            // 过滤掉图片相关的警告
+            const filteredErrors = errors.filter(error =>
+              !error.message.includes('Module parse failed') &&
+              !error.message.includes('no loaders are configured') &&
+              !error.message.includes('Failed to parse source map') &&
+              !error.message.includes('no longer needs to be imported')
+            );
+
+            // if (filteredErrors.length > 0) {
+            //   const logFilePath = path.resolve(__dirname, 'build-warnings.log');
+            //   const logMessage = filteredErrors.map(err => `${err.name}: ${err.message}`).join('\n');
+            //   // 直接写入文件（覆盖）
+            //   fs.writeFileSync(logFilePath, `${new Date().toISOString()} - ${logMessage}\n`, 'utf8');
+
+            //   // 如果想要追加而不是覆盖，可以使用 appendFileSync
+            //   // fs.appendFileSync(logFilePath, `${new Date().toISOString()} - ${logMessage}\n`, 'utf8');
+            // }
+          },
+          clearConsole: true, // 清除控制台
+          additionalTransformers: [filterWarnings], // 添加自定义转换器
+          additionalFormatters: [],   // 添加自定义格式化器
           ignore: ['WARNING', 'warning'],  // 忽略警告
-          additionalTransformers: [filterWarnings]
+          compilationSuccessInfo: {
+            messages: [], // 清空成功信息
+            notes: []     // 清空提示信息
+          },
         }), // 显示打包错误
       );
     }
@@ -157,10 +197,6 @@ module.exports = {
       config.plugins.push(
         new SpeedMeasurePlugin(),  // 配置打包速度分析
         new WebpackBar(),  // 配置打包进度条
-        new FriendlyErrorsWebpackPlugin({
-          ignore: ['WARNING', 'warning'],  // 忽略警告
-          additionalTransformers: [filterWarnings]
-        }), // 显示打包错误
       );
 
       console.log(`Output directory: ${outputDir}`);
@@ -188,8 +224,7 @@ module.exports = {
         await formatFiles(htmlFiles, 'html', 'html');
         await formatFiles(cssFiles, 'css', 'css');
         // console.log('Files in the output directory have been formatted.');
-      }),
-      );
+      }));
       await setTerserOptions(config);
     };
   },
@@ -198,14 +233,14 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: `http://${process.env.VUE_APP_IP}:3000`,
         changeOrigin: true,
         // pathRewrite: { '^/api': '' },
       },
     },
     port: 8033,  // Vue 3 开发服务器的端口  
     hot: true,   // 启用热更新
-    open: true,  // 自动打开浏览器
+    open: true,  // 自动打开浏览器时启用 network 路径
     quiet: true  // 如果使用webpack-dev-server，需要设为true，禁止显示devServer的console信息
   },
 }

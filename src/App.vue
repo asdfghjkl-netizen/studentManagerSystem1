@@ -1,5 +1,4 @@
 <template>
-  <!-- 在 @/utils/dataOption/ElementOpt 有 :locale="locale" 的配置项 -->
   <el-config-provider :locale="configStore.locale" :message="config" :button="btn">
     <router-view />
   </el-config-provider>
@@ -21,7 +20,5 @@ const btn = reactive({
   autoInsertSpace: true,
 });
 
-onMounted(() => {
-  getFileList().then(res => { console.log(res) })
-});
+onMounted(() => { getFileList().then(res => { console.log(res) }) });
 </script>

@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerInit = require('./node/config/swaggerConfig');
 const { getFilePath } = require('./node/tools/fileOption');
+const { setEnvironmentVariables } = require('./configureIP'); // 引入ip配置文件
 const { publicPath, PORT, headerConfig } = require('./node/config/publicConfig');
 // 引用路由
 const getExcelDataRouter = require('./node/router/seatDataOpt/getExcelData');
@@ -10,9 +11,9 @@ const saveToExcelRouter = require('./node/router/seatDataOpt/saveToExcel');
 const optDataRouter = require('./node/router/seatDataOpt/optionData');
 const addExcelRouter = require('./node/router/indexOpt/addExcelFile');
 
+setEnvironmentVariables();
 // 创建 express 应用程序
 const app = express();
-
 // 静态资源目录
 app.use(express.static(publicPath));
 // 用于解析 JSON 格式的数据
@@ -42,5 +43,5 @@ app.get('/file-list', async (req, res) => {
 
 // 启动服务器
 app.listen(PORT, () => {
-  console.log(`Server is running on ${publicPath} http://localhost:${PORT}`);
+  console.log(`Server is running on ${publicPath} http://${process.env.SERVER_IP}:${PORT}`);
 });

@@ -30,7 +30,8 @@ setEnvironmentVariables();
 
 // 配置 webpack
 module.exports = {
-  lintOnSave: undefined,       // 是否在控制台输出 eslint 警告和错误
+  // 是否在控制台输出 eslint 警告和错误(仅在开发环境启用lint)
+  lintOnSave: process.env.NODE_ENV === 'development', 
   publicPath: './',            // 配置根目录
   outputDir: process.env.VUE_APP_OUTPUT_DIR,  // 输出目录
   assetsDir,                   // 设置静态资源输出目录
@@ -170,15 +171,15 @@ module.exports = {
               !error.message.includes('no longer needs to be imported')
             );
 
-            // if (filteredErrors.length > 0) {
-            //   const logFilePath = path.resolve(__dirname, 'build-warnings.log');
-            //   const logMessage = filteredErrors.map(err => `${err.name}: ${err.message}`).join('\n');
-            //   // 直接写入文件（覆盖）
-            //   fs.writeFileSync(logFilePath, `${new Date().toISOString()} - ${logMessage}\n`, 'utf8');
+            if (filteredErrors.length > 0) {
+              const logFilePath = path.resolve(__dirname, 'build-warnings.log');
+              const logMessage = filteredErrors.map(err => `${err.name}: ${err.message}`).join('\n');
+              // 直接写入文件（覆盖）
+              fs.writeFileSync(logFilePath, `${new Date().toISOString()} - ${logMessage}\n`, 'utf8');
 
-            //   // 如果想要追加而不是覆盖，可以使用 appendFileSync
-            //   // fs.appendFileSync(logFilePath, `${new Date().toISOString()} - ${logMessage}\n`, 'utf8');
-            // }
+              // 如果想要追加而不是覆盖，可以使用 appendFileSync
+              // fs.appendFileSync(logFilePath, `${new Date().toISOString()} - ${logMessage}\n`, 'utf8');
+            }
           },
           clearConsole: true, // 清除控制台
           additionalTransformers: [filterWarnings], // 添加自定义转换器

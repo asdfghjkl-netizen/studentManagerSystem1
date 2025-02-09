@@ -7,6 +7,7 @@ export const useConfig = defineStore('config', {
     state: () => ({
         lang: "1",  // 语言切换 1 中文 2 英文
         language: "zh-cn",  // 设置语言包
+        ipConfig: "",  // 解密ip
     }),
     // 计算属性 
     getters: {
@@ -25,13 +26,25 @@ export const useConfig = defineStore('config', {
             
             if (this.lang === "1") {
                 this.language = "zh-cn";
-                console.log(this.locale)
+                // console.log(this.locale)
             } else {
                 this.language = "en";
-                console.log(this.locale)
+                // console.log(this.locale)
             }
         },
+        // 设置ip
+        setIpConfig(event) {
+            this.ipConfig = event;
+            if (event) {
+                sessionStorage.setItem("globalConfig", event);
+            }
+        },
+        // 获取ip
+        getIpConfig() {
+            return sessionStorage.getItem("globalConfig");
+        }
     },
+
 
     // 使用持久化
     persist: {

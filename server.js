@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerInit = require('./node/config/swaggerConfig');
-const { getFilePath } = require('./node/tools/fileOption');
+const { getFilePath } = require('./node/tools/option/fileOption');
 const { setEnvironmentVariables } = require('./configureIP'); // 引入ip配置文件
 const { publicPath, PORT, headerConfig } = require('./node/config/publicConfig');
 // 引用路由

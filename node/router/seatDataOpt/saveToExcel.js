@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const ExcelJS = require('exceljs'); // 导入 ExcelJS
 const { publicPath, headerConfig } = require('../../config/publicConfig');
-const { RedisOpt } = require('../../tools/redisOpt'); // 导入 Redis 操作类
+const { RedisOpt } = require('../../tools/option/redisOpt'); // 导入 Redis 操作类
 
 // 创建路由实例
 const saveToExcelRouter = express.Router();

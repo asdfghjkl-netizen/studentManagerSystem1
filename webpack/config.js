@@ -1,9 +1,7 @@
-const defaultGateway = require('default-gateway'); // 获取默认网关
 const prettier = require('prettier');    // 格式化代码
 const glob = require('glob');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 
 // 获取所有以 server 开头的文件
 const serverFiles = glob.sync('server*', { cwd: path.join(__dirname, '..') });
@@ -24,15 +22,20 @@ module.exports = {
   outputDir,
   // 配置 copy-webpack-plugin
   patterns: [
-    {
-      // 添加 copy-webpack-plugin 配置 public 目录
+    { // 添加 copy-webpack-plugin 配置 public 目录
       from: path.resolve(path.join(__dirname, '../', 'public')),
       to: path.resolve(path.join(__dirname, '../', outputDir, 'public')),
       filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
     }, {
       // 添加 copy-webpack-plugin 配置 node 目录
       from: path.resolve(path.join(__dirname, '../', 'node')),
-      to: path.resolve(path.join(__dirname, '../', outputDir, 'node'))
+      to: path.resolve(path.join(__dirname, '../', outputDir, 'node')),
+      filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
+    }, {
+      // 添加 copy-webpack-plugin 配置 translations 目录
+      from: path.resolve(path.join(__dirname, '../', 'translations')),
+      to: path.resolve(path.join(__dirname, '../', outputDir, 'translations')),
+      filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
     },
     // 添加 copy-webpack-plugin 配置 server 文件
     ...serverFiles.map(file => ({
@@ -46,17 +49,20 @@ module.exports = {
       to: path.resolve(path.join(__dirname, '../', outputDir, file)),
       filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
     })), {
-      // 添加 copy-webpack-plugin 配置 markdown 文件
-      from: path.resolve(path.join(__dirname, '../', 'README.md')),
-      to: path.resolve(path.join(__dirname, '../', outputDir))
-    }, {
-      // 添加 copy-webpack-plugin 配置 favicon.ico 图标
-      from: path.resolve(path.join(__dirname, '../', 'public/favicon.ico')),
-      to: path.resolve(path.join(__dirname, '../', outputDir))
-    }, {
       // 添加 copy-webpack-plugin 配置 redis-server 目录
       from: path.resolve(path.join(__dirname, '../', 'redis-server')),
-      to: path.resolve(path.join(__dirname, '../', outputDir, 'redis-server'))
+      to: path.resolve(path.join(__dirname, '../', outputDir, 'redis-server')),
+      filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
+    }, {
+      // 添加 copy-webpack-plugin 配置 configureIP.js 文件
+      from: path.resolve(path.join(__dirname, '../', 'configureIP.js')),
+      to: path.resolve(path.join(__dirname, '../', outputDir, 'configureIP.js')),
+      filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
+    }, {
+      // 添加 copy-webpack-plugin 配置 说明文档.docx 文件
+      from: path.resolve(path.join(__dirname, '../', '说明文档.docx')),
+      to: path.resolve(path.join(__dirname, '../', outputDir, '说明文档.docx')),
+      filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
     },
   ],
   formatFiles,

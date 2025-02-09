@@ -6,7 +6,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --verbose",
     "lint": "vue-cli-service lint",
-    "startForDependece": "nodemon server.js",
+    "startForDependece": "node server.js",
     "startForProduction": "start-production.bat",
     "test": "vue-cli-service test --mode test"
   },

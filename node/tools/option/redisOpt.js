@@ -1,4 +1,4 @@
-const redisClient = require('../config/redisConfig');
+const redisClient = require('../../config/redisConfig');
 
 class RedisOpt {
   constructor() {

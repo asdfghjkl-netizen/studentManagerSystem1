@@ -1,11 +1,11 @@
 const express = require('express');
 const fsPromises = require('fs').promises;
 const ExcelJS = require('exceljs');
-const { parseExcelFile, parseWorkSheetLong, processRow } = require('../../tools/excelOpt');
+const { parseExcelFile, parseWorkSheetLong, processRow } = require('../../tools/option/excelOpt');
 const { ref } = require('vue');
-const { findFilePath } = require('../../tools/fileOption');
+const { findFilePath } = require('../../tools/option/fileOption');
 const { publicPath, headerConfig } = require('../../config/publicConfig');
-const { RedisOpt } = require('../../tools/redisOpt'); 
+const { RedisOpt } = require('../../tools/option/redisOpt'); 
 
 // 创建路由实例
 const getExcelDataRouter = express.Router();

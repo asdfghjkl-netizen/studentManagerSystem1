@@ -2,8 +2,12 @@ import { importExcelFile } from "@/store/excelOptions";
 import { getTeamListFromBackend } from "@/utils/api/DataOptions";
 import { ref } from "vue";
 
-// 得到组号的方法
 const teamId = ref('');
+/**
+ * 得到组号的方法
+ * @param   {string} student - 学生姓名
+ * @returns {string}         - 组号
+ */
 export const getTeamNum = async (student) => {
     const importFile = importExcelFile();
     const teamList = importFile.teamLists;
@@ -19,7 +23,11 @@ export const getTeamNum = async (student) => {
 
 // 获取组信息(整合)
 let student = ref([]);
-// 从后端获取组信息
+/**
+ * 从后端获取组信息
+ * @param {string}    teamId - 组号
+ * @returns {Promise<Array>} - 组信息
+ */
 export const getTeamList = async (teamId) => {
     student.value = [];
     await getTeamListFromBackend(teamId).then((res) => {

@@ -1,6 +1,6 @@
 const express = require('express');
 const { headerConfig } = require('../../config/publicConfig');
-const { RedisOpt } = require('../../tools/redisOpt');
+const { RedisOpt } = require('../../tools/option/redisOpt');
 
 // 创建路由实例
 const getTableDataRouter = express.Router();

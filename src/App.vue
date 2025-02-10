@@ -6,8 +6,7 @@
 
 <script setup lang="ts">
 import { translate } from "../translations/translator";
-import { ElConfigProvider } from 'element-plus';
-import { reactive, onMounted } from 'vue';
+import { reactive, onMounted, onBeforeMount } from 'vue';
 import { getFileList } from "@/utils/api/apiPromiss";
 import { useConfig } from '@/store/config';
 
@@ -23,12 +22,15 @@ const btn = reactive({
 
 onMounted(() => {
   getFileList().then(res => { console.log(res); });
-  // console.log("window.globalConfig", window.globalConfig);
-  configStore.setIpConfig(window.globalConfig);
+  // console.log("APP_CONFIG_SECRET", process.env.APP_CONFIG_SECRET);
   console.log(translate('你好')); // 输出: Hello
   console.log(translate('谢谢')); // 输出: Thank you
   // 英译中
   console.log(translate('Goodbye')); // 输出: 再见
   console.log(translate('Thank you')); // 输出: 谢谢
+});
+onBeforeMount(() => {
+  console.log("window.globalConfig", window.globalConfig);
+  configStore.setIpConfig(window.globalConfig);
 });
 </script>

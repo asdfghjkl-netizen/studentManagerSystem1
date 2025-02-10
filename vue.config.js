@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const glob = require('glob');
+const webpack = require('webpack');
 const WebpackBar = require('webpackbar');                  // 显示打包进度
 const CopyWebpackPlugin = require('copy-webpack-plugin');  // 复制文件
 const customParser = require('./webpack/custom-parser');   // 自定义解析器
@@ -26,12 +27,12 @@ const {
 } = require('./webpack/config');
 
 const assetsDir = 'assets'; // 静态资源输出目录
-setEnvironmentVariables();
+setEnvironmentVariables();  // 设置环境变量
 
 // 配置 webpack
 module.exports = {
   // 是否在控制台输出 eslint 警告和错误(仅在开发环境启用lint)
-  lintOnSave: process.env.NODE_ENV === 'development', 
+  lintOnSave: process.env.NODE_ENV === 'development',
   publicPath: './',            // 配置根目录
   outputDir: process.env.VUE_APP_OUTPUT_DIR,  // 输出目录
   assetsDir,                   // 设置静态资源输出目录
@@ -154,6 +155,14 @@ module.exports = {
 
   // 配置 webpack
   configureWebpack: async (config) => {
+    // 注入环境变量
+    config.plugins.push(new webpack.DefinePlugin({
+      'process.env': {
+        APP_CONFIG_SECRET: JSON.stringify(process.env.APP_CONFIG_SECRET),
+        // 你可以在这里添加更多的环境变量
+      },
+    }));
+
     // 配置开发环境
     if (process.env.NODE_ENV === 'development') {
       config.plugins.push(
@@ -244,4 +253,4 @@ module.exports = {
     open: true,  // 自动打开浏览器时启用 network 路径
     quiet: true  // 如果使用webpack-dev-server，需要设为true，禁止显示devServer的console信息
   },
-}
+};

@@ -26,10 +26,10 @@ export const useConfig = defineStore('config', {
             
             if (this.lang === "1") {
                 this.language = "zh-cn";
-                // console.log(this.locale)
+                console.log(this.locale)
             } else {
                 this.language = "en";
-                // console.log(this.locale)
+                console.log(this.locale)
             }
         },
         // 设置ip
@@ -44,7 +44,6 @@ export const useConfig = defineStore('config', {
             return sessionStorage.getItem("globalConfig");
         }
     },
-
 
     // 使用持久化
     persist: {

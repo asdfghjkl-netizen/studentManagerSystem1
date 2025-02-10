@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
-// 加密密钥（建议从环境变量获取）
-const secret = 'abcdefghijklmnopqrstuvwxyz123456';
+// 加密密钥（建议从环境变量获取） || 'abcdefghijklmnopqrstuvwxyz123456'
+const secret = process.env.APP_CONFIG_SECRET;
 // 加密算法
 const algorithm = 'aes-256-cbc';
 

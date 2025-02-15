@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --verbose",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "startForDependece": "node server.js",
     "startForProduction": "start-production.bat",
@@ -29,6 +29,7 @@
     "sass": "^1.81.0",
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0",
+    "vue-lazyload": "^3.0.0",
     "vue-router": "^4.4.4"
   },
   "devDependencies": {

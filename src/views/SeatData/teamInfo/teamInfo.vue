@@ -2,7 +2,7 @@
   <!--  右边部分  -->
   <tr class="student-info-right">
     <td class="stu-img">
-      <el-image :src="`${envImagePath}/image/team.jpg`" style="height: 250px;" class="img" />
+      <el-image lazy :src="`${envImagePath}/image/team.jpg`" style="height: 250px;" class="img" />
     </td>
     <td class="student-team">
       <!--  小组情况  -->

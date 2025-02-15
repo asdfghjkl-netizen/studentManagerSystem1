@@ -4,7 +4,7 @@
     <!-- 选择区域 -->
     <div class="select-area">
       <!-- 座位表选择 -->
-      <el-radio-group v-model="radio1" @change="handleSelectRoom($event as any)">
+      <el-radio-group v-model="selectRadio" @change="handleSelectRoom($event as any)">
         <el-radio value="1" size="large" border>班级座位表</el-radio>
         <el-radio value="2" size="large" border style="margin-left: -30px;">机房座位表</el-radio>
       </el-radio-group>
@@ -141,15 +141,12 @@
     -->
   <el-dialog draggable destroy-on-close v-model="dialogVisibleForStu" :title="`${data.studentName}的学习卡`" width="720"
     style="background-color: #f8f6f6; ">
-    <!--  有内容加载 height: 85%; -->
-    <div v-if="data.studentName" class="student_info">
+    <div class="student_info">
       <div class="top">
         <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL"
           :env-image-path="data.envImagePath" />
       </div>
     </div>
-    <!--  无内容加载  -->
-    <span v-else>无法加载该地区图片和信息</span>
     <template #footer>
       <div class="dialog-footer">
         <el-button type="primary" @click="dialogVisibleForStu = false">确定</el-button>
@@ -160,14 +157,11 @@
   <!--  弹出的团队卡对话框 -->
   <el-dialog draggable destroy-on-close v-model="dialogVisibleForTeam" :title="`第${data.teamId}组学习卡`" width="750"
     style="background-color: #f8f6f6">
-    <!--  有内容加载  -->
-    <div v-if="data.teamId" class="student_info">
+    <div class="student_info">
       <div class="top">
         <TeamInfo :team-id="data.teamId" :env-image-path="data.envImagePath" />
       </div>
     </div>
-    <!--  无内容加载  -->
-    <span v-else>无法加载该地区图片和信息</span>
     <template #footer>
       <div class="dialog-footer">
         <el-button type="primary" @click="dialogVisibleForTeam = false">确定</el-button>
@@ -177,21 +171,25 @@
 </template>
 
 <script lang="ts" setup>
-import { handleManage } from '@/utils/dataOption/routerOpt';
-import TooltipButton from '@/components/TooltipButton.vue';
+import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
+import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { createElNotification } from "@/utils/dataOption/ElementOpt";
+import { handleManage } from '@/utils/dataOption/routerOpt';
+import { importAsyncComponent } from "@/component.ts";
+import TooltipButton from '@/components/TooltipButton.vue';
 import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
-import StudentInfo from "@/views/SeatData/studentInfo/studentInfo.vue";
-import TeamInfo from "@/views/SeatData/teamInfo/teamInfo.vue";
-import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { ElMessage } from "element-plus";
-import { importExcelFile } from "@/store/excelOptions";
-import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
+import { useDataOptions } from "@/store/dataOptions";
+import { useConfig } from "@/store/globalConfig";
+// 导入异步组件
+const StudentInfo = importAsyncComponent(() => import("@/views/SeatData/studentInfo/studentInfo.vue"));
+const TeamInfo = importAsyncComponent(() => import("@/views/SeatData/teamInfo/teamInfo.vue"));
 
-const importFile: any = importExcelFile();
+const configStore: any = useConfig();
+const importFileStore: any = useDataOptions();
 const fileInput = ref("");
-const radio1 = ref("1");  // 学生座位表选择数据，默认为1---》班级座位表
+const selectRadio = ref(configStore.selectedSeatData);
 const className = ref("");  // 获取班级名称
 const dialogVisibleForStu = ref(false);  // 定义学生卡对话框的状态
 const dialogVisibleForTeam = ref(false);
@@ -215,10 +213,10 @@ const data = reactive({
   selectTeamList: [] as number[],  // 获取所选团队的id
   studentName: '' as string,       // 获取学生姓名
   teamId: '' as any,               // 获取团队id
-  filePath: importFile.filePath,   // 获取文件路径(用于获取文件名路径，并写入保存文件)
+  filePath: importFileStore.filePath,   // 获取文件路径(用于获取文件名路径，并写入保存文件)
   envImagePath: process.env.VUE_APP_IMAGE_PATH, // 获取环境图片路径
   // 新增字段，用于存储学生角色信息  {} as { [key: string]: string }
-  studentRoles: importFile.studentRoles,
+  studentRoles: importFileStore.studentRoles,
 });
 
 const list = computed(() => {
@@ -307,7 +305,7 @@ const selectStudent = () => {
 
 // 截取文件名
 const getclassName = () => {
-  const filename = importFile.fileName;
+  const filename = importFileStore.fileName;
   // 找到 '.' 的位置
   const dotIndex = filename.indexOf('.');
   // 截取从开头到 '.' 之前的部分
@@ -322,12 +320,12 @@ const getclassName = () => {
 // 导入excel   event: { target: { files: any } }
 const importExcel: UploadProps['onChange'] = async (uploadFile, uploadFiles) => {
   console.log(uploadFile, uploadFiles);
-  importFile.importExcel(uploadFile);
+  importFileStore.importExcel(uploadFile);
   // 获取团队状态
-  importFile.getStudentTeamStatu(data.teamList, teamListData);
+  importFileStore.getStudentTeamStatu(data.teamList, teamListData);
 
   setTimeout(() => {
-    fileInput.value = importFile.fileName;
+    fileInput.value = importFileStore.fileName;
     ImportFile();
   }, 4000);
 };
@@ -340,7 +338,7 @@ const ImportFile = () => {
         console.log(res);
       });
     }
-    importFile.students.forEach(student => {
+    importFileStore.students.forEach(student => {
       // console.log("student", student.stuName);
       pushStudentStatusToRedis(student.stuName).then(res => {
         console.log(res);
@@ -358,18 +356,19 @@ const exportExcel = () => {
 
 // 学生座位表的选择(二维数组写法)
 const handleSelectRoom = (event: any) => {
-  radio1.value = event;
+  // console.log("radio1.value", config.selectedSeatData, event);
+  configStore.setSelectedSeatData(event);  // 设置学生座位表选择数据
 
   // 扁平化 seatList
   const flatSeatList = data.seatList.flat();
   // 扁平化 classSeat
-  const classSeatList = importFile.classSeat.flat();
+  const classSeatList = importFileStore.classSeat.flat();
   // 扁平化 classSeat
-  const computerRoomSeat = importFile.computerRoomSeat.flat();
+  const computerRoomSeat = importFileStore.computerRoomSeat.flat();
   // 判断是否为空，如果为空，则返回
   if (classSeatList.length == 0 || computerRoomSeat.length == 0) return;
 
-  if (radio1.value == "1") {
+  if (configStore.selectedSeatData == "1") {
     data.studentList = flatSeatList.map((seatId, index) => ({
       seatId,
       stu: classSeatList[index] !== undefined
@@ -455,7 +454,7 @@ const getImgURL = () => {
 };
 
 watchEffect(() => {
-  handleSelectRoom(radio1.value);
+  handleSelectRoom(selectRadio.value);
   getclassName();
 });
 onMounted(() => { getImgURL(); });

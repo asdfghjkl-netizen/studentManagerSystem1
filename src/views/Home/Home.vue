@@ -6,10 +6,18 @@
         <div class="content">
           <div class="main-header">
             <el-switch v-model="music" active-text="音乐：on" inactive-text="音乐：off"></el-switch>
-            <el-select v-model="selectedClass" placeholder="班级：">
-              <el-option label="班级1" value="1"></el-option>
-              <el-option label="班级2" value="2"></el-option>
-            </el-select>
+            <div class="class-select-group">
+              <h3>班级：</h3>
+              <el-select v-model="selectedClass" @change="handleSelectClass" placeholder="请选择班级：">
+                <el-option v-for="item in classList" :key="item.value" :label="item.label" :value="item.label" />
+              </el-select>
+              <TooltipButton tip-placement="top" element-name="button" btn-type="primary" btn-plain
+                @click="isSelectClass">
+                <template #content>
+                  <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
+                </template>确定选择？
+              </TooltipButton>
+            </div>
           </div>
           <div class="buttons">
             <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleToManage">
@@ -36,24 +44,48 @@
 <script setup lang="ts">
 import { handleManage } from '@/utils/dataOption/routerOpt';
 import TooltipButton from '@/components/TooltipButton.vue';
-import { useConfig } from "@/store/config";
+import { useConfig } from "@/store/globalConfig";
+import { useDataOptions } from "@/store/dataOptions";
 import router from '@/router';
-import { ref } from 'vue';
+import { reactive, ref } from 'vue';
+import { ElMessage } from 'element-plus';
 
-const config: any = useConfig();
-const music = ref(true);   // 音乐开关
+const dataOptionsStore = useDataOptions();
+const configStore = useConfig();
+const music = ref(false);   // 音乐开关
 const selectedClass = ref(''); // 选择班级
+const classList = reactive([
+  {
+    label: '班级12',
+    value: 1
+  },
+  {
+    label: '班级34',
+    value: 2
+  }
+]); // 班级列表
 // 语言切换 1 中文 2 英文
-const lang = ref(config.lang)
+const lang = ref(configStore.lang);
 
 // 切换语言
-const changeLang = (event: any) => config.changeGlobalLang(event);
+const changeLang = (event: any) => configStore.changeGlobalLang(event);
 
 // 跳转座位界面
 const handleToSeat = () => router.push("/seatData");
 
 // 跳转管理员界面
 const handleToManage = () => handleManage();
+
+// 选择班级
+const handleSelectClass = () => {
+  ElMessage.success('确定选择班级：' + selectedClass.value);
+};
+
+// 确定选择班级
+const isSelectClass = () => {
+  dataOptionsStore.setSelectClass(selectedClass.value);
+  ElMessage.success('已确定选择班级：' + selectedClass.value);
+};
 
 // 点击期中考
 const handleMidExam = () => {
@@ -100,22 +132,48 @@ const handleDraw = () => {
 
     .main-header {
       display: flex;
-      justify-content: space-between;
+      // justify-content: space-between;
       width: 80%;
+      align-items: center;
       margin-bottom: 20px;
+      gap: 20px;
+      justify-content: center;
+
+      .class-select-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+
+        h3 {
+          white-space: nowrap;
+          margin: 0;
+        }
+
+        .el-select {
+          width: 300px;
+        }
+      }
     }
 
     .buttons {
       display: flex;
       justify-content: space-around;
       width: 80%;
+      margin-top: 20px;
+
+      .radio-group {
+        display: flex;
+        justify-content: center;
+
+        .el-radio {
+          margin-right: 0;
+        }
+
+        &:last-child {
+          margin-right: 0;
+        }
+      }
     }
   }
-}
-
-.radio-group {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
 }
 </style>

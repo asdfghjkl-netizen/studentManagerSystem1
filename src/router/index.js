@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from "vue-router";
+import { createRouter, createWebHashHistory, createWebHistory, createMemoryHistory } from "vue-router";
 import { useRouterStore } from '@/store/routerOptions';
 
 const routes = [
@@ -32,12 +32,14 @@ const routes = [
         ],
       },
     ],
-    redirect: '/manage/test/table', // 默认重定向到 /manage/test/table useRouterStore().activeIndex
+    redirect: '/manage/test/table', // 默认重定向到 /manage/test/table 
   },
 ];
 
 const router = createRouter({
   history: createWebHashHistory(process.env.BASE_URL),
+  // history: createWebHistory(process.env.BASE_URL),  // 使用 history 模式
+  // history: createMemoryHistory(process.env.BASE_URL),  // 使用 memory 模式
   routes,
 })
 

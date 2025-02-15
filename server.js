@@ -41,7 +41,15 @@ app.get('/file-list', async (req, res) => {
   });
 });
 
-// 启动服务器
+// 读取excel配置文件（获取班级配置文件）
+app.get('/excel/class-config', async (req, res) => {
+  res.status(200).json({
+    code: 200,
+    msg: '获取excel配置文件成功'
+  });
+});
+
+// 启动服务器  ${process.env.SERVER_IP}
 app.listen(PORT, () => {
-  console.log(`Server is running on ${publicPath} http://${process.env.SERVER_IP}:${PORT}`);
+  console.log(`Server is running on ${publicPath} http://localhost:${PORT}`);
 });

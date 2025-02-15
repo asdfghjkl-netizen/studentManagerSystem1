@@ -2,7 +2,7 @@
   <!--  右边部分  -->
   <tr class="student-info-right">
     <td class="stu-img">
-      <el-image :src="`${envImagePath}/${reqStudentImgUrl}/${studentName}.jpg`" :alt="studentName"
+      <el-image lazy :src="`${envImagePath}/${reqStudentImgUrl}/${studentName}.jpg`" :alt="studentName"
         style="height: 315px;" class="img" />
     </td>
     <td class="student-team">

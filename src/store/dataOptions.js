@@ -4,22 +4,29 @@ import { ElMessage } from "element-plus";
 import { defineStore } from "pinia";
 
 // defineStore('userInfo',{})  userInfo就是这个仓库的名称name
-export const importExcelFile = defineStore('excelFile', {
+export const useDataOptions = defineStore('dataOptions', {
     // 初始化数据
     state: () => ({
+        selectedClass: '',    // 选择班级的值
+        selectClassList: [],  // 班级列表
+
         teamLists: [],        // 获取团队列表数据（团队名称，团队人数，团队成员）
         students: [],         // 获取学生列表数据（学号，姓名，性别）
         classSeat: [],        // 获取班级的座位表数据
         computerRoomSeat: [], // 获取学生机房座位表的数据
         fileName: '',         // 获取excel文件名
         filePath: '',         // 获取excel文件路径
+
         studentRoles: {},     // 学生角色信息
     }),
     // 计算属性 
     getters: {},
     // 方法
     actions: {
-        // 导入excel 以文件名导入
+        /**
+         * 导入excel 以文件名导入
+         * @param {*} uploadFile 上传的文件
+         */
         importExcel(uploadFile) {
             // console.log("uploadFile", uploadFile);
             if (!uploadFile.name) {
@@ -30,7 +37,7 @@ export const importExcelFile = defineStore('excelFile', {
             this.fileName = uploadFile.name;
             sessionStorage.setItem('fileName', this.fileName);
             // 去除uploadFile.raw里的uid
-            // delete uploadFile.raw.uid;
+            delete uploadFile.raw.uid;
 
             // 获取学生信息
             getExcelFile({ fileName: this.fileName }).then(res => {
@@ -44,10 +51,14 @@ export const importExcelFile = defineStore('excelFile', {
                 this.classSeat = res.data.classSeat;  // 教室坐位信息
                 this.computerRoomSeat = res.data.computerRoomSeat;  // 计算机教室坐位信息
                 this.students = res.data.students;  // 学生信息
-                ElMessage.success({ message: res.message, duration: 1000 })
-            })
+                ElMessage.success({ message: res.message, duration: 1000 });
+            });
         },
-        // 学生团队状态获取
+        /**
+         * 学生团队状态获取
+         * @param {*} teamList 团队列表
+         * @param {*} targetArray 目标数组
+         */
         async getStudentTeamStatu(teamList, targetArray) {
             targetArray.value = [];
             const uniqueItems = new Set();  // 去重
@@ -72,14 +83,37 @@ export const importExcelFile = defineStore('excelFile', {
             });
             // console.log("this.studentRoles", this.studentRoles);
         },
+        /**
+         * 存储选择班级
+         * @param {*} value 
+         */
+        setSelectClass(value) {
+            this.selectedClass = value;
+        },
+        /**
+         * 获取选择班级
+         * @returns 
+         */
+        getSelectClass() {
+            return this.selectedClass;
+        },
     },
 
     // 使用持久化
     persist: {
         enabled: true,
         storage: localStorage,
-        key: "excelFile",
-        path: ["teamLists", "students", "classSeat", "fileName",
-            "computerRoomSeat", "filePath", "studentRoles"]
+        key: "dataOptions",
+        path: [
+            "selectedClass",
+            "selectClassList",
+            "teamLists",
+            "students",
+            "classSeat",
+            "fileName",
+            "computerRoomSeat",
+            "filePath",
+            "studentRoles"
+        ],
     },
-})
+});

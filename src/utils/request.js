@@ -7,7 +7,7 @@ const globalConfig = decrypt(sessionStorage.getItem("globalConfig"));
 const IP = globalConfig ? globalConfig.VUE_APP_IP : '127.0.0.1';
 
 /** 创建axios实例 */
-const instance = axios.create({
+let instance = axios.create({
     baseURL: `http://${IP}:3000/`,
     timeout: 1000 * 10,
 });
@@ -36,10 +36,11 @@ instance.interceptors.response.use(
         return response.data;
     },
     async (error) => {
+        // console.log("error", error);
         const config = error.config; // 获取请求配置
         const globalConfig = decrypt(sessionStorage.getItem("globalConfig"));
         // 获取 IP
-        const IP = globalConfig ? globalConfig.VUE_APP_IP : '127.0.0.1';
+        const IP = globalConfig.VUE_APP_IP;
         // 如果配置不存在或未设置重试选项，则拒绝
         if (!config || !config.retry) return Promise.reject(error);
         // 重试次数
@@ -65,7 +66,14 @@ instance.interceptors.response.use(
 
         // 返回Promise以重新发起请求
         return backoff.then(() => {
-            return instance(config);
+            // 重置 IP 地址
+            config.baseURL = `http://${IP}:3000/`;
+            // 使用新的 axios 实例重新发起请求
+            const newInstance = axios.create({
+                baseURL: config.baseURL,
+                timeout: config.timeout,
+            });
+            return newInstance(config);
         });
     }
 );

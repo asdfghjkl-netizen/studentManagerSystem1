@@ -97,6 +97,7 @@ getExcelDataRouter.post('/get-excel-file/student', async (req, res) => {
     if (exists(key)) del(key);
     // 获取 excel-data 数据，并拿到里面的 buffer 字段
     const datasss = await get(bufferKey);
+    // console.log("datasss", datasss);
     const buffer = datasss.data; // 解析 JSON 字符串
     // console.log("buffer", buffer);
 
@@ -129,6 +130,7 @@ getExcelDataRouter.post('/get-excel-file/team', async (req, res) => {
     if (exists(key)) del(key);
     // 获取 excel-data 数据，并拿到里面的 buffer 字段
     const datasss = await get(bufferKey);
+    // console.log("datasss", datasss);
     const buffer = datasss.data; // 解析 JSON 字符串
     // console.log("buffer", buffer);
     try {

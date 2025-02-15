@@ -18,6 +18,14 @@ export function getFileList() {
     })
 }
 
+// 读取excel配置文件（获取班级配置文件）
+export function getClassConfig() {
+    return instance({
+        url: 'excel/class-config',
+        method: 'get'
+    })
+}
+
 // 读取文件（传入文件名）
 export function getExcelFile(data) {
     // console.log("fileName", fileName);

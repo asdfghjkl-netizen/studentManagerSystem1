@@ -12,19 +12,7 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin'); //
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const SpeedMeasurePlugin = require('speed-measure-webpack-plugin');
 const { setEnvironmentVariables } = require('./configureIP');
-/**
- * 引入配置文件 webpack/config.js
- * @type {String} outputDir    输出目录 
- * @type {Array}  patterns     复制文件列表
- * @type {Function} formatFiles 格式化文件
- * @type {Function} filterWarnings 过滤警告
- * @type {Function} setTerserOptions 设置 Terser 选项
- * */
-const {
-  outputDir,
-  patterns,
-  formatFiles, filterWarnings, setTerserOptions
-} = require('./webpack/config');
+const { outputDir, patterns, formatFiles, filterWarnings, setTerserOptions } = require('./webpack/config');
 
 const assetsDir = 'assets'; // 静态资源输出目录
 setEnvironmentVariables();  // 设置环境变量
@@ -36,7 +24,7 @@ module.exports = {
   publicPath: './',            // 配置根目录
   outputDir: process.env.VUE_APP_OUTPUT_DIR,  // 输出目录
   assetsDir,                   // 设置静态资源输出目录
-  runtimeCompiler: true,  // 是否启用运行时编译
+  runtimeCompiler: true,       // 是否启用运行时编译
   productionSourceMap: false,  // 是否生成 sourceMap 文件
   parallel: undefined,         // 允许并发打包线程数
   css: {    // 配置 css-loader loader
@@ -160,7 +148,9 @@ module.exports = {
       'process.env': {
         APP_CONFIG_SECRET: JSON.stringify(process.env.APP_CONFIG_SECRET),
         // 你可以在这里添加更多的环境变量
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(true)
       },
+      '__VUE_PROD_HYDRATION_MISMATCH_DETAILS__': JSON.stringify(true)
     }));
 
     // 配置开发环境

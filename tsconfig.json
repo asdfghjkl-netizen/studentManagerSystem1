@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
+    "target": "es2020",
+    // "target": "esnext",
+    // "module": "esnext",
     "strict": false,
     "jsx": "preserve",
     "importHelpers": true,
@@ -29,11 +31,10 @@
     ],
     "typeRoots": [
       "./node_modules/@types",
-      "node/config/index.d.ts", 
+      "node/config/index.d.ts",
       "./src/types"
     ],
   },
-
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
@@ -41,7 +42,10 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "node/**/*.d.ts",
-    "node/**/*.ts"
+    "node/**/*.ts",
+    "src/views/Home/Home.vue",
+    "src/main.js",
+    "src/component.js"
   ],
   "exclude": [
     "node_modules",

@@ -62,7 +62,7 @@ function setEnvironmentVariables() {
     process.env.VUE_APP_IP = "localhost" || "127.0.0.1";
     process.env.REDIS_HOST = "localhost" || "127.0.0.1";
     process.env.SERVER_IP = "localhost" || "127.0.0.1";
-    console.error('No matching IPs found.');
+    console.error('没有匹配的IP地址！已设置为localhost');
     
     // 动态生成config.js加密配置
     generateConfigContent();
@@ -88,8 +88,6 @@ function generateConfigContent() {
     // 生成配置文件
     const configPath = path.join(__dirname, 'public', 'config.js');
     fs.writeFileSync(configPath, `window.globalConfig = '${configContent}';`);
-    
-    console.log('配置文件已加密生成');
   } catch (error) {
     console.error('配置文件生成失败:', error);
   }

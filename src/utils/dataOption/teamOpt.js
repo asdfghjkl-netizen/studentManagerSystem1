@@ -1,4 +1,4 @@
-import { importExcelFile } from "@/store/excelOptions";
+import { useDataOptions } from "@/store/dataOptions";
 import { getTeamListFromBackend } from "@/utils/api/DataOptions";
 import { ref } from "vue";
 
@@ -9,8 +9,8 @@ const teamId = ref('');
  * @returns {string}         - 组号
  */
 export const getTeamNum = async (student) => {
-    const importFile = importExcelFile();
-    const teamList = importFile.teamLists;
+    const importFileStore = useDataOptions();
+    const teamList = importFileStore.teamLists;
     // console.log("teamList", teamList);
     teamList.forEach(item => {
         // console.log("item", item);

@@ -11,12 +11,6 @@ const { RedisOpt } = require('../../tools/option/redisOpt');
 const getExcelDataRouter = express.Router();
 const { set, get, del, exists, hset, lpush, hmset } = new RedisOpt();  
 const bufferKey = 'buffer';  // 存取 Buffer 的 Redis 缓存的键名
-// 定义一个映射对象
-const valueMapping = {
-    日期: 'dateTime',
-    学习表现: 'studyStatus',
-    得分: 'score'
-};
 
 // 允许跨域请求
 getExcelDataRouter.all('*', function (req, res, next) { headerConfig(req, res, next) });
@@ -54,7 +48,7 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
         // 解析 Excel 文件
-        const parsedData = parseExcelFile(workbook);
+        const parsedData = await parseExcelFile(workbook);
 
         // 存储 students 数据到 Redis  hmset模式
         parsedData.students.forEach(async (student) => {
@@ -68,8 +62,8 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
         // 存储 teamLists 数据到 Redis  hset模式
         parsedData.teamLists.forEach(async (team) => {
             const key = `team:${team.teamId}`;
-            const { teamId, ...teamInfo } = team;
-            await hset(key, team.stuName, teamInfo);
+            // const { teamId, ...teamInfo } = team;
+            await hset(key, team.stuName, team);
         });
         res.status(200).json({
             filePath: filePathStr,
@@ -154,7 +148,7 @@ function parseStudentData(workbook, student) {
     const worksheet = workbook.getWorksheet(student);
     studentHeaders.value = [];
     // 获取第一行的标题
-    processRow(worksheet.getRow(1), valueMapping, studentHeaders);
+    processRow(worksheet.getRow(1), studentHeaders);
     // 创建一个空的JavaScript对象数组，用于存储解析后的数据
     const studentPush = []
     parseWorkSheetLong(studentPush, worksheet, studentHeaders, students);
@@ -169,7 +163,7 @@ function parseTeamData(workbook, teamName) {
     const worksheet = workbook.getWorksheet(teamName);
     teamsHeaders.value = [];
     // 获取第一行的标题
-    processRow(worksheet.getRow(1), valueMapping, teamsHeaders);
+    processRow(worksheet.getRow(1), teamsHeaders);
     // 创建一个空的JavaScript对象数组，用于存储解析后的数据
     const teamsPush = []
     parseWorkSheetLong(teamsPush, worksheet, teamsHeaders, teams);

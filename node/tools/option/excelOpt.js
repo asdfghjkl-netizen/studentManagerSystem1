@@ -1,6 +1,8 @@
-// nodejs 模块
 const { ref } = require('vue');
+const { translate } = require('../../../translations/translator.cjs');
+const { stuManageInfoTitle } = require('../../config/publicConfig');
 
+// 公共变量
 const studentsHeaders = ref([]);
 const teamHeaders = ref([]);
 const students = ref([]);
@@ -12,17 +14,13 @@ const teamLists = ref([]);
  * 公共代码段（获取worksheet内容）
  * 
  * @param {Object} row          行对象
- * @param {object} valueMapping 映射对象
  * @param {Array} headers       标题数组
  */
-const processRow = (row, valueMapping, headers) => {
+const processRow = async (row, headers) => {
     headers.value = [];
-    row.eachCell(cell => {
-        // 使用映射对象来更新cell.value
-        if (valueMapping[cell.value]) {
-            cell.value = valueMapping[cell.value];
-        }
-        headers.value.push(cell.value);
+    await row.eachCell((cell) => {
+        cell.value = translate(cell.value); // 翻译
+        headers.value.push(cell.value);     // 将每个单元格的值添加到headers.value数组中
     });
 }
 
@@ -84,48 +82,22 @@ const parseWorkSheetShort = (dataArray, worksheet, targetArray) => {
 }
 
 // 获取表格第一行数据
-function getFirstRow(worksheet) {
+async function getFirstRow(worksheet) {
     // 获取第一个worksheet内容（学生信息表）
     if (worksheet.id == 1) {
-        // 定义一个映射对象
-        const valueMapping = {
-            "班级": "class",
-            "学号": "stuId",
-            "姓名": "stuName",
-            "性别": "sex",
-        };
-        processRow(worksheet.getRow(1), valueMapping, studentsHeaders);
+        await processRow(worksheet.getRow(1), studentsHeaders);
         // 获取第四个worksheet内容（组员信息表）
     } else if (worksheet.id == 4) {
-        // 定义一个映射对象
-        const valueMapping = {
-            "班级": "class",
-            "学号": "stuId",
-            "姓名": "stuName",
-            "性别": "sex",
-            "是否组长科代表": "isLeader",
-            "小组号": "teamId",
-            "学习表现": "studyStatus",
-            "期中考": "midtermScore",
-            "期末考": "finalScore",
-            "作业情况": "homeworkStatus",
-            "测试": "testScore",
-            "平时成绩1": "normalScore1",
-            "平时成绩2": "normalScore2",
-            "平时成绩3": "normalScore3",
-            "总评": "totalScore",
-            "头像": "avatar",
-        };
-        processRow(worksheet.getRow(1), valueMapping, teamHeaders);
+        await processRow(worksheet.getRow(1), teamHeaders);
     }
 }
 
 // 重新解析文件内容
-function parseExcelFile(workbook) {
+async function parseExcelFile(workbook) {
     // 获取第一个worksheet内容（学生信息表）
     let worksheet = workbook.getWorksheet(1);
     // 获取第一行的标题
-    getFirstRow(worksheet);
+    await getFirstRow(worksheet);
     // 创建一个空的JavaScript对象数组，用于存储解析后的数据
     const dataexl = [];
     parseWorkSheetLong(dataexl, worksheet, studentsHeaders, students);
@@ -138,13 +110,18 @@ function parseExcelFile(workbook) {
     const dataexl2 = [];
     parseWorkSheetShort(dataexl2, workbook.getWorksheet(3), computerRoomSeat);
 
-    // 获取第一个worksheet内容（学生信息表）
-    const worksheetFour = workbook.getWorksheet(4);
-    // 获取第一行的标题
-    getFirstRow(worksheetFour);
-    // 创建一个空的JavaScript对象数组，用于存储解析后的数据
-    const dataexl4 = [];
-    parseWorkSheetLong(dataexl4, worksheetFour, teamHeaders, teamLists);
+    // 获取第一个worksheet内容（学生信息表 stuManageInfo）
+    const worksheetFour = workbook.getWorksheet(stuManageInfoTitle);
+    if (worksheetFour) {
+        // 获取第一行的标题
+        await getFirstRow(worksheetFour);
+        // 创建一个空的JavaScript对象数组，用于存储解析后的数据
+        const dataexl4 = [];
+        parseWorkSheetLong(dataexl4, worksheetFour, teamHeaders, teamLists);
+    } 
+    // else {
+    //     const createsheet = workbook.addWorksheet(stuManageInfoTitle);
+    // }
 
     console.log("文件读取成功！");
     return {

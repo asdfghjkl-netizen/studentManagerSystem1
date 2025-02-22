@@ -34,6 +34,9 @@
               <el-radio value="2" size="default" border>英文</el-radio>
             </el-radio-group>
           </div>
+          <div class="buttons">
+            <el-button type="primary" @click="handleToCeate">创建新的班级</el-button>
+          </div>
         </div>
       </el-main>
       <el-footer></el-footer>
@@ -69,6 +72,11 @@ const lang = ref(configStore.lang);
 
 // 切换语言
 const changeLang = (event: any) => configStore.changeGlobalLang(event);
+
+// 跳转创建班级界面
+const handleToCeate = () => {
+  router.push("/createClass");
+};
 
 // 跳转座位界面
 const handleToSeat = () => router.push("/seatData");

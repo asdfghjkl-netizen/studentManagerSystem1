@@ -82,6 +82,7 @@ export const useDataOptions = defineStore('dataOptions', {
                 });
             });
             // console.log("this.studentRoles", this.studentRoles);
+            return targetArray.value;
         },
         /**
          * 存储选择班级

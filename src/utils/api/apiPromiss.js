@@ -37,11 +37,11 @@ export function getExcelFile(data) {
 }
 
 // 写入并保存文件的接口获取
-export function downloadExcelFile(data) {
+export function saveExcelFile(data) {
     return instance({
-        url: 'download-excel',
+        url: 'save-excel',
         method: 'post',
         data,
-        headers: { "Content-Type": "multipart/form-data" },
+        // headers: { "Content-Type": "multipart/form-data" },
     })
 }

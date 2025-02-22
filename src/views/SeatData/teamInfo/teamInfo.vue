@@ -77,7 +77,7 @@
 <script lang="ts" setup>
 import InfoTitle from "@/components/InfoTitle.vue";
 import { InfoFilled } from "@element-plus/icons-vue";
-import { onMounted, ref, defineProps, reactive, watch } from "vue";
+import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
 import { ElMessage } from "element-plus";
 import { getDateTime } from "@/utils/dateTime";
 import { addTeamTableData, getTeamTableData, removeTeamTableData } from "@/utils/api/DataOptions";
@@ -120,11 +120,13 @@ const teamMemberScore = ref(0);
 const teamScore = ref(0);
 // 获取小组总分数
 const teamTotalScoreAll = ref(0);
+const isChange = ref(false); // 监听是否修改数据
 // 接收父组件传递过来的数据  
 const props = defineProps({
   teamId: { type: String, default: "" },
   envImagePath: { type: String, default: "" },
 })
+const emit = defineEmits(['changeStatus']); // 监听事件
 
 // 获取团队数据(封装),==》 信息引用
 const getTeamData = (teamId: any) => {
@@ -181,6 +183,7 @@ const submit = async () => {
       score.value = 0;
       otherStatus.value = "";
       getTeamData(props.teamId)
+      emit('changeStatus', isChange.value = true);
     }
   } catch (error) {
     ElMessage.error({ message: '读取失败' + error, duration: 1000 });
@@ -199,6 +202,7 @@ async function handleContextmenu(row: any, column: any, event: Event) {
     if (res.code == 200) {
       ElMessage.success({ message: res.message, duration: 1000 });
       getTeamData(props.teamId);
+      emit('changeStatus', isChange.value = true);
     }
   }).catch(error => {
     ElMessage.error({ message: '删除失败' + error, duration: 1000 });

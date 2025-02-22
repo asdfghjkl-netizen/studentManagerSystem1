@@ -4,7 +4,7 @@
     <!-- 选择区域 -->
     <div class="select-area">
       <!-- 座位表选择 -->
-      <el-radio-group v-model="selectRadio" @change="handleSelectRoom($event as any)">
+      <el-radio-group v-model="selectRoom" @change="handleSelectRoom($event as any)">
         <el-radio value="1" size="large" border>班级座位表</el-radio>
         <el-radio value="2" size="large" border style="margin-left: -30px;">机房座位表</el-radio>
       </el-radio-group>
@@ -16,11 +16,11 @@
       </el-button-group>
       <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
       <!-- 成绩分数选择 -->
-      <el-button-group>
-        <el-button type="success" plain>期中</el-button>
-        <el-button type="success" plain>期末</el-button>
-        <el-button type="success" plain>平时分</el-button>
-      </el-button-group>
+      <el-radio-group v-model="selectScore" @change="handleSelectScore($event as any)">
+        <el-radio value="1" size="large" border>平时分</el-radio>
+        <el-radio value="2" size="large" border style="margin-left: -30px;">期中</el-radio>
+        <el-radio value="3" size="large" border style="margin-left: -30px;">期末</el-radio>
+      </el-radio-group>
       <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
       <!-- 点击进入管理界面 -->
       <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleToManage">
@@ -58,7 +58,7 @@
         <el-row v-for="item in teamList['1']" :key="item">
           <el-col :span="20">
             <div class="seat" @click="addTeam(item)">
-              <h3 style="color: red;">第{{ item }}组</h3>
+              <h3 class="font-sizes" style="color: red;">{{ item }}</h3>
             </div>
           </el-col>
         </el-row>
@@ -67,9 +67,15 @@
         <el-row :gutter="20">
           <el-col :span="6" v-for="item in list['0']" :key="item">
             <div class="seat" @click="add(item)">
-              <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }"
-                v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
-              <h3 v-else></h3>
+              <div class="font-sizes" v-if="data.stuSeat[item - 1]">
+                <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }">
+                  {{ data.stuSeat[item - 1].stu }}
+                </h3>
+                <div style="margin-top: 10px;" v-if="data.stuSeat[item - 1].stu != ''">
+                  <div>期中：78</div>
+                  <div>期中：78</div>
+                </div>
+              </div>
             </div>
           </el-col>
         </el-row>
@@ -82,9 +88,8 @@
       <el-col :span="2">
         <el-row v-for="item in teamList['0']" :key="item">
           <el-col :span="20">
-            <!-- :class="['seat', data.selectTeamList.indexOf(item) > -1 ? 'active' : '']" -->
             <div class="seat" @click="addTeam(item)">
-              <h3 style="color: red;">第{{ item }}组</h3>
+              <h3 class="font-sizes" style="color: red;">{{ item }}</h3>
             </div>
           </el-col>
         </el-row>
@@ -93,9 +98,15 @@
         <el-row :gutter="20">
           <el-col :span="4" v-for="item in list['1']" :key="item">
             <div class="seat" @click="add(item)">
-              <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }"
-                v-if="data.stuSeat[item - 1]">{{ data.stuSeat[item - 1].stu }}</h3>
-              <h3 v-else></h3>
+              <div class="font-sizes" v-if="data.stuSeat[item - 1]">
+                <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }">
+                  {{ data.stuSeat[item - 1].stu }}
+                </h3>
+                <div style="margin-top: 10px;" v-if="data.stuSeat[item - 1].stu != ''">
+                  <div>期中：78</div>
+                  <div>期中：78</div>
+                </div>
+              </div>
             </div>
           </el-col>
         </el-row>
@@ -133,18 +144,13 @@
     </div>
   </div>
 
-  <!--  
-    弹出的学生卡对话框   
-      require==>返回依赖项的导出。调用是同步的。不会触发对服务器的请求。编译器确保依赖项可用。
-      close-on-click-modal==>是否可以通过点击 modal 关闭 Dialog
-      destroy-on-close==>当关闭 Dialog 时，销毁其中的元素
-    -->
+  <!--  弹出的学生卡对话框  -->
   <el-dialog draggable destroy-on-close v-model="dialogVisibleForStu" :title="`${data.studentName}的学习卡`" width="720"
     style="background-color: #f8f6f6; ">
     <div class="student_info">
       <div class="top">
         <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL"
-          :env-image-path="data.envImagePath" />
+          :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
       </div>
     </div>
     <template #footer>
@@ -159,7 +165,7 @@
     style="background-color: #f8f6f6">
     <div class="student_info">
       <div class="top">
-        <TeamInfo :team-id="data.teamId" :env-image-path="data.envImagePath" />
+        <TeamInfo :team-id="data.teamId" :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
       </div>
     </div>
     <template #footer>
@@ -173,9 +179,11 @@
 <script lang="ts" setup>
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
+import { getTeamList, getTeamNum } from "@/utils/dataOption/teamOpt";
 import { createElNotification } from "@/utils/dataOption/ElementOpt";
 import { handleManage } from '@/utils/dataOption/routerOpt';
 import { importAsyncComponent } from "@/component.ts";
+import { saveExcelFile } from "@/utils/api/apiPromiss";
 import TooltipButton from '@/components/TooltipButton.vue';
 import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
@@ -186,10 +194,11 @@ import { useConfig } from "@/store/globalConfig";
 const StudentInfo = importAsyncComponent(() => import("@/views/SeatData/studentInfo/studentInfo.vue"));
 const TeamInfo = importAsyncComponent(() => import("@/views/SeatData/teamInfo/teamInfo.vue"));
 
-const configStore: any = useConfig();
-const importFileStore: any = useDataOptions();
+const configStore = useConfig();
+const importFileStore = useDataOptions();
 const fileInput = ref("");
-const selectRadio = ref(configStore.selectedSeatData);
+const selectRoom = ref(configStore.selectedSeatData);
+const selectScore = ref(configStore.selectedScoreStatu);
 const className = ref("");  // 获取班级名称
 const dialogVisibleForStu = ref(false);  // 定义学生卡对话框的状态
 const dialogVisibleForTeam = ref(false);
@@ -199,6 +208,7 @@ let teamListData = ref([]);
 const reqStudentIMGURL = ref<any>([]);
 const rows = ref(7);  // 行数
 const cols = ref(10);  // 列数
+let stuManageInfoData = ref({});  // 保存团队数据
 const data = reactive({
   stuSeat: [] as any[],            // 获取学生的数据==》studentList的对象
   //  变量的值动态生成一个 7 行 10 列的二维数组，并且座位编号也会按照顺序排列。
@@ -235,7 +245,6 @@ const list = computed(() => {
   });
   return arr;
 });
-
 // （组位）根据每行多少列拆分数组，目前1行8列(根据自己需求来，如果只有6列修改%8=>%6)
 const teamList = computed(() => {
   let arr = [[] as number[], [] as number[]];  // 定义二维数组的变位表
@@ -256,6 +265,31 @@ const teamList = computed(() => {
   arr['1'].reverse();
   return arr;
 });
+
+// 获取学生管理信息
+const getStuManageInfoData = async () => {
+  return new Promise((resolve, reject) => {
+    let setStudentTeamStatu = new Set();
+
+    importFileStore.getStudentTeamStatu(data.teamList, teamListData).then((res: any) => {
+      // console.log("getStudentTeamStatu", res);
+      for (let i = 0; i < res.length; i++) { // 遍历数组
+        const element = res[i];
+        setStudentTeamStatu.add(element);
+      }
+      const result = setStudentTeamStatu.values().next().value;
+      resolve(result);  // 返回结果
+    }).catch(error => {
+      reject(error);  // 处理错误
+    });
+  });
+};
+const requestData = () => {
+  getStuManageInfoData().then(res => {
+    stuManageInfoData.value = res;
+    console.log("teamData", stuManageInfoData.value);
+  });
+};
 
 // 点击进入管理页面（管理员用户使用）
 const handleToManage = () => handleManage();
@@ -323,6 +357,8 @@ const importExcel: UploadProps['onChange'] = async (uploadFile, uploadFiles) => 
   importFileStore.importExcel(uploadFile);
   // 获取团队状态
   importFileStore.getStudentTeamStatu(data.teamList, teamListData);
+  getStuManageInfoData();
+  getImgURL();
 
   setTimeout(() => {
     fileInput.value = importFileStore.fileName;
@@ -334,24 +370,15 @@ const ImportFile = () => {
     for (let i = 0; i < data.teamList.length; i++) {
       const team = data.teamList[i];
       // console.log("team", team);
-      pushTeamStatusToRedis(team).then(res => {
-        console.log(res);
-      });
+      pushTeamStatusToRedis(team);
     }
     importFileStore.students.forEach(student => {
       // console.log("student", student.stuName);
-      pushStudentStatusToRedis(student.stuName).then(res => {
-        console.log(res);
-      });
+      pushStudentStatusToRedis(student.stuName);
     });
   } catch (error) {
     ElMessage.error(error);
   }
-};
-
-// 导出excel文件(测试阶段)
-const exportExcel = () => {
-  ElMessage.success({ message: '导出成功', duration: 1000 });
 };
 
 // 学生座位表的选择(二维数组写法)
@@ -384,6 +411,14 @@ const handleSelectRoom = (event: any) => {
     }));
   }
   data.stuSeat = data.studentList;
+};
+
+// 选择成绩表
+const handleSelectScore = (event: any) => {
+  // console.log("handleSelectScore", event);
+  configStore.setSelectedScoreStatu(event);
+
+  // TODO 选择成绩表
 };
 
 // 选择座位表
@@ -423,6 +458,33 @@ const addTeam = (id: number) => {
   dialogVisibleForTeam.value = true;
 };
 
+// 改变状态，并获取学生管理信息
+const changeStatus = (event: any) => {
+  console.log("changeStatus", event);
+  if (event) {
+    getStuManageInfoData();
+  }
+};
+
+// 导出excel文件(测试阶段)
+const exportExcel = () => {
+  const validStudents = data.studentList
+    .filter(student => student.stu && student.stu !== '**' && student.stu !== '')
+    .map(student => student.stu);
+  // console.log("validStudents", validStudents);
+  requestData();
+  saveExcelFile({
+    fileName: importFileStore.fileName,
+    filePath: importFileStore.filePath,
+    stuManageInfoData: stuManageInfoData.value,
+    studentList: validStudents,
+    teamList: data.teamList,
+  }).then(res => {
+    console.log(res);
+  });
+  ElMessage.success({ message: '导出成功', duration: 1000 });
+};
+
 // 搜索图片路径
 const getImgURL = () => {
   const imgFiles = require.context("/public/images/", true, /\.jpg$/).keys();
@@ -436,7 +498,6 @@ const getImgURL = () => {
     const parts = key.split('/').slice(1);
     parts.pop();
     // console.log(parts, parts.length);
-
     // 把['24应2', '24应2照片']转成字符串，在字符串之间添加/号，并添加到 Set 中
     const secondLevelDir = parts.join('/');
     // console.log(secondLevelDir);
@@ -449,12 +510,15 @@ const getImgURL = () => {
     //  在这里，secondLevelDirsString 已经是字符串了，所以我们直接将其添加到数组中
     myArray.push(secondLevelDirsString);
   }
-
-  reqStudentIMGURL.value = myArray[0];
+  // 筛选出包含 className 的数组元素
+  const match = myArray.filter(item => item.includes(className.value));
+  // 如果存在匹配的数组元素，则将其赋值给 reqStudentIMGURL,
+  // 如果不存在匹配的数组元素，则使用默认值
+  match.length > 0 ? reqStudentIMGURL.value = match[0] : reqStudentIMGURL.value = myArray[0];
 };
 
 watchEffect(() => {
-  handleSelectRoom(selectRadio.value);
+  handleSelectRoom(selectRoom.value);
   getclassName();
 });
 onMounted(() => { getImgURL(); });
@@ -547,5 +611,9 @@ onMounted(() => { getImgURL(); });
 
 .upload-container {
   margin-left: 100px;
+}
+
+.font-sizes {
+  font-size: 14px;
 }
 </style>

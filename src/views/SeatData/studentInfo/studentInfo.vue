@@ -78,7 +78,7 @@
 import InfoTitle from "@/components/InfoTitle.vue";
 import { InfoFilled } from "@element-plus/icons-vue";
 import { getDateTime } from "@/utils/dateTime";
-import { onMounted, ref, defineProps, reactive, watch } from "vue";
+import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
 import { addStudentTableData, removeStudentTableData, getStudentTableData } from "@/utils/api/DataOptions";
 import { ElMessage } from "element-plus";
 import { getTeamNum, getTeamList } from "@/utils/dataOption/teamOpt";
@@ -148,11 +148,13 @@ const otherStatus = ref("");
 const studyStatusString = ref("");
 // 获取学生所在组队id
 const getTeamId = ref("");
+const isChange = ref(false); // 监听是否修改数据
 const props = defineProps({
   studentName: { type: String, default: "" },
   reqStudentImgUrl: { type: String, default: "" },
   envImagePath: { type: String, default: "" },
 })
+const emit = defineEmits(['changeStatus']); // 监听事件
 
 // 获取学生数据(封装),==》 信息引用
 const getStudentData = (student: string) => {
@@ -216,6 +218,7 @@ const submit = async () => {
       otherStatus.value = "";
       getStudentData(props.studentName)
       getTeamData(getTeamId.value)
+      emit('changeStatus', isChange.value = true);
     }
   } catch (err) {
     ElMessage.error({ message: '读取失败' + err, duration: 1000 });
@@ -236,6 +239,7 @@ function handleContextmenu(row: any, column: any, event: Event) {
       ElMessage.success({ message: res.message, duration: 1000 });
       getStudentData(props.studentName)
       getTeamData(getTeamId.value)
+      emit('changeStatus', isChange.value = true);
     }
   }).catch(error => {
     ElMessage.error({ message: '删除失败' + error, duration: 1000 });

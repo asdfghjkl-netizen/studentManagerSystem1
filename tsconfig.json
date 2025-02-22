@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
+    "target": "es2020",
+    // "target": "esnext",
+    // "module": "esnext",
     "strict": false,
     "jsx": "preserve",
     "importHelpers": true,
@@ -27,16 +29,26 @@
       "dom.iterable",
       "scripthost"
     ],
-    "typeRoots": ["./node_modules/@types", "./types/"]
+    "typeRoots": [
+      "./node_modules/@types",
+      "node/config/index.d.ts",
+      "./src/types"
+    ],
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
-, "src/utils/getTableData.js", "src/utils/getTeamMember.ts", "src/utils/dataOption/saveExcel.js"  ],
+    "tests/**/*.tsx",
+    "node/**/*.d.ts",
+    "node/**/*.ts",
+    "src/views/Home/Home.vue",
+    "src/main.js",
+    "src/component.js"
+  ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "node",
   ]
 }

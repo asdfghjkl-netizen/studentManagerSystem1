@@ -1,8 +1,8 @@
 <template>
-  <el-dialog draggable destroy-on-close :v-model="dialogVisible" :title="mainTitle" :width="width" :style="dialogStyle">
+  <el-dialog draggable destroy-on-close overflow :v-model="dialogVisible" :title="mainTitle" :width="width" :style="dialogStyle">
     <div class="student_info">
       <div class="top">
-        <slot></slot>
+        <slot />
       </div>
     </div>
     <template #footer>
@@ -23,6 +23,8 @@ defineProps({
   mainTitle: String,       // 弹窗标题
   width: Number,           // 弹窗宽度
 });
+
+// 点击确定按钮逻辑
 const emit = defineEmits(['updateStatu']);
 const handleChangeStatu = () => emit('updateStatu');
 </script>

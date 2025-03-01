@@ -131,8 +131,7 @@
       <el-button type="primary" @click="exportExcel">
         <el-icon>
           <Download />
-        </el-icon>
-        导出excel</el-button>
+        </el-icon>导出excel</el-button>
       <el-upload :limit="1" :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
         <el-button type="primary">
           <el-icon>
@@ -165,7 +164,7 @@ import { createElNotification } from "@/utils/dataOption/ElementOpt";
 import { handleManage } from '@/utils/dataOption/routerOpt';
 import { importAsyncComponent } from "@/component.ts";
 import { saveExcelFile } from "@/utils/api/apiPromiss";
-import StudentDialog from "@/components/StudentDialog.vue";
+import StudentDialog from "@/components/InfoDialog.vue";
 import TooltipButton from '@/components/TooltipButton.vue';
 import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';

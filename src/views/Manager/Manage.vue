@@ -7,41 +7,7 @@
         </el-aside>
         <el-container>
           <el-header>
-            <div class="header-content">
-              <div class="left-section">
-                <el-button type="primary" class="collapse-btn" @click="toggleCollapse">
-                  <el-icon>
-                    <Menu />
-                  </el-icon>
-                </el-button>
-                <el-breadcrumb separator="/">
-                  <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-                  <el-breadcrumb-item :to="{ path: '/seatData' }">座位表</el-breadcrumb-item>
-                  <el-breadcrumb-item>{{ currentRoute }}</el-breadcrumb-item>
-                </el-breadcrumb>
-              </div>
-              <div class="center-section">
-                <h2 class="system-title">后台管理系统</h2>
-              </div>
-              <div class="right-section">
-                <el-dropdown trigger="hover" placement="bottom">
-                  <div class="user-info">
-                    <el-avatar :size="32" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
-                    <span class="username">管理员</span>
-                    <el-icon class="el-icon--right">
-                      <arrow-down />
-                    </el-icon>
-                  </div>
-                  <template #dropdown>
-                    <el-dropdown-menu>
-                      <el-dropdown-item @click="handleProfile">个人信息</el-dropdown-item>
-                      <el-dropdown-item @click="handleSettings">系统设置</el-dropdown-item>
-                      <el-dropdown-item divided @click="handleLogout">退出登录</el-dropdown-item>
-                    </el-dropdown-menu>
-                  </template>
-                </el-dropdown>
-              </div>
-            </div>
+            <MainHeader @click-collapse="isMenuCollapsed = !isMenuCollapsed" />
           </el-header>
           <el-main>
             <div class="main-container">
@@ -70,38 +36,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { Menu, ArrowDown, House, Setting, List } from '@element-plus/icons-vue';
-import MenuData from './Layout/Aside/Menu.vue';
+import MainHeader from '@/views/Manager/Layout/Header/Header.vue';
+import { House, Setting, List } from '@element-plus/icons-vue';
+import MenuData from '@/views/Manager/Layout/Aside/Menu.vue';
 import { ElMessage } from 'element-plus';
-import { Component } from 'vue';
+import { ref, Component } from 'vue';
 
-const isMenuCollapsed = ref(false);
-const route = useRoute();
-
-// 计算当前路由名称
-const currentRoute = computed(() => {
-  return route.meta.title || route.name || '未知页面';
-});
-
-// 菜单折叠切换
-const toggleCollapse = () => {
-  isMenuCollapsed.value = !isMenuCollapsed.value;
-};
-
-// 用户操作处理函数
-const handleProfile = () => {
-  console.log('查看个人信息');
-};
-
-const handleSettings = () => {
-  console.log('打开系统设置');
-};
-
-const handleLogout = () => {
-  console.log('退出登录');
-};
+const isMenuCollapsed = ref(false);  // is menu collapsed
 
 // 添加接口定义
 interface TagItem {
@@ -144,14 +85,14 @@ const handleClick = (tag: TagItem) => {
 // 关闭标签事件
 const handleClose = (tag: TagItem) => {
   const tags = defaultTags.value;
-  
+
   if (tags.length <= 1) {
     return ElMessage.warning('最后一个标签不能关闭');
   }
-  
+
   const index = tags.findIndex(item => item.path === tag.path);
   tags.splice(index, 1);
-  
+
   if (tag.active) {
     handleClick(tags[index - 1] || tags[index]);
   }
@@ -205,74 +146,6 @@ const handleClose = (tag: TagItem) => {
   }
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 100%;
-  padding: 0 20px;
-
-  .left-section {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-
-    .collapse-btn {
-      padding: 6px;
-      height: 32px;
-    }
-
-    .el-breadcrumb {
-      margin-left: 8px;
-      font-size: 16px;
-
-      &__inner {
-        cursor: pointer;
-      }
-    }
-  }
-
-  .center-section {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    
-    .system-title {
-      margin: 0;
-      font-size: 25px;
-      font-weight: 600;
-      color: var(--el-text-color-primary);
-      white-space: nowrap;
-    }
-  }
-
-  .right-section {
-    flex: 1;
-    display: flex;
-    justify-content: flex-end;
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      padding: 5px 12px;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-
-      &:hover {
-        background-color: var(--el-color-primary-light-9);
-      }
-
-      .username {
-        margin: 0 8px;
-        font-size: 14px;
-        color: var(--el-text-color-primary);
-      }
-    }
-  }
-}
-
 .tabs-view-container {
   background-color: #fff;
   padding: 6px 4px;
@@ -299,22 +172,22 @@ const handleClose = (tag: TagItem) => {
     margin-right: 5px;
     display: flex;
     align-items: center;
-    
+
     &:hover {
       background-color: #f5f7fa;
     }
-    
+
     .tag-icon {
       margin-right: 4px;
       width: 12px;
       height: 12px;
     }
-    
+
     &.active-tag {
       background-color: var(--el-color-primary);
       border-color: var(--el-color-primary);
       color: #fff;
-      
+
       &:hover {
         background-color: var(--el-color-primary);
       }
@@ -349,7 +222,7 @@ const handleClose = (tag: TagItem) => {
 
 .page-scroll {
   height: 100%;
-  
+
   .el-scrollbar__wrap {
     overflow-x: hidden;
   }

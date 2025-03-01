@@ -33,7 +33,11 @@ const routes = [
       },
     ],
     redirect: '/manage/test/table', // 默认重定向到 /manage/test/table 
-  },
+  }, {  // 创建班级页
+    path: '/createClass',
+    name: 'createClass',
+    component: () => import(/* webpackChunkName: "createClass" */'@/views/Home/createClass.vue'),
+  }
 ];
 
 const router = createRouter({

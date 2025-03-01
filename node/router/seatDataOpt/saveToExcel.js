@@ -33,8 +33,9 @@ saveToExcelRouter.all('*', function (req, res, next) { headerConfig(req, res, ne
 saveToExcelRouter.post('/save-excel', async (req, res) => {
   // 获取上传的文件
   const { filePath, fileName, stuManageInfoData, studentList, teamList } = req.body;
-  // console.log('ecxelFile', filePath, fileName, studentList, teamList);
-  // console.log('stuManageInfoData', stuManageInfoData);
+  // console.log('ecxelFile', filePath, fileName);
+  console.log('stuManageInfoData', stuManageInfoData);
+  // console.log('listData', studentList, teamList);
 
   // 判断文件是否为空
   if (!fileName) {
@@ -59,45 +60,46 @@ saveToExcelRouter.post('/save-excel', async (req, res) => {
 
     // 获取工作表
     const stuManageInfo = workbook.getWorksheet(stuManageInfoTitle);
-    // 获取表头行并建立字段映射
-    const headerRow = stuManageInfo.getRow(1);
     // 获取表头并构建动态字段映射
-    const fieldMap = {};
-    headerRow.eachCell((cell, colNumber) => {
-      const headerText = cell.text.trim();
-      // console.log('headerText', headerText);
+    const manageFieldMap = {};
+    parseExcelFile(stuManageInfo, manageFieldMap, stuManageInfoData);
 
-      // 将表头翻译回原始字段名
-      const originalField = translate(headerText);
-      // console.log('originalField', originalField);
+    studentList.forEach(async (student, index) => {
+      // console.log('student', student, index);
+      const stuStudyStatusKey = `stuStudyStatus:${student}`;
+      const studyStatusData = await lrange(stuStudyStatusKey);
+      let dataList = [];
+      studyStatusData.forEach(item => {
+        dataList.push(JSON.parse(item));
+      });
+      console.log('stuStudyStatusKey', dataList);
 
-      // if (originalField) fieldMap[headerText] = originalField;
-      if (originalField) {
-        // 使用列号而不是字段名作为映射值
-        fieldMap[headerText] = colNumber;
-      }
+      const studentTable = workbook.getWorksheet(student);
+      // 获取表头并构建动态字段映射
+      const stuStudyFieldMap = {};
+      parseExcelFile(studentTable, stuStudyFieldMap, dataList);
+      // 保存修改后的Excel文件
+      await workbook.xlsx.writeFile(theExcelPath);
     });
 
-    // 从第二行开始写入数据
-    let rowIndex = 2;
-    // 直接遍历数组
-    for (const student of stuManageInfoData) {
-      const row = stuManageInfo.getRow(rowIndex);
-      // console.log('student', student);
-      // console.log('fieldMap', fieldMap);
-      // 遍历字段映射，将学生数据写入Excel
-      Object.entries(fieldMap).forEach(([header, colNumber]) => {
-        const field = translate(header);
-        // console.log('header', header, 'field', field);
-        // console.log('header', fieldMap[header], 'student', student[field]);
-        if (student[field] !== undefined) {
-          // console.log('row', row.getCell(colNumber).value);
-          // console.log("is ok");
-          row.getCell(colNumber).value = student[field];
-        }
+    teamList.forEach(async (teamId, index) => {
+      // console.log('student', teamId, index);
+      const teamNameForExcel = teamId + "组";
+      const teamStudyKey = `teamStudyStatus:${teamNameForExcel}`;  // 组号作为key
+      const studyStatusData = await lrange(teamStudyKey);
+      let dataList = [];
+      studyStatusData.forEach(item => {
+        dataList.push(JSON.parse(item));
       });
-      rowIndex++;
-    }
+      console.log('teamStudyKey', dataList);
+
+      const teamTable = workbook.getWorksheet(teamNameForExcel);
+      // 获取表头并构建动态字段映射
+      const teamStudyFieldMap = {};
+      parseExcelFile(teamTable, teamStudyFieldMap, dataList);
+      // 保存修改后的Excel文件
+      await workbook.xlsx.writeFile(theExcelPath);
+    });
 
     // 保存修改后的Excel文件
     try {
@@ -107,10 +109,58 @@ saveToExcelRouter.post('/save-excel', async (req, res) => {
       console.error('Error writing file:', error);
       res.status(500).send({ error: '文件保存失败' });
     }
+    // res.status(200).send({ message: '文件保存成功' });
   } catch (error) {
     console.error('Error reading file, buffer:', error);
     res.status(500).send({ error: '文件读取失败' + error });
   }
 });
+
+/**
+ * 解析Excel文件
+ * 
+ * @param {*} worksheet  Excel工作表
+ * @param {*} fieldMap   获取表头并构建动态字段映射
+ * @param {*} sourceData 源数据
+ */
+function parseExcelFile(worksheet, fieldMap, sourceData) {
+  // 获取表头行并建立字段映射
+  const headerRow = worksheet.getRow(1);
+  headerRow.eachCell((cell, colNumber) => {
+    const headerText = cell.text.trim();
+    // console.log('headerText', headerText);
+
+    // 将表头翻译回原始字段名
+    const originalField = translate(headerText);
+    // console.log('originalField', originalField);
+
+    // if (originalField) fieldMap[headerText] = originalField;
+    if (originalField) {
+      // 使用列号而不是字段名作为映射值
+      fieldMap[headerText] = colNumber;
+    }
+  });
+
+  // 从第二行开始写入数据
+  let rowIndex = 2;
+  // 直接遍历数组
+  for (const item of sourceData) {
+    const row = worksheet.getRow(rowIndex);
+    // console.log('student', item);
+    // console.log('fieldMap', fieldMap);
+    // 遍历字段映射，将学生数据写入Excel
+    Object.entries(fieldMap).forEach(([header, colNumber]) => {
+      const field = translate(header);
+      // console.log('header', header, 'field', field);
+      // console.log('header', fieldMap[header], 'student', item[field]);
+      if (item[field] !== undefined) {
+        // console.log('row', row.getCell(colNumber).value);
+        // console.log("is ok");
+        row.getCell(colNumber).value = item[field];
+      }
+    });
+    rowIndex++;
+  }
+}
 
 module.exports = saveToExcelRouter;

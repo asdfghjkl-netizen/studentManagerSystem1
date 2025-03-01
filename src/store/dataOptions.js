@@ -91,10 +91,7 @@ export const useDataOptions = defineStore('dataOptions', {
         setSelectClass(value) {
             this.selectedClass = value;
         },
-        /**
-         * 获取选择班级
-         * @returns 
-         */
+        /** 获取选择班级 */
         getSelectClass() {
             return this.selectedClass;
         },

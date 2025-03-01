@@ -145,45 +145,27 @@
   </div>
 
   <!--  弹出的学生卡对话框  -->
-  <el-dialog draggable destroy-on-close v-model="dialogVisibleForStu" :title="`${data.studentName}的学习卡`" width="720"
-    style="background-color: #f8f6f6; ">
-    <div class="student_info">
-      <div class="top">
-        <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL"
-          :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
-      </div>
-    </div>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="dialogVisibleForStu = false">确定</el-button>
-      </div>
-    </template>
-  </el-dialog>
+  <StudentDialog v-model="dialogVisibleForStu" @updateStatu="dialogVisibleForStu = false" :width="720"
+    :main-title="`${data.studentName}的学习卡`" :dialog-style="{ backgroundColor: '#f8f6f6' }">
+    <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL"
+      :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
+  </StudentDialog>
 
   <!--  弹出的团队卡对话框 -->
-  <el-dialog draggable destroy-on-close v-model="dialogVisibleForTeam" :title="`第${data.teamId}组学习卡`" width="750"
-    style="background-color: #f8f6f6">
-    <div class="student_info">
-      <div class="top">
-        <TeamInfo :team-id="data.teamId" :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
-      </div>
-    </div>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="dialogVisibleForTeam = false">确定</el-button>
-      </div>
-    </template>
-  </el-dialog>
+  <StudentDialog v-model="dialogVisibleForTeam" @updateStatu="dialogVisibleForTeam = false" :width="750"
+    :main-title="`第${data.teamId}组学习卡`" :dialog-style="{ backgroundColor: '#f8f6f6' }">
+    <TeamInfo :team-id="data.teamId" :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
+  </StudentDialog>
 </template>
 
 <script lang="ts" setup>
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
-import { getTeamList, getTeamNum } from "@/utils/dataOption/teamOpt";
 import { createElNotification } from "@/utils/dataOption/ElementOpt";
 import { handleManage } from '@/utils/dataOption/routerOpt';
 import { importAsyncComponent } from "@/component.ts";
 import { saveExcelFile } from "@/utils/api/apiPromiss";
+import StudentDialog from "@/components/StudentDialog.vue";
 import TooltipButton from '@/components/TooltipButton.vue';
 import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
@@ -436,7 +418,6 @@ const add = (id: number) => {
   // data.studentList的id是 data.studentList的数组下标 所以-1
   data.studentName = data.studentList[id - 1].stu;
   // 如果选中的位置没有名字，则不执行后面代码
-
   if (data.studentName == '') {
     createElNotification('提示', '该座位并没有学生，可在此处添加学生信息，或选择其他座位', 'warning', 2000);
     return false;
@@ -520,6 +501,7 @@ const getImgURL = () => {
 watchEffect(() => {
   handleSelectRoom(selectRoom.value);
   getclassName();
+  getStuManageInfoData();
 });
 onMounted(() => { getImgURL(); });
 </script>

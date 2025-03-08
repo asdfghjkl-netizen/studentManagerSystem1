@@ -18,13 +18,30 @@ export function getFileList() {
     })
 }
 
+// 读取excel配置文件（获取班级配置文件）
+export function getClassConfig() {
+    return instance({
+        url: 'excel/class-config',
+        method: 'get'
+    })
+}
+
 // 读取文件（传入文件名）
-export function getExcelFile(fileName) {
+export function getExcelFile(data) {
     // console.log("fileName", fileName);
     return instance({
         url: 'get-excel-file',
         method: 'post',
-        // data: { file: fileName }
-        data: fileName
+        data
+    })
+}
+
+// 写入并保存文件的接口获取
+export function saveExcelFile(data) {
+    return instance({
+        url: 'save-excel',
+        method: 'post',
+        data,
+        // headers: { "Content-Type": "multipart/form-data" },
     })
 }

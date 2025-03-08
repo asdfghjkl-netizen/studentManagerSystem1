@@ -11,7 +11,6 @@
 </template>
 
 <script setup lang="ts">
-import { ElButton, ElTooltip } from 'element-plus';
 import { ref, defineProps, defineEmits } from 'vue';
 
 defineProps({
@@ -41,8 +40,5 @@ const visible = ref(false);  // 是否显示弹窗
 const handleClick = () => emits('click');
 </script>
 
-<style scoped>
-.button {
-  /* 这里可以添加按钮的样式 */
-}
+<style lang="scss" scoped>
 </style>

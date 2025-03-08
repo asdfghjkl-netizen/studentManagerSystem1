@@ -34,7 +34,6 @@ saveToExcelRouter.post('/save-excel', async (req, res) => {
   // 获取上传的文件
   const { filePath, fileName, stuManageInfoData, studentList, teamList } = req.body;
   // console.log('ecxelFile', filePath, fileName);
-  console.log('stuManageInfoData', stuManageInfoData);
   // console.log('listData', studentList, teamList);
 
   // 判断文件是否为空
@@ -46,6 +45,10 @@ saveToExcelRouter.post('/save-excel', async (req, res) => {
     res.status(400).send({ error: `未接收到文件路径${filePath}` });
     return;
   }
+
+  // 对 stuManageInfoData 按照 stuId 排序
+  stuManageInfoData.sort((a, b) => a.stuId - b.stuId);
+  console.log('stuManageInfoData', stuManageInfoData);
 
   // 获取文件路径
   const theExcelPath = await findFilePath(filePath, fileName);

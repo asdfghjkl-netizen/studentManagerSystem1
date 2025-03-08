@@ -9,9 +9,9 @@ export const useConfig = defineStore('config', {
         language: 'zh-cn',     // 设置语言包
         ipConfig: '',          // 解密ip
         /** 学生座位表选择数据，默认为1---》班级座位表 */ 
-        selectedSeatData: '1', 
+        selectedSeatData: 1, 
         /** 分数选择数据，默认为1---》隐藏 */ 
-        selectedScoreStatu: '1',
+        selectedScoreStatu: 1,
     }),
     // 计算属性 
     getters: {

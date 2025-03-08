@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-import { ElDialog, ElButton } from 'element-plus';
 import { defineProps, defineEmits } from 'vue';
 
 defineProps({

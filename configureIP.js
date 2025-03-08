@@ -46,29 +46,28 @@ function getMatchingIPs() {
 }
 
 /**
- * 设置环境变量
+ * 根据匹配的IP地址设置环境变量。
+ * 如果找到匹配的IP地址，则将环境变量设置为第一个匹配的IP地址。
+ * 否则，将环境变量默认为“localhost”。另外，它会生成一个加密的配置文件。
  */
 function setEnvironmentVariables() {
   const matchingIPs = getMatchingIPs();  // 获取匹配的IP地址列表
   if (matchingIPs.length > 0) {
-    process.env.VUE_APP_IP = matchingIPs[0];  // 设置VUE_APP_IP环境变量
-    process.env.REDIS_HOST = matchingIPs[0];  // 设置REDIS_HOST环境变量
-    process.env.SERVER_IP = matchingIPs[0];  // 设置SERVER_IP环境变量
+    // 设置环境变量
+    const envs = ['VUE_APP_IP', 'REDIS_HOST', 'SERVER_IP'];
+    envs.forEach(env => process.env[env] = matchingIPs[0]);
     console.log("配置环境变量成功");
-
     // 动态生成config.js加密配置
     generateConfigContent();
   } else {
-    process.env.VUE_APP_IP = "localhost" || "127.0.0.1";
-    process.env.REDIS_HOST = "localhost" || "127.0.0.1";
-    process.env.SERVER_IP = "localhost" || "127.0.0.1";
+    // 设置环境变量
+    const envs = ['VUE_APP_IP', 'REDIS_HOST', 'SERVER_IP'];
+    envs.forEach(env => process.env[env] = "localhost" || "127.0.0.1");
     console.error('没有匹配的IP地址！已设置为localhost');
-    
     // 动态生成config.js加密配置
     generateConfigContent();
   }
 }
-// setEnvironmentVariables();
 
 module.exports = {
   getLocalIPs,

@@ -14,19 +14,13 @@
     </transition>
 </template>
 
-<script>
-export default {
-    props: {
-        message: {
-            type: String,
-            default: '加载中'
-        },
-        visible: {
-            type: Boolean,
-            default: true
-        }
-    }
-}
+<script lang="ts" setup>
+import { defineProps } from 'vue'
+
+defineProps({
+    message: { type: String, default: '加载中' },
+    visible: { type: Boolean, default: true },
+})
 </script>
 
 <style scoped>

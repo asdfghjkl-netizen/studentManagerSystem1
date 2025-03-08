@@ -9,28 +9,18 @@
     </div>
 </template>
 
-<script>
-export default {
-    props: {
-        title: {
-            type: String,
-            default: '发生错误'
-        },
-        message: {
-            type: String,
-            required: true
-        },
-        showRetry: {
-            type: Boolean,
-            default: false
-        }
-    },
-    methods: {
-        handleRetry() {
-            this.$emit('retry');
-        }
-    }
-}
+<script setup lang="ts">
+import { defineProps } from 'vue';
+
+defineProps({
+    title: { type: String, default: '发生错误' },  // 标题
+    message: { type: String, required: true },    // 错误信息
+    showRetry: { type: Boolean, default: false }, // 是否显示重试按钮
+});
+const emit = defineEmits(['retry']);  // 定义 retry 事件
+const handleRetry = () => {
+    emit('retry');
+};
 </script>
 
 <style scoped>

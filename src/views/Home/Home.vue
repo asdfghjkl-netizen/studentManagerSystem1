@@ -74,9 +74,7 @@ const lang = ref(configStore.lang);
 const changeLang = (event: any) => configStore.changeGlobalLang(event);
 
 // 跳转创建班级界面
-const handleToCeate = () => {
-  router.push("/createClass");
-};
+const handleToCeate = () => router.push("/createClass");
 
 // 跳转座位界面
 const handleToSeat = () => router.push("/seatData");

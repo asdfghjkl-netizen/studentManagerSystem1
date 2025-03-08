@@ -2,35 +2,38 @@
   <!-- 主体内容区域 -->
   <div class="alarm">
     <!-- 选择区域 -->
-    <div class="select-area">
-      <!-- 座位表选择 -->
-      <el-radio-group v-model="selectRoom" @change="handleSelectRoom($event as any)">
-        <el-radio value="1" size="large" border>班级座位表</el-radio>
-        <el-radio value="2" size="large" border style="margin-left: -30px;">机房座位表</el-radio>
-      </el-radio-group>
-      <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
-      <!-- 随机学生选择 -->
-      <el-button-group>
-        <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
-        <el-button type="info" plain @click="data.selectList.splice(0)">取消选择</el-button>
-      </el-button-group>
-      <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
-      <!-- 成绩分数选择 -->
-      <el-radio-group v-model="selectScore" @change="handleSelectScore($event as any)">
-        <el-radio value="1" size="large" border>平时分</el-radio>
-        <el-radio value="2" size="large" border style="margin-left: -30px;">期中</el-radio>
-        <el-radio value="3" size="large" border style="margin-left: -30px;">期末</el-radio>
-      </el-radio-group>
-      <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
-      <!-- 点击进入管理界面 -->
-      <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleToManage">
-        <template #content>
-          <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
-        </template>进入管理界面
-      </TooltipButton>
-      <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
-    </div>
-    <el-divider class="divider" direction="horizontal" border-style="solid" />
+    <el-affix :offset="15">
+      <div class="select-area">
+        <!-- 座位表选择 -->
+        <el-radio-group v-model="selectRoom" @change="handleSelectRoom($event as any)">
+          <el-radio :value="1" size="large" border>班级座位表</el-radio>
+          <el-radio :value="2" size="large" border style="margin-left: -30px;">机房座位表</el-radio>
+        </el-radio-group>
+        <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
+        <!-- 随机学生选择 -->
+        <el-button-group>
+          <el-button type="success" plain @click="selectStudent">随机选择学生</el-button>
+          <el-button type="info" plain @click="data.selectList.splice(0)">取消选择</el-button>
+        </el-button-group>
+        <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
+        <!-- 成绩分数选择 -->
+        <el-radio-group v-model="selectScore" @change="handleSelectScore($event as any)">
+          <el-radio :value="1" size="large" border>全部</el-radio>
+          <el-radio :value="2" size="large" border style="margin-left: -30px;">平时分</el-radio>
+          <el-radio :value="3" size="large" border style="margin-left: -30px;">期中</el-radio>
+          <el-radio :value="4" size="large" border style="margin-left: -30px;">期末</el-radio>
+        </el-radio-group>
+        <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
+        <!-- 点击进入管理界面 -->
+        <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleToManage">
+          <template #content>
+            <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
+          </template>进入管理界面
+        </TooltipButton>
+        <el-divider direction="vertical" border-style="hidden" style="margin-left: 15px;margin-right: 15px;" />
+      </div>
+      <el-divider class="divider" direction="horizontal" border-style="solid" />
+    </el-affix>
 
     <!-- 座位表 -->
     <el-row :gutter="20">
@@ -72,8 +75,15 @@
                   {{ data.stuSeat[item - 1].stu }}
                 </h3>
                 <div style="margin-top: 10px;" v-if="data.stuSeat[item - 1].stu != ''">
-                  <div>期中：78</div>
-                  <div>期中：78</div>
+                  <div v-if="selectScore === 1 || selectScore === 2">
+                    <span>平时分：{{ data.stuSeat[item - 1].normalScore1 ? data.stuSeat[item - 1].normalScore1 : 0 }}</span>
+                  </div>
+                  <div v-if="selectScore === 1 || selectScore === 3">
+                    <span>期中：{{ data.stuSeat[item - 1].midtermScore ? data.stuSeat[item - 1].midtermScore : 0 }}</span>
+                  </div>
+                  <div v-if="selectScore === 1 || selectScore === 4">
+                    <span>期末：{{ data.stuSeat[item - 1].finalScore ? data.stuSeat[item - 1].finalScore : 0 }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -95,7 +105,7 @@
         </el-row>
       </el-col>
       <el-col :span="10" style="margin-left: -15px;">
-        <el-row :gutter="20">
+        <el-row :gutter="14">
           <el-col :span="4" v-for="item in list['1']" :key="item">
             <div class="seat" @click="add(item)">
               <div class="font-sizes" v-if="data.stuSeat[item - 1]">
@@ -103,8 +113,15 @@
                   {{ data.stuSeat[item - 1].stu }}
                 </h3>
                 <div style="margin-top: 10px;" v-if="data.stuSeat[item - 1].stu != ''">
-                  <div>期中：78</div>
-                  <div>期中：78</div>
+                  <div v-if="selectScore === 1 || selectScore === 2">
+                    <span>平时分：{{ data.stuSeat[item - 1].normalScore1 ? data.stuSeat[item - 1].normalScore1 : 0 }}</span>
+                  </div>
+                  <div v-if="selectScore === 1 || selectScore === 3">
+                    <span>期中：{{ data.stuSeat[item - 1].midtermScore ? data.stuSeat[item - 1].midtermScore : 0 }}</span>
+                  </div>
+                  <div v-if="selectScore === 1 || selectScore === 4">
+                    <span>期末：{{ data.stuSeat[item - 1].finalScore ? data.stuSeat[item - 1].finalScore : 0 }}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -112,7 +129,7 @@
         </el-row>
       </el-col>
     </el-row>
-    <el-row :gutter="20">
+    <el-row :gutter="20" style="margin-bottom: 20px;">
       <el-col :span="8">
         <div class="grid-content ep-bg-purple" />
       </el-col>
@@ -126,21 +143,23 @@
     </el-row>
 
     <!-- 导入导出按钮区域 -->
-    <el-divider class="divider divider-bottom" direction="horizontal" border-style="solid" />
-    <div class="btn-group">
-      <el-button type="primary" @click="exportExcel">
-        <el-icon>
-          <Download />
-        </el-icon>导出excel</el-button>
-      <el-upload :limit="1" :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
-        <el-button type="primary">
+    <el-affix position="bottom" :offset="0">
+      <el-divider class="divider-bottom" direction="horizontal" border-style="solid" />
+      <div class="btn-group background-color-white">
+        <el-button type="primary" @click="exportExcel">
           <el-icon>
-            <Upload />
-          </el-icon>
-          导入excel文件
-        </el-button>
-      </el-upload>
-    </div>
+            <Download />
+          </el-icon>导出excel</el-button>
+        <el-upload :limit="1" :ref="fileInput" class="upload-demo upload-container" :on-change="importExcel">
+          <el-button type="primary">
+            <el-icon>
+              <Upload />
+            </el-icon>
+            导入excel文件
+          </el-button>
+        </el-upload>
+      </div>
+    </el-affix>
   </div>
 
   <!--  弹出的学生卡对话框  -->
@@ -178,18 +197,18 @@ const TeamInfo = importAsyncComponent(() => import("@/views/SeatData/teamInfo/te
 const configStore = useConfig();
 const importFileStore = useDataOptions();
 const fileInput = ref("");
-const selectRoom = ref(configStore.selectedSeatData);
-const selectScore = ref(configStore.selectedScoreStatu);
+const selectRoom = ref(configStore.selectedSeatData);     // 获取座位表状态
+const selectScore = ref(configStore.selectedScoreStatu);  // 获取成绩状态
 const className = ref("");  // 获取班级名称
 const dialogVisibleForStu = ref(false);  // 定义学生卡对话框的状态
-const dialogVisibleForTeam = ref(false);
+const dialogVisibleForTeam = ref(false); // 定义团队卡对话框的状态
 // 获取成员团队状态
 let teamListData = ref([]);
 // 获取图片路径
 const reqStudentIMGURL = ref<any>([]);
 const rows = ref(7);  // 行数
 const cols = ref(10);  // 列数
-let stuManageInfoData = ref({});  // 保存团队数据
+// let stuManageInfoData = ref({});  // 保存团队数据
 const data = reactive({
   stuSeat: [] as any[],            // 获取学生的数据==》studentList的对象
   //  变量的值动态生成一个 7 行 10 列的二维数组，并且座位编号也会按照顺序排列。
@@ -265,11 +284,27 @@ const getStuManageInfoData = async () => {
     });
   });
 };
-const requestData = () => {
-  getStuManageInfoData().then(res => {
-    stuManageInfoData.value = res;
-    console.log("teamData", stuManageInfoData.value);
+const requestData = async () => {
+  let setStudentTeamStatu: any = new Set();
+
+  // 获取学生管理信息
+  const res: any = await getStuManageInfoData();
+  // 遍历结果并添加到 Set 中以确保唯一性
+  res.forEach((item: any) => {
+    setStudentTeamStatu.add(JSON.stringify(item));
   });
+  // 将 Set 转换为数组并解析 JSON 字符串
+  setStudentTeamStatu = Array.from(setStudentTeamStatu).map((item: any) => JSON.parse(item));
+
+  // 合并 stuManageInfoData 到 data.stuSeat
+  data.stuSeat = data.stuSeat.map(seat => {
+    const studentInfo = setStudentTeamStatu.find((info: any) => info.stuName === seat.stu);
+    return studentInfo ? { ...seat, ...studentInfo } : seat;
+  });
+
+  // console.log("data.stuSeat", data.stuSeat);
+  // console.log("setStudentTeamStatu", setStudentTeamStatu);
+  return setStudentTeamStatu;
 };
 
 // 点击进入管理页面（管理员用户使用）
@@ -339,6 +374,7 @@ const importExcel: UploadProps['onChange'] = async (uploadFile, uploadFiles) => 
   // 获取团队状态
   importFileStore.getStudentTeamStatu(data.teamList, teamListData);
   getStuManageInfoData();
+  await requestData();
   getImgURL();
 
   setTimeout(() => {
@@ -364,7 +400,7 @@ const ImportFile = () => {
 
 // 学生座位表的选择(二维数组写法)
 const handleSelectRoom = (event: any) => {
-  // console.log("radio1.value", config.selectedSeatData, event);
+  // console.log("radio1.value", event);
   configStore.setSelectedSeatData(event);  // 设置学生座位表选择数据
 
   // 扁平化 seatList
@@ -376,7 +412,7 @@ const handleSelectRoom = (event: any) => {
   // 判断是否为空，如果为空，则返回
   if (classSeatList.length == 0 || computerRoomSeat.length == 0) return;
 
-  if (configStore.selectedSeatData == "1") {
+  if (configStore.selectedSeatData == 1) {
     data.studentList = flatSeatList.map((seatId, index) => ({
       seatId,
       stu: classSeatList[index] !== undefined
@@ -395,12 +431,7 @@ const handleSelectRoom = (event: any) => {
 };
 
 // 选择成绩表
-const handleSelectScore = (event: any) => {
-  // console.log("handleSelectScore", event);
-  configStore.setSelectedScoreStatu(event);
-
-  // TODO 选择成绩表
-};
+const handleSelectScore = (event: any) => configStore.setSelectedScoreStatu(event);
 
 // 选择座位表
 const add = (id: number) => {
@@ -439,24 +470,24 @@ const addTeam = (id: number) => {
 };
 
 // 改变状态，并获取学生管理信息
-const changeStatus = (event: any) => {
+const changeStatus = async (event: any) => {
   console.log("changeStatus", event);
   if (event) {
     getStuManageInfoData();
+    await requestData();
   }
 };
 
 // 导出excel文件(测试阶段)
-const exportExcel = () => {
+const exportExcel = async () => {
   const validStudents = data.studentList
     .filter(student => student.stu && student.stu !== '**' && student.stu !== '')
     .map(student => student.stu);
   // console.log("validStudents", validStudents);
-  requestData();
   saveExcelFile({
     fileName: importFileStore.fileName,
     filePath: importFileStore.filePath,
-    stuManageInfoData: stuManageInfoData.value,
+    stuManageInfoData: await requestData(),
     studentList: validStudents,
     teamList: data.teamList,
   }).then(res => {
@@ -508,19 +539,18 @@ onMounted(() => { getImgURL(); });
 <style lang="scss" scoped>
 .divider {
   margin: 0 0 10px 0;
-
-  &-bottom {
-    margin: 20px 0 0 0;
-  }
 }
 
 .select-area {
   margin-top: -30px;
-  margin-left: 20px;
-  margin-bottom: 20px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-bottom: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
+  background-color: white;
+  /* 添加此行，确保背景色 */
 }
 
 .alarm {
@@ -570,10 +600,15 @@ onMounted(() => { getImgURL(); });
   display: flex;
   // justify-content: space-around;
   justify-content: flex-start;
-  margin-top: 2rem;
-  margin-left: 20px;
+  padding-top: 2rem;
+  padding-left: 20px;
   width: 30%;
   height: 70px;
+}
+
+.background-color-white {
+  width: 100%;
+  background-color: white;
 }
 
 .el-upload-list {
@@ -596,5 +631,9 @@ onMounted(() => { getImgURL(); });
 
 .font-sizes {
   font-size: 14px;
+}
+
+.el-divider--horizontal {
+  margin: 0 0;
 }
 </style>

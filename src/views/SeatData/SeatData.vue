@@ -202,13 +202,10 @@ const selectScore = ref(configStore.selectedScoreStatu);  // 获取成绩状态
 const className = ref("");  // 获取班级名称
 const dialogVisibleForStu = ref(false);  // 定义学生卡对话框的状态
 const dialogVisibleForTeam = ref(false); // 定义团队卡对话框的状态
-// 获取成员团队状态
-let teamListData = ref([]);
-// 获取图片路径
-const reqStudentIMGURL = ref<any>([]);
+let teamListData = ref([]);  // 获取成员团队状态
+const reqStudentIMGURL = ref<any>([]);   // 获取图片路径
 const rows = ref(7);  // 行数
 const cols = ref(10);  // 列数
-// let stuManageInfoData = ref({});  // 保存团队数据
 const data = reactive({
   stuSeat: [] as any[],            // 获取学生的数据==》studentList的对象
   //  变量的值动态生成一个 7 行 10 列的二维数组，并且座位编号也会按照顺序排列。

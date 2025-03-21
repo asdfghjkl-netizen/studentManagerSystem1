@@ -4,6 +4,9 @@ const path = require('path');
 const { encrypt } = require('./node/tools/setCrypt');
 const defaultGateway = require('default-gateway');
 
+// 定义环境变量
+const envs = ['VUE_APP_IP', 'REDIS_HOST', 'SERVER_IP'];
+
 /**
  * 获取本机IP地址
  * @returns {Array} 本机IP地址列表
@@ -54,18 +57,34 @@ function setEnvironmentVariables() {
   const matchingIPs = getMatchingIPs();  // 获取匹配的IP地址列表
   if (matchingIPs.length > 0) {
     // 设置环境变量
-    const envs = ['VUE_APP_IP', 'REDIS_HOST', 'SERVER_IP'];
     envs.forEach(env => process.env[env] = matchingIPs[0]);
     console.log("配置环境变量成功");
     // 动态生成config.js加密配置
     generateConfigContent();
   } else {
     // 设置环境变量
-    const envs = ['VUE_APP_IP', 'REDIS_HOST', 'SERVER_IP'];
     envs.forEach(env => process.env[env] = "localhost" || "127.0.0.1");
     console.error('没有匹配的IP地址！已设置为localhost');
     // 动态生成config.js加密配置
     generateConfigContent();
+  }
+}
+
+/** 动态生成config.js加密配置 */
+function generateConfigContent() {
+  try {
+    // 加密配置
+    const configContent = encrypt(JSON.stringify(
+      envs.reduce((acc, env) => {
+        acc[env] = process.env[env];
+        return acc;
+      }, {})
+    ));
+    // 生成配置文件
+    const configPath = path.join(__dirname, 'public', 'config.js');
+    fs.writeFileSync(configPath, `window.globalConfig = '${configContent}';`);
+  } catch (error) {
+    console.error('配置文件生成失败:', error);
   }
 }
 
@@ -74,20 +93,3 @@ module.exports = {
   getMatchingIPs,
   setEnvironmentVariables
 };
-
-/** 动态生成config.js加密配置 */
-function generateConfigContent() {
-  try {
-    // 加密配置
-    const configContent = encrypt(JSON.stringify({
-      VUE_APP_IP: process.env.VUE_APP_IP,
-      REDIS_HOST: process.env.REDIS_HOST,
-      SERVER_IP: process.env.SERVER_IP
-    }));
-    // 生成配置文件
-    const configPath = path.join(__dirname, 'public', 'config.js');
-    fs.writeFileSync(configPath, `window.globalConfig = '${configContent}';`);
-  } catch (error) {
-    console.error('配置文件生成失败:', error);
-  }
-}

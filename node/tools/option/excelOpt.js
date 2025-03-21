@@ -9,7 +9,6 @@ const students = ref([]);
 const classSeat = ref([]);
 const computerRoomSeat = ref([]);
 const teamLists = ref([]);
-
 /**
  * 公共代码段（获取worksheet内容）
  * 
@@ -60,16 +59,13 @@ const parseWorkSheetLong = (dataArray, worksheet, headers, targetArray, startRow
  * @param {Array} targetArray 目标数组
  */
 const parseWorkSheetShort = (dataArray, worksheet, targetArray) => {
-    // dataArray = [];
+    dataArray = [];
     // for (let rowNumber = 1; rowNumber <= worksheet.rowCount; rowNumber++) {
     //     const row = worksheet.getRow(rowNumber);
     //     row.eachCell((cell) => {
     //         dataArray.push(cell.value);
     //     })
     // }
-    // targetArray.value = dataArray;
-    // // console.log("data", dataArray);
-    dataArray = [];
     for (let rowNumber = 1; rowNumber <= worksheet.rowCount; rowNumber++) {
         const row = worksheet.getRow(rowNumber);
         const rowData = [];
@@ -79,6 +75,7 @@ const parseWorkSheetShort = (dataArray, worksheet, targetArray) => {
         dataArray.push(rowData);
     }
     targetArray.value = dataArray;
+    // console.log("data", dataArray);
 }
 
 // 获取表格第一行数据
@@ -93,7 +90,7 @@ async function getFirstRow(worksheet) {
 }
 
 // 重新解析文件内容
-async function parseExcelFile(workbook) {
+async function parseExcelFile(workbook, file = null) {
     // 获取第一个worksheet内容（学生信息表）
     let worksheet = workbook.getWorksheet(1);
     // 获取第一行的标题
@@ -118,10 +115,54 @@ async function parseExcelFile(workbook) {
         // 创建一个空的JavaScript对象数组，用于存储解析后的数据
         const dataexl4 = [];
         parseWorkSheetLong(dataexl4, worksheetFour, teamHeaders, teamLists);
-    } 
-    // else {
-    //     const createsheet = workbook.addWorksheet(stuManageInfoTitle);
-    // }
+    }
+    else {
+        // 创建一个新的工作表
+        const createsheet = workbook.addWorksheet(stuManageInfoTitle);
+        /** 
+         * 复制第一个工作表的全部数据 
+         * 使用 worksheet.eachRow 遍历第一个工作表的所有行。
+         * 使用 row.eachCell 遍历每一行的所有单元格，并将单元格的值添加到 rowData 数组中。
+         * 使用 createsheet.addRow(rowData) 将 rowData 添加到新工作表中。
+         */
+        // worksheet.eachRow((row, rowNumber) => {
+        //     const rowData = [];
+        //     row.eachCell((cell) => {
+        //         rowData.push(cell.value);
+        //     });
+        //     createsheet.addRow(rowData);
+        // });
+        // 将新工作表插入到第四位置
+        workbook.worksheets.splice(3, 0, createsheet);
+
+        try {
+            await workbook.xlsx.writeFile(file);
+            // 重新解析新创建的工作表
+            await parseExcelFile(workbook);
+        } catch (error) {
+            console.error('Error writing file:', error);
+            throw new Error('Error creating stuManageInfoTitle sheet');
+        }
+        // // 设置列标题
+        // createsheet.columns = [
+        //     { header: '班级', key: 'class', width: 10 },
+        //     { header: '学号', key: 'stuId', width: 20 },
+        //     { header: '姓名', key: 'stuName', width: 10 },
+        //     { header: '性别', key: 'sex', width: 10 },
+        //     { header: '是否组长科代表', key: 'isLeader', width: 30 },
+        //     { header: '小组号', key: 'teamId', width: 10 },
+        //     { header: '学习表现', key: 'studyStatus', width: 10 },
+        //     { header: '期中考', key: 'midtermScore', width: 10 },
+        //     { header: '期末考', key: 'finalScore', width: 10 },
+        //     { header: '作业情况', key: 'homeworkStatus', width: 10 },
+        //     { header: '测试', key: 'testScore', width: 10 },
+        //     { header: '平时成绩1', key: 'normalScore1', width: 10 },
+        //     { header: '平时成绩2', key: 'normalScore2', width: 10 },
+        //     { header: '平时成绩3', key: 'normalScore3', width: 10 },
+        //     { header: '总评', key: 'totalScore', width: 10 },
+        //     { header: '头像', key: 'avatar', width: 10 },
+        // ];
+    }
 
     console.log("文件读取成功！");
     return {

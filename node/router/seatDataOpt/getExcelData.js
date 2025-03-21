@@ -48,7 +48,7 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
         // 解析 Excel 文件
-        const parsedData = await parseExcelFile(workbook);
+        const parsedData = await parseExcelFile(workbook, filePath);
 
         // 存储 students 数据到 Redis  hmset模式
         parsedData.students.forEach(async (student) => {
@@ -62,7 +62,6 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
         // 存储 teamLists 数据到 Redis  hset模式
         parsedData.teamLists.forEach(async (team) => {
             const key = `team:${team.teamId}`;
-            // const { teamId, ...teamInfo } = team;
             await hset(key, team.stuName, team);
         });
         res.status(200).json({
@@ -72,6 +71,7 @@ getExcelDataRouter.post('/get-excel-file', async (req, res) => {
             message: '上传成功'
         });
     } catch (error) {
+        console.log('Error reading or parsing file:', error);
         res.status(500).json({ error: 'Failed to read or parse file' });
     }
 });

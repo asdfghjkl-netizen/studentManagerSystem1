@@ -2,35 +2,44 @@
   "name": "seat",
   "version": "1.4.0",
   "private": true,
+  "main": "./electron/background.js",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --verbose",
+    "build": "vue-cli-service build",
+    "startForDependece": "node server.js",
+    "electron:serve": "vue-cli-service build && electron .",
+    "electron:build": "vue-cli-service build && electron-builder",
     "lint": "vue-cli-service lint",
-    "startForDependece": "nodemon server.js",
     "startForProduction": "start-production.bat",
     "test": "vue-cli-service test --mode test"
   },
   "dependencies": {
+    "@vueuse/core": "^12.4.0",
     "axios": "^1.7.7",
     "body-parser": "^1.20.3",
     "core-js": "^3.6.5",
-    "cors": "^2.8.5",
+    "default-gateway": "^6.0.3",
     "element-plus": "^2.8.1",
     "exceljs": "^4.4.0",
     "express": "^4.21.1",
-    "file-saver": "^2.0.5",
     "fs": "0.0.1-security",
+    "md5": "^2.3.0",
     "multer": "^1.4.5-lts.1",
     "path": "^0.12.7",
     "pinia": "^2.2.2",
     "pinia-plugin-persist": "^1.0.0",
+    "pkg": "^5.8.1",
+    "redis": "^3.1.2",
     "sass": "^1.81.0",
     "vue": "^3.0.0",
     "vue-class-component": "^8.0.0-0",
+    "vue-lazyload": "^3.0.0",
     "vue-router": "^4.4.4"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
+    "@types/md5": "^2.3.5",
+    "@types/redis": "^4.0.11",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",
@@ -46,11 +55,13 @@
     "babel-plugin-import": "^1.13.8",
     "copy-webpack-plugin": "^6.4.1",
     "dart-sass": "^1.25.0",
+    "electron-builder": "^24.13.3",
     "eslint": "^6.7.2",
     "eslint-loader": "^3.0.4",
     "eslint-plugin-vue": "^7.0.0",
     "friendly-errors-webpack-plugin": "^1.7.0",
     "html-webpack-plugin": "^5.6.3",
+    "ignore-loader": "^0.1.2",
     "nodemon": "^3.1.7",
     "on-build-webpack": "^0.1.0",
     "prettier": "^3.3.3",
@@ -62,6 +73,31 @@
     "vue-loader": "^16.8.3",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpackbar": "^6.0.1"
+  },
+  "build": {
+    "productName": "Seat",
+    "appId": "com.example.seat",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "Seat Setup.exe"
+    },
+    "asar": true,
+    "nsis": {
+      "oneClick": false, 
+      "perMachine": true, 
+      "allowElevation": true, 
+      "allowToChangeInstallationDirectory": true, 
+      "createDesktopShortcut": true, 
+      "createStartMenuShortcut": false 
+    }
   },
   "apidoc": {
     "title": "seat接口文档",
@@ -91,7 +127,6 @@
     "not dead"
   ],
   "description": "",
-  "main": "babel.config.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lanxiya2006/studentManagerSystem1.git"

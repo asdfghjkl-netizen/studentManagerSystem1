@@ -36,7 +36,15 @@ export const useMenuStore = defineStore('menu', {
         title: '测试配置',
         items: [
           { index: '/manage/test/table', title: '表格测试' },
-          { index: '/manage/test/table1', title: '表格1测试' }
+          { index: '/manage/test/table1', title: '表格1测试' },
+          { index: '/manage/system', title: '系统设置' },
+        ]
+      }, {
+        index: '3',
+        icon: 'Setting',
+        title: '系统设置',
+        items: [
+          { index: '/manage/system', title: '系统设置' },
         ]
       },
     ],

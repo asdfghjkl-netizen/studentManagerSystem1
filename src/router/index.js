@@ -30,7 +30,11 @@ const routes = [
           //   component: () => import(/* webpackChunkName: "test-table" */'@/components/test/table.vue'),
           // },
         ],
-      },
+      }, {
+        path: 'system',
+        name: 'System',
+        component: () => import(/* webpackChunkName: "system" */'@/views/Manager/Main/systemSetting.vue'),
+      }
     ],
     redirect: '/manage/test/table', // 默认重定向到 /manage/test/table 
   }, {  // 创建班级页
@@ -41,9 +45,13 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory(process.env.BASE_URL),
+  // history: createWebHashHistory(process.env.BASE_URL),  // 使用 hash 模式
   // history: createWebHistory(process.env.BASE_URL),  // 使用 history 模式
   // history: createMemoryHistory(process.env.BASE_URL),  // 使用 memory 模式
+  // 如果开发环境，使用 hash 模式，否则使用 history 模式
+  history: process.env.NODE_ENV === 'production'
+    ? createWebHistory(process.env.BASE_URL)
+    : createWebHashHistory(process.env.BASE_URL),
   routes,
 })
 

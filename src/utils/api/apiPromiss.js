@@ -45,3 +45,13 @@ export function saveExcelFile(data) {
         // headers: { "Content-Type": "multipart/form-data" },
     })
 }
+
+// 下载桌面应用程序的接口获取
+export function downloadDesktopApp() {
+    return instance({
+        url: 'downloadApp',
+        method: 'post',
+        // responseType: 'blob', // important
+        // data: { team }
+    })
+}

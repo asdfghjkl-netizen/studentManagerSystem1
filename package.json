@@ -2,11 +2,14 @@
   "name": "seat",
   "version": "1.4.0",
   "private": true,
+  "main": "./electron/background.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
     "startForDependece": "node server.js",
+    "electron:serve": "vue-cli-service build && electron .",
+    "electron:build": "vue-cli-service build && electron-builder",
+    "lint": "vue-cli-service lint",
     "startForProduction": "start-production.bat",
     "test": "vue-cli-service test --mode test"
   },
@@ -52,6 +55,7 @@
     "babel-plugin-import": "^1.13.8",
     "copy-webpack-plugin": "^6.4.1",
     "dart-sass": "^1.25.0",
+    "electron-builder": "^24.13.3",
     "eslint": "^6.7.2",
     "eslint-loader": "^3.0.4",
     "eslint-plugin-vue": "^7.0.0",
@@ -69,6 +73,31 @@
     "vue-loader": "^16.8.3",
     "webpack-bundle-analyzer": "^4.10.2",
     "webpackbar": "^6.0.1"
+  },
+  "build": {
+    "productName": "Seat",
+    "appId": "com.example.seat",
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!**/*.map"
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "Seat Setup.exe"
+    },
+    "asar": true,
+    "nsis": {
+      "oneClick": false, 
+      "perMachine": true, 
+      "allowElevation": true, 
+      "allowToChangeInstallationDirectory": true, 
+      "createDesktopShortcut": true, 
+      "createStartMenuShortcut": false 
+    }
   },
   "apidoc": {
     "title": "seat接口文档",
@@ -98,7 +127,6 @@
     "not dead"
   ],
   "description": "",
-  "main": "babel.config.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lanxiya2006/studentManagerSystem1.git"

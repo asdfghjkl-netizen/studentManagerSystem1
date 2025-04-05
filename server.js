@@ -1,15 +1,17 @@
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerInit = require('./node/config/swaggerConfig');
 const { getFilePath } = require('./node/tools/option/fileOption');
 const { setEnvironmentVariables } = require('./configureIP'); // 引入ip配置文件
-const { publicPath, PORT, headerConfig } = require('./node/config/publicConfig');
+const { publicPath, PORT, headerConfig, currentDir } = require('./node/config/publicConfig');
 // 引用路由
 const getExcelDataRouter = require('./node/router/seatDataOpt/getExcelData');
 const getTableDataRouter = require('./node/router/seatDataOpt/getTableData');
 const saveToExcelRouter = require('./node/router/seatDataOpt/saveToExcel');
 const optDataRouter = require('./node/router/seatDataOpt/optionData');
 const addExcelRouter = require('./node/router/indexOpt/addExcelFile');
+const addAPPRouter = require('./node/router/indexOpt/downloadApp');
 
 setEnvironmentVariables();
 // 创建 express 应用程序
@@ -26,9 +28,19 @@ app.use(getTableDataRouter);
 app.use(saveToExcelRouter);
 app.use(addExcelRouter);
 app.use(optDataRouter);
+app.use(addAPPRouter);
 
 // 允许跨域请求
 app.all('*', function (req, res, next) { headerConfig(req, res, next) });
+
+// 处理所有路由，返回 index.html
+app.get('*', function (req, res, next) {
+  if (process.env.NODE_ENV === 'production') {
+    res.sendFile(path.join(currentDir, process.env.VUE_APP_OUTPUT_DIR, 'index.html'));
+  } else {
+    next();
+  }
+});
 
 // /file-list 获取文件列表接口
 app.get('/file-list', async (req, res) => {

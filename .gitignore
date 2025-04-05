@@ -26,3 +26,7 @@ build-warnings.log*
 *.sln
 *.sw?
 start-production.bat
+
+#Electron-builder output
+/dist_electron
+/build

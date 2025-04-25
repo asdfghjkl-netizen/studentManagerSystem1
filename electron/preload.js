@@ -7,10 +7,14 @@ window.addEventListener('DOMContentLoaded', () => {
     const replaceText = (selector, text) => {
         const element = document.getElementById(selector);
         if (element) element.innerText = text;
+        console.log(`Replaced ${selector} with ${text}`);
+        // 也可以在此处添加其他功能，如检查应用是否在后台运行等
     };
     // 遍历 Electron 版本信息中的每个类型，并替换页面中对应元素的文本内容
     // 该信息包括 Chrome、Node 和 Electron 的版本号
     for (const type of ['chrome', 'node', 'electron']) {
         replaceText(`${type}-version`, process.versions[type]);
+        console.log(`Replaced ${type}-version with ${process.versions[type]}`);
+        // 也可以在此处添加其他功能，如检查应用是否在后台运行等
     }
 });

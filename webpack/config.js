@@ -50,8 +50,8 @@ module.exports = {
       filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
     })), {
       // 添加 copy-webpack-plugin 配置 redis-server 目录
-      from: path.resolve(path.join(__dirname, '../', 'redis-server')),
-      to: path.resolve(path.join(__dirname, '../', outputDir, 'redis-server')),
+      from: path.resolve(path.join(__dirname, '../', 'server')),
+      to: path.resolve(path.join(__dirname, '../', outputDir, 'server')),
       filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
     }, {
       // 添加 copy-webpack-plugin 配置 configureIP.js 文件
@@ -62,6 +62,16 @@ module.exports = {
       // 添加 copy-webpack-plugin 配置 说明文档.docx 文件
       from: path.resolve(path.join(__dirname, '../', '说明文档.docx')),
       to: path.resolve(path.join(__dirname, '../', outputDir, '说明文档.docx')),
+      filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
+    }, {
+      // 添加 copy-webpack-plugin 配置 configureIP.js 文件
+      from: path.resolve(path.join(__dirname, '../', 'desktopApp.config.js')),
+      to: path.resolve(path.join(__dirname, '../', outputDir, 'desktopApp.config.js')),
+      filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
+    }, {
+      // 添加 copy-webpack-plugin 配置 configureIP.js 文件
+      from: path.resolve(path.join(__dirname, '../', 'package.json')),
+      to: path.resolve(path.join(__dirname, '../', outputDir, 'package.json')),
       filter: source => !excludeFiles.includes(path.basename(source)) // 排除特定文件
     },
   ],

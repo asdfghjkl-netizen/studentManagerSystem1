@@ -7,7 +7,7 @@
 <script setup lang="ts">
 import { translate } from "../translations/translator";
 import { reactive, onMounted, onBeforeMount } from 'vue';
-import { getFileList, getClassConfig } from "@/utils/api/apiPromiss";
+import { getFileList } from "@/utils/api/apiPromiss";
 import { useConfig } from '@/store/globalConfig';
 
 const configStore: any = useConfig();
@@ -30,7 +30,6 @@ onMounted(() => {
   console.log(translate('Thank you')); // 输出: 谢谢
 });
 onBeforeMount(() => {
-  getClassConfig().then(res => { console.log(res); });
   console.log("window.globalConfig", window.globalConfig);
   configStore.setIpConfig(window.globalConfig);
 });

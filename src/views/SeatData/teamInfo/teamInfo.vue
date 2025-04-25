@@ -53,8 +53,8 @@
           {{ scope.$index + 1 }}
         </template>
       </el-table-column>
-      <el-table-column prop="dateTime" label="日期" width="180" />
-      <el-table-column prop="studyStatus" :label="`第${teamId}组学习表现`" width="200" />
+      <el-table-column prop="date_time" label="日期" width="180" />
+      <el-table-column prop="study_statu" :label="`第${teamId}组学习表现`" width="200" />
       <el-table-column prop="score" label="得分" width="80" />
       <el-table-column label="操作" width="100">
         <template #default="scope">
@@ -75,35 +75,19 @@
 </template>
 
 <script lang="ts" setup>
-import InfoTitle from "@/components/InfoTitle.vue";
-import { InfoFilled } from "@element-plus/icons-vue";
-import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
 import { ElMessage } from "element-plus";
 import { getDateTime } from "@/utils/dateTime";
-import { addTeamTableData, getTeamTableData, removeTeamTableData } from "@/utils/api/DataOptions";
+import InfoTitle from "@/components/InfoTitle.vue";
+import { InfoFilled } from "@element-plus/icons-vue";
+import { stuTeamStudyStatus } from "@/utils/studySatus";
 import { getTeamList } from "@/utils/dataOption/teamOpt";
+import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
+import { addTeamTableData, getTeamTableData, removeTeamTableData } from "@/utils/api/DataOptions";
 
 // 获取时间数据
 const dateTime = ref("");
 // 定义学生课程状态列表
-const studyStatus = reactive([
-  {
-    value: 1,
-    label: '完成任务',
-  }, {
-    value: 2,
-    label: '上台展示',
-  }, {
-    value: 3,
-    label: '自创项目',
-  }, {
-    value: 4,
-    label: '表现优秀',
-  }, {
-    value: 5,
-    label: '其他',
-  },
-])
+const studyStatus = reactive(stuTeamStudyStatus);
 // 定义选择器
 const selectStudyStatus = ref(1);
 // 定义数字输入框的数据
@@ -123,6 +107,7 @@ const teamTotalScoreAll = ref(0);
 const isChange = ref(false); // 监听是否修改数据
 // 接收父组件传递过来的数据  
 const props = defineProps({
+  className: { type: String, default: "" },
   teamId: { type: String, default: "" },
   envImagePath: { type: String, default: "" },
 })
@@ -130,32 +115,37 @@ const emit = defineEmits(['changeStatus']); // 监听事件
 
 // 获取团队数据(封装),==》 信息引用
 const getTeamData = (teamId: any) => {
-  getTeamTableData(teamId).then((res: any) => {
-    // console.log("teamData", res);
+  getTeamTableData({ data: props.className, teamId }).then((res: any) => {
+    console.log("teamData", res);
     tableData.value = res.data;
-    teamScore.value = res.totalScore;
+    // teamScore.value = res.totalScore;
   })
-  // TODO 给totalTeamScore去重
-  getTeamList(teamId).then((res: any) => {
-    // console.log("teamData", res);
-    // 创建一个 Set 来存储所有团队的小组总分
-    const teamTotalScore = new Set();
-    teamMemberScore.value = 0;
-    // 获取二级目录
-    res.forEach((key: any) => {
-      // 添加到 Set 中以去重
-      teamTotalScore.add(key.totalScore);
-      // console.log("studyStatus", key.studyStatus);
-      teamMemberScore.value += key.studyStatus;
-    })
-    console.log(teamTotalScore);
-    // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
-    if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
-      teamTotalScoreAll.value = 0;
-      throw new Error("团队数据异常");
-    }
-    teamTotalScoreAll.value = teamTotalScore.values().next().value;
-  })
+  // getTeamTableData(teamId).then((res: any) => {
+  //   // console.log("teamData", res);
+  //   tableData.value = res.data;
+  //   teamScore.value = res.totalScore;
+  // })
+  // // TODO 给totalTeamScore去重
+  // getTeamList(teamId).then((res: any) => {
+  //   // console.log("teamData", res);
+  //   // 创建一个 Set 来存储所有团队的小组总分
+  //   const teamTotalScore = new Set();
+  //   teamMemberScore.value = 0;
+  //   // 获取二级目录
+  //   res.forEach((key: any) => {
+  //     // 添加到 Set 中以去重
+  //     teamTotalScore.add(key.totalScore);
+  //     // console.log("studyStatus", key.studyStatus);
+  //     teamMemberScore.value += key.studyStatus;
+  //   })
+  //   console.log(teamTotalScore);
+  //   // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
+  //   if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
+  //     teamTotalScoreAll.value = 0;
+  //     throw new Error("团队数据异常");
+  //   }
+  //   teamTotalScoreAll.value = teamTotalScore.values().next().value;
+  // })
 }
 
 // 课程状态的字符提取

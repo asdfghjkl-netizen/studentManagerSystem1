@@ -1,7 +1,5 @@
 const crypto = require('crypto');
 
-// 加密密钥（建议从环境变量获取） || 'abcdefghijklmnopqrstuvwxyz123456'
-const secret = process.env.APP_CONFIG_SECRET;
 // 加密算法
 const algorithm = 'aes-256-cbc';
 
@@ -15,7 +13,7 @@ function encrypt(text) {
     // 生成随机初始化向量
     const iv = crypto.randomBytes(16);
     // 创建加密器
-    const cipher = crypto.createCipheriv(algorithm, Buffer.from(secret), iv);
+    const cipher = crypto.createCipheriv(algorithm, Buffer.from(process.env.APP_CONFIG_SECRET), iv);
 
     // 加密文本
     let encrypted = cipher.update(text);
@@ -39,7 +37,7 @@ function decrypt(text) {
         // 将加密后的文本转换为缓冲区
         const encryptedText = Buffer.from(textParts.join(':'), 'hex');
         // 创建解密器
-        const decipher = crypto.createDecipheriv(algorithm, Buffer.from(secret), iv);
+        const decipher = crypto.createDecipheriv(algorithm, Buffer.from(process.env.APP_CONFIG_SECRET), iv);
         // 解密文本
         let decrypted = decipher.update(encryptedText);
         // 将解密后的文本和初始化向量连接起来

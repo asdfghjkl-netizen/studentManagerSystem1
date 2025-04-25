@@ -1,5 +1,5 @@
 import { getTeamList } from "@/utils/dataOption/teamOpt";
-import { getExcelFile } from "@/utils/api/apiPromiss";
+import { getExcelFile, studata } from "@/utils/api/apiPromiss";
 import { ElMessage } from "element-plus";
 import { defineStore } from "pinia";
 
@@ -10,6 +10,7 @@ export const useDataOptions = defineStore('dataOptions', {
         selectedClass: '',    // 选择班级的值
         selectClassList: [],  // 班级列表
 
+        changeData: false,    // 是否修改数据:如果修改数据则获取班级数据
         teamLists: [],        // 获取团队列表数据（团队名称，团队人数，团队成员）
         students: [],         // 获取学生列表数据（学号，姓名，性别）
         classSeat: [],        // 获取班级的座位表数据
@@ -85,11 +86,44 @@ export const useDataOptions = defineStore('dataOptions', {
             return targetArray.value;
         },
         /**
+         * 获取班级列表
+         */
+        getStuData(value) {
+            // 当changeData为true时，获取班级数据
+            if (this.changeData) {
+                studata({ data: value }).then((res) => {
+                    console.log("database", res);
+                    if (res.code != 200) {
+                        ElMessage.error("获取班级数据失败");
+                        return;
+                    }
+                    this.classSeat = res.data.class_seat.map(row => {
+                        return Object.keys(row)
+                            .filter(key => key.startsWith('col')) // 筛选出以 col 开头的键
+                            .sort((a, b) => Number(a.replace('col', '')) - Number(b.replace('col', ''))) // 按数字顺序排序
+                            .map(key => row[key]);  // 转换为数组
+                    });  // 教室坐位信息
+                    this.computerRoomSeat = res.data.computer_room_seat.map(row => {
+                        return Object.keys(row)
+                            .filter(key => key.startsWith('col')) // 筛选出以 col 开头的键
+                            .sort((a, b) => Number(a.replace('col', '')) - Number(b.replace('col', ''))) // 按数字顺序排序
+                            .map(key => row[key]);  // 转换为数组
+                    });  // 计算机教室坐位信息
+                    this.teamLists = res.data.studentmanagentinfo;  // 团队信息
+                    this.students = res.data.student;  // 学生信息
+                    ElMessage.success({ message: res.msg, duration: 1000 });
+                })
+            }
+        },
+        /**
          * 存储选择班级
          * @param {*} value 
          */
         setSelectClass(value) {
+            this.changeData = true;  // 修改数据
             this.selectedClass = value;
+            // 获取班级数据
+            this.getStuData(value);
         },
         /** 获取选择班级 */
         getSelectClass() {
@@ -111,7 +145,8 @@ export const useDataOptions = defineStore('dataOptions', {
             "fileName",
             "computerRoomSeat",
             "filePath",
-            "studentRoles"
+            "studentRoles",
+            "changeData",
         ],
     },
 });

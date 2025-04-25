@@ -9,12 +9,12 @@
             <div class="class-select-group">
               <h3>班级：</h3>
               <el-select v-model="selectedClass" @change="handleSelectClass" placeholder="请选择班级：">
-                <el-option v-for="item in classList" :key="item.value" :label="item.label" :value="item.label" />
+                <el-option v-for="item in classList" :key="item" :label="item.label" :value="item.label" />
               </el-select>
               <TooltipButton tip-placement="top" element-name="button" btn-type="primary" btn-plain
                 @click="isSelectClass">
                 <template #content>
-                  <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
+                  <span>点击选择班级</span>
                 </template>确定选择？
               </TooltipButton>
             </div>
@@ -45,28 +45,20 @@
 </template>
 
 <script setup lang="ts">
+import { getClassNameforHomePage } from "@/utils/api/apiPromiss";
 import { handleManage } from '@/utils/dataOption/routerOpt';
 import TooltipButton from '@/components/TooltipButton.vue';
 import { useConfig } from "@/store/globalConfig";
 import { useDataOptions } from "@/store/dataOptions";
 import router from '@/router';
-import { reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { ElMessage } from 'element-plus';
 
 const dataOptionsStore = useDataOptions();
 const configStore = useConfig();
 const music = ref(false);   // 音乐开关
-const selectedClass = ref(''); // 选择班级
-const classList = reactive([
-  {
-    label: '班级12',
-    value: 1
-  },
-  {
-    label: '班级34',
-    value: 2
-  }
-]); // 班级列表
+const selectedClass = ref(dataOptionsStore.selectedClass); // 选择班级
+const classList = ref([]); // 班级列表
 // 语言切换 1 中文 2 英文
 const lang = ref(configStore.lang);
 
@@ -77,7 +69,7 @@ const changeLang = (event: any) => configStore.changeGlobalLang(event);
 const handleToCeate = () => router.push("/createClass");
 
 // 跳转座位界面
-const handleToSeat = () => router.push("/seatData");
+const handleToSeat = () => selectedClass.value ? router.push("/seatData") : ElMessage.warning('请先选择班级！');
 
 // 跳转管理员界面
 const handleToManage = () => handleManage();
@@ -89,8 +81,11 @@ const handleSelectClass = () => {
 
 // 确定选择班级
 const isSelectClass = () => {
+  if (!selectedClass.value) {
+    ElMessage.warning('请先选择班级！');
+    return;
+  }
   dataOptionsStore.setSelectClass(selectedClass.value);
-  ElMessage.success('已确定选择班级：' + selectedClass.value);
 };
 
 // 点击期中考
@@ -106,7 +101,14 @@ const handleFinalExam = () => {
 // 点击抽签
 const handleDraw = () => {
   console.log('抽签');
-}; 
+};
+
+onMounted(() => {
+  getClassNameforHomePage().then(res => {
+    // console.log(res);
+    classList.value = res.data;
+  });
+});
 </script>
 
 <style lang="scss" scoped>

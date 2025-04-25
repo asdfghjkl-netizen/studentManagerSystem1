@@ -2,8 +2,8 @@
 setlocal
 
 :: 设置 Redis 服务器路径和配置文件路径-service
-set REDIS_SERVER=%~dp0redis-server\redis-server.exe
-set REDIS_CONF=%~dp0redis-server\redis.windows.conf
+set REDIS_SERVER=%~dp0server\redis-server\redis-server.exe
+set REDIS_CONF=%~dp0server\redis-server\redis.windows.conf
 
 :: 检查路径和文件存在性
 if not exist "%REDIS_SERVER%" (

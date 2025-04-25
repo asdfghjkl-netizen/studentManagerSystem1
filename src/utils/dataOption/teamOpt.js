@@ -14,8 +14,8 @@ export const getTeamNum = async (student) => {
     // console.log("teamList", teamList);
     teamList.forEach(item => {
         // console.log("item", item);
-        if (item.stuName === student) {
-            teamId.value = item.teamId;
+        if (item.student_name === student) {
+            teamId.value = item.team_id;
         }
     })
     return teamId.value;

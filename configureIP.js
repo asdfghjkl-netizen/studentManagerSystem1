@@ -5,7 +5,7 @@ const { encrypt } = require('./node/tools/setCrypt');
 const defaultGateway = require('default-gateway');
 
 // 定义环境变量
-const envs = ['VUE_APP_IP', 'REDIS_HOST', 'SERVER_IP'];
+const envs = ['VUE_APP_IP', 'REDIS_HOST', 'SERVER_IP', 'DB_HOST'];
 
 /**
  * 获取本机IP地址

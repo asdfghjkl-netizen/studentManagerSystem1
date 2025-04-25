@@ -2,13 +2,13 @@
   "name": "seat",
   "version": "1.4.0",
   "private": true,
-  "main": "./electron/background.js",
+  "main": "./desktopApp.config.js",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "startForDependece": "node server.js",
     "electron:serve": "vue-cli-service build && electron .",
-    "electron:build": "vue-cli-service build && electron-builder",
+    "electron:build": "electron-builder",
     "lint": "vue-cli-service lint",
     "startForProduction": "start-production.bat",
     "test": "vue-cli-service test --mode test"
@@ -25,6 +25,7 @@
     "fs": "0.0.1-security",
     "md5": "^2.3.0",
     "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.14.0",
     "path": "^0.12.7",
     "pinia": "^2.2.2",
     "pinia-plugin-persist": "^1.0.0",
@@ -81,9 +82,8 @@
       "output": "build"
     },
     "files": [
-      "**/*",
-      "!dist/**/*",
-      "!**/*.map"
+      "Vue3-Seat-Admin/**/*",
+      "desktopApp.config.js"
     ],
     "win": {
       "target": "nsis",
@@ -91,12 +91,12 @@
     },
     "asar": true,
     "nsis": {
-      "oneClick": false, 
-      "perMachine": true, 
-      "allowElevation": true, 
-      "allowToChangeInstallationDirectory": true, 
-      "createDesktopShortcut": true, 
-      "createStartMenuShortcut": false 
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false
     }
   },
   "apidoc": {

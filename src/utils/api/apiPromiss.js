@@ -1,12 +1,27 @@
 import instance from "@/utils/request";
 
-// 上传文件的接口获取
-export function uploadExcelFile(data) {
+export function getClassNameforHomePage() {
     return instance({
-        url: 'upload-excel',
+        url: 'databases',
+        method: 'get'
+    })
+}
+
+export function studata(data) {
+    return instance({
+        url: 'get_stu_data',
         method: 'post',
-        data,
-        headers: { "Content-Type": "multipart/form-data" },
+        data
+    })
+}
+
+// 下载桌面应用程序的接口获取
+export function downloadDesktopApp() {
+    return instance({
+        url: 'downloadApp',
+        method: 'post',
+        // responseType: 'blob', // important
+        // data: { team }
     })
 }
 
@@ -14,14 +29,6 @@ export function uploadExcelFile(data) {
 export function getFileList() {
     return instance({
         url: 'file-list',
-        method: 'get'
-    })
-}
-
-// 读取excel配置文件（获取班级配置文件）
-export function getClassConfig() {
-    return instance({
-        url: 'excel/class-config',
         method: 'get'
     })
 }
@@ -43,15 +50,5 @@ export function saveExcelFile(data) {
         method: 'post',
         data,
         // headers: { "Content-Type": "multipart/form-data" },
-    })
-}
-
-// 下载桌面应用程序的接口获取
-export function downloadDesktopApp() {
-    return instance({
-        url: 'downloadApp',
-        method: 'post',
-        // responseType: 'blob', // important
-        // data: { team }
     })
 }

@@ -30,7 +30,7 @@
       <!--  其他  -->
       <div class="other" style="margin-left: 36px;">
         <InfoTitle title="其他">
-          <el-input v-model="otherStatus" style="width: 240px" clearable :disabled="selectStudyStatus != 5" />
+          <el-input v-model="otherStatus" :disabled="selectStudyStatus != 14" style="width: 240px" clearable />
         </InfoTitle>
       </div>
       <!--  得分  -->
@@ -53,8 +53,8 @@
           {{ scope.$index + 1 }}
         </template>
       </el-table-column>
-      <el-table-column prop="dateTime" label="日期" width="180" />
-      <el-table-column prop="studyStatus" :label="`${studentName}学习表现`" width="200" />
+      <el-table-column prop="date_time" label="日期" width="180" />
+      <el-table-column prop="study_statu" :label="`${studentName}学习表现`" width="200" />
       <el-table-column prop="score" label="得分" width="80" />
       <el-table-column label="操作" width="100">
         <template #default="scope">
@@ -75,14 +75,17 @@
 </template>
 
 <script lang="ts" setup>
-import InfoTitle from "@/components/InfoTitle.vue";
-import { InfoFilled } from "@element-plus/icons-vue";
+import { ElMessage } from "element-plus";
 import { getDateTime } from "@/utils/dateTime";
+import InfoTitle from "@/components/InfoTitle.vue";
+import { studentStudyStatus } from "@/utils/studySatus";
+import { InfoFilled } from "@element-plus/icons-vue";
+import { useDataOptions } from "@/store/dataOptions";
+import { getTeamNum, getTeamList } from "@/utils/dataOption/teamOpt";
 import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
 import { addStudentTableData, removeStudentTableData, getStudentTableData } from "@/utils/api/DataOptions";
-import { ElMessage } from "element-plus";
-import { getTeamNum, getTeamList } from "@/utils/dataOption/teamOpt";
 
+const dataOptionsStore = useDataOptions();
 const memberScore = ref(0);
 // 小组得分（总）
 const totalTeamScore = ref(0);
@@ -93,51 +96,7 @@ const isLeaderOrMember = ref("");
 // 获取学生学习状态数据列表
 const tableData = ref([]);
 // 定义学生课程状态列表
-const studyStatus = reactive([
-  {
-    value: 1,
-    label: '回答问题',
-  }, {
-    value: 2,
-    label: '抢答',
-  }, {
-    value: 3,
-    label: '帮忙完成任务',
-  }, {
-    value: 4,
-    label: '上台展示',
-  }, {
-    value: 5,
-    label: '超前学习',
-  }, {
-    value: 6,
-    label: '自创项目',
-  }, {
-    value: 7,
-    label: '作业优秀',
-  }, {
-    value: 8,
-    label: '不按时完成作业',
-  }, {
-    value: 9,
-    label: '睡觉',
-  }, {
-    value: 10,
-    label: '讲话',
-  }, {
-    value: 11,
-    label: '玩游戏',
-  }, {
-    value: 12,
-    label: '玩手机',
-  }, {
-    value: 13,
-    label: '开小差',
-  }, {
-    value: 14,
-    label: '其他',
-  },
-])
+const studyStatus = reactive(studentStudyStatus);
 // 定义选择器
 const selectStudyStatus = ref(1);
 // 定义数字输入框的数据
@@ -150,6 +109,7 @@ const studyStatusString = ref("");
 const getTeamId = ref("");
 const isChange = ref(false); // 监听是否修改数据
 const props = defineProps({
+  className: { type: String, default: "" },
   studentName: { type: String, default: "" },
   reqStudentImgUrl: { type: String, default: "" },
   envImagePath: { type: String, default: "" },
@@ -158,8 +118,8 @@ const emit = defineEmits(['changeStatus']); // 监听事件
 
 // 获取学生数据(封装),==》 信息引用
 const getStudentData = (student: string) => {
-  getStudentTableData(student).then((res: any) => {
-    // console.log("studentData", res);
+  getStudentTableData({ data: props.className, studentName: student }).then((res: any) => {
+    console.log("studentData", res);
     if (res.code === 200) {
       tableData.value = res.data;
       memberScore.value = res.totalScore;
@@ -169,26 +129,38 @@ const getStudentData = (student: string) => {
 
 // TODO 给totalTeamScore去重  获取团队列表数据(封装),==》 信息引用 
 const getTeamData = (teamId: any) => {
-  getTeamList(teamId).then((res: any) => {
-    // console.log("teamData", res);
-    // 创建一个 Set 来存储所有团队的小组总分
-    const teamTotalScore = new Set();
-    // 获取二级目录
-    res.forEach((key: any) => {
-      // 添加到 Set 中以去重
-      teamTotalScore.add(key.totalScore);
-      if (key.stuName == props.studentName) {
-        isLeaderOrMember.value = key.isLeader == 0 ? "组员" : "组长";
-      }
-    })
-    // console.log(teamTotalScore);
-    // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
-    // if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
-    //   totalTeamScore.value = 0;
-    //   throw new Error("团队数据异常");
-    // }
-    totalTeamScore.value = teamTotalScore.values().next().value;
+  const teamLists = dataOptionsStore.teamLists;
+  // console.log("teamLists", teamLists, teamId);
+  
+  teamLists.forEach((key: any) => {
+    // console.log("teamLists", key);
+    if (key.student_name == props.studentName) {
+      isLeaderOrMember.value = key.is_leader == 0 ? "组员" : "组长";
+    }
+    // // 添加到 Set 中以去重
+    // teamTotalScore.add(key.totalScore);
+    
   })
+  // getTeamList(teamId).then((res: any) => {
+  //   console.log("teamData", res);
+  //   // 创建一个 Set 来存储所有团队的小组总分
+  //   const teamTotalScore = new Set();
+  //   // 获取二级目录
+  //   res.forEach((key: any) => {
+  //     // 添加到 Set 中以去重
+  //     teamTotalScore.add(key.totalScore);
+  //     if (key.stuName == props.studentName) {
+  //       isLeaderOrMember.value = key.isLeader == 0 ? "组员" : "组长";
+  //     }
+  //   })
+  //   console.log(teamTotalScore);
+  //   // 判断 teamTotalScore 的大小  ==》 等于0 或 大于1(错误)
+  //   // if (teamTotalScore.size == 0 || teamTotalScore.size > 1) {
+  //   //   totalTeamScore.value = 0;
+  //   //   throw new Error("团队数据异常");
+  //   // }
+  //   totalTeamScore.value = teamTotalScore.values().next().value;
+  // })
 }
 
 // 课程状态的字符提取

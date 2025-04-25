@@ -10,11 +10,11 @@ export function addStudentTableData(data) {
 }
 
 // 获取学生学习数据
-export function getStudentTableData(student) {
+export function getStudentTableData(data) {
     return instance({
         url: 'table/student',
         method: 'post',
-        data: { student }
+        data
     })
 }
 
@@ -28,11 +28,11 @@ export function removeStudentTableData(data) {
 }
 
 // 获取团队学习数据
-export function getTeamTableData(team) {
+export function getTeamTableData(data) {
     return instance({
         url: 'table/team',
         method: 'post',
-        data: { team }
+        data
     })
 }
 

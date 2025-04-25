@@ -41,11 +41,9 @@
         <div class="grid-content ep-bg-purple" />
       </el-col>
       <el-col :span="16">
-        <div v-if="className" class="grid-content ep-bg-purple"
-          style="text-align: center;font-size: 30px;font-family: '楷体';">
-          {{ className }}上课座位表</div>
-        <div v-else class="grid-content ep-bg-purple" style="text-align: center;font-size: 30px;font-family: '楷体';">
-          上课座位表(请选择班级)</div>
+        <div class="grid-content ep-bg-purple" style="text-align: center;font-size: 30px;font-family: '楷体';">
+          {{ className }}上课座位表
+        </div>
       </el-col>
       <el-col :span="4">
         <div class="grid-content ep-bg-purple" />
@@ -71,18 +69,26 @@
           <el-col :span="6" v-for="item in list['0']" :key="item">
             <div class="seat" @click="add(item)">
               <div class="font-sizes" v-if="data.stuSeat[item - 1]">
-                <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }">
+                <!-- <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }"> -->
+                <h3
+                  :style="{ color: (dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item - 1].stu) || {}).is_leader == 1 ? 'red' : 'black' }">
                   {{ data.stuSeat[item - 1].stu }}
                 </h3>
                 <div style="margin-top: 10px;" v-if="data.stuSeat[item - 1].stu != ''">
                   <div v-if="selectScore === 1 || selectScore === 2">
-                    <span>平时分：{{ data.stuSeat[item - 1].normalScore1 ? data.stuSeat[item - 1].normalScore1 : 0 }}</span>
+                    <span>平时分：{{(dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item -
+                      1].stu)
+                      || {}).normal_score1 || 0}}</span>
                   </div>
                   <div v-if="selectScore === 1 || selectScore === 3">
-                    <span>期中：{{ data.stuSeat[item - 1].midtermScore ? data.stuSeat[item - 1].midtermScore : 0 }}</span>
+                    <span>期中：{{(dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item -
+                      1].stu)
+                      || {}).midterm_score || 0}}</span>
                   </div>
                   <div v-if="selectScore === 1 || selectScore === 4">
-                    <span>期末：{{ data.stuSeat[item - 1].finalScore ? data.stuSeat[item - 1].finalScore : 0 }}</span>
+                    <span>期末：{{(dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item -
+                      1].stu)
+                      || {}).final_score || 0}}</span>
                   </div>
                 </div>
               </div>
@@ -109,18 +115,26 @@
           <el-col :span="4" v-for="item in list['1']" :key="item">
             <div class="seat" @click="add(item)">
               <div class="font-sizes" v-if="data.stuSeat[item - 1]">
-                <h3 :style="{ color: data.studentRoles[data.stuSeat[item - 1].stu] == '组长' ? 'red' : 'black' }">
+                <h3
+                  :style="{ color: (dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item - 1].stu) || {}).is_leader == 1 ? 'red' : 'black' }">
                   {{ data.stuSeat[item - 1].stu }}
                 </h3>
                 <div style="margin-top: 10px;" v-if="data.stuSeat[item - 1].stu != ''">
                   <div v-if="selectScore === 1 || selectScore === 2">
-                    <span>平时分：{{ data.stuSeat[item - 1].normalScore1 ? data.stuSeat[item - 1].normalScore1 : 0 }}</span>
+                    <!-- <span>平时分：{{ data.stuSeat[item - 1].normalScore1 ? data.stuSeat[item - 1].normalScore1 : 0 }}</span> -->
+                    <span>平时分：{{(dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item -
+                      1].stu)
+                      || {}).normal_score1 || 0}}</span>
                   </div>
                   <div v-if="selectScore === 1 || selectScore === 3">
-                    <span>期中：{{ data.stuSeat[item - 1].midtermScore ? data.stuSeat[item - 1].midtermScore : 0 }}</span>
+                    <span>期中：{{(dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item -
+                      1].stu)
+                      || {}).midterm_score || 0}}</span>
                   </div>
                   <div v-if="selectScore === 1 || selectScore === 4">
-                    <span>期末：{{ data.stuSeat[item - 1].finalScore ? data.stuSeat[item - 1].finalScore : 0 }}</span>
+                    <span>期末：{{(dataOptionsStore.teamLists.find(team => team.student_name === data.stuSeat[item -
+                      1].stu)
+                      || {}).final_score || 0}}</span>
                   </div>
                 </div>
               </div>
@@ -165,14 +179,15 @@
   <!--  弹出的学生卡对话框  -->
   <StudentDialog v-model="dialogVisibleForStu" @updateStatu="dialogVisibleForStu = false" :width="720"
     :main-title="`${data.studentName}的学习卡`" :dialog-style="{ backgroundColor: '#f8f6f6' }">
-    <StudentInfo :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL"
+    <StudentInfo :class-name="className" :student-name="data.studentName" :req-student-img-url="reqStudentIMGURL"
       :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
   </StudentDialog>
 
   <!--  弹出的团队卡对话框 -->
   <StudentDialog v-model="dialogVisibleForTeam" @updateStatu="dialogVisibleForTeam = false" :width="750"
     :main-title="`第${data.teamId}组学习卡`" :dialog-style="{ backgroundColor: '#f8f6f6' }">
-    <TeamInfo :team-id="data.teamId" :env-image-path="data.envImagePath" @changeStatus="changeStatus" />
+    <TeamInfo :class-name="className" :team-id="data.teamId" :env-image-path="data.envImagePath"
+      @changeStatus="changeStatus" />
   </StudentDialog>
 </template>
 
@@ -182,7 +197,6 @@ import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { createElNotification } from "@/utils/dataOption/ElementOpt";
 import { handleManage } from '@/utils/dataOption/routerOpt';
 import { importAsyncComponent } from "@/component.ts";
-import { saveExcelFile } from "@/utils/api/apiPromiss";
 import StudentDialog from "@/components/InfoDialog.vue";
 import TooltipButton from '@/components/TooltipButton.vue';
 import { Download, Upload } from '@element-plus/icons-vue';
@@ -195,16 +209,16 @@ const StudentInfo = importAsyncComponent(() => import("@/views/SeatData/studentI
 const TeamInfo = importAsyncComponent(() => import("@/views/SeatData/teamInfo/teamInfo.vue"));
 
 const configStore = useConfig();
-const importFileStore = useDataOptions();
+const dataOptionsStore = useDataOptions();
 const fileInput = ref("");
 const selectRoom = ref(configStore.selectedSeatData);     // 获取座位表状态
 const selectScore = ref(configStore.selectedScoreStatu);  // 获取成绩状态
-const className = ref("");  // 获取班级名称
+const className = ref("");               // 获取班级名称
 const dialogVisibleForStu = ref(false);  // 定义学生卡对话框的状态
 const dialogVisibleForTeam = ref(false); // 定义团队卡对话框的状态
-let teamListData = ref([]);  // 获取成员团队状态
-const reqStudentIMGURL = ref<any>([]);   // 获取图片路径
-const rows = ref(7);  // 行数
+let teamListData = ref([]);                    // 获取成员团队状态
+const reqStudentIMGURL = ref<any>([]);         // 获取图片路径
+const rows = ref(7);   // 行数
 const cols = ref(10);  // 列数
 const data = reactive({
   stuSeat: [] as any[],            // 获取学生的数据==》studentList的对象
@@ -220,10 +234,10 @@ const data = reactive({
   selectTeamList: [] as number[],  // 获取所选团队的id
   studentName: '' as string,       // 获取学生姓名
   teamId: '' as any,               // 获取团队id
-  filePath: importFileStore.filePath,   // 获取文件路径(用于获取文件名路径，并写入保存文件)
+  filePath: dataOptionsStore.filePath,   // 获取文件路径(用于获取文件名路径，并写入保存文件)
   envImagePath: process.env.VUE_APP_IMAGE_PATH, // 获取环境图片路径
   // 新增字段，用于存储学生角色信息  {} as { [key: string]: string }
-  studentRoles: importFileStore.studentRoles,
+  studentRoles: dataOptionsStore.studentRoles,
 });
 
 const list = computed(() => {
@@ -263,49 +277,14 @@ const teamList = computed(() => {
   return arr;
 });
 
-// 获取学生管理信息
-const getStuManageInfoData = async () => {
-  return new Promise((resolve, reject) => {
-    let setStudentTeamStatu = new Set();
-
-    importFileStore.getStudentTeamStatu(data.teamList, teamListData).then((res: any) => {
-      // console.log("getStudentTeamStatu", res);
-      for (let i = 0; i < res.length; i++) { // 遍历数组
-        const element = res[i];
-        setStudentTeamStatu.add(element);
-      }
-      const result = setStudentTeamStatu.values().next().value;
-      resolve(result);  // 返回结果
-    }).catch(error => {
-      reject(error);  // 处理错误
-    });
-  });
-};
-const requestData = async () => {
-  let setStudentTeamStatu: any = new Set();
-
-  // 获取学生管理信息
-  const res: any = await getStuManageInfoData();
-  // 遍历结果并添加到 Set 中以确保唯一性
-  res.forEach((item: any) => {
-    setStudentTeamStatu.add(JSON.stringify(item));
-  });
-  // 将 Set 转换为数组并解析 JSON 字符串
-  setStudentTeamStatu = Array.from(setStudentTeamStatu).map((item: any) => JSON.parse(item));
-
-  // 合并 stuManageInfoData 到 data.stuSeat
-  data.stuSeat = data.stuSeat.map(seat => {
-    const studentInfo = setStudentTeamStatu.find((info: any) => info.stuName === seat.stu);
-    return studentInfo ? { ...seat, ...studentInfo } : seat;
-  });
-
-  // console.log("data.stuSeat", data.stuSeat);
-  // console.log("setStudentTeamStatu", setStudentTeamStatu);
-  return setStudentTeamStatu;
-};
-
 // 点击进入管理页面（管理员用户使用）
 const handleToManage = () => handleManage();
+
+// 截取文件名
+const getclassName = () => className.value = dataOptionsStore.getSelectClass();
+
+// 选择成绩表
+const handleSelectScore = (event: any) => configStore.setSelectedScoreStatu(event);
 
 // 随机选择学生
 const selectStudent = () => {
@@ -350,32 +329,16 @@ const selectStudent = () => {
   }
 };
 
-// 截取文件名
-const getclassName = () => {
-  const filename = importFileStore.fileName;
-  // 找到 '.' 的位置
-  const dotIndex = filename.indexOf('.');
-  // 截取从开头到 '.' 之前的部分
-  const classNamefront = filename.substring(0, dotIndex);
-  /* 如果需要进一步截取到"班"为止
-   找到 '班' 的位置，并加上1确保包含"班"字 */
-  const classEndIndex = classNamefront.indexOf('班') + 1;
-  className.value = classNamefront.substring(0, classEndIndex);
-  // console.log(className.value);
-};
-
 // 导入excel   event: { target: { files: any } }
 const importExcel: UploadProps['onChange'] = async (uploadFile, uploadFiles) => {
   console.log(uploadFile, uploadFiles);
-  importFileStore.importExcel(uploadFile);
+  dataOptionsStore.importExcel(uploadFile);
   // 获取团队状态
-  importFileStore.getStudentTeamStatu(data.teamList, teamListData);
-  getStuManageInfoData();
-  await requestData();
+  dataOptionsStore.getStudentTeamStatu(data.teamList, teamListData);
   getImgURL();
 
   setTimeout(() => {
-    fileInput.value = importFileStore.fileName;
+    fileInput.value = dataOptionsStore.fileName;
     ImportFile();
   }, 4000);
 };
@@ -386,7 +349,7 @@ const ImportFile = () => {
       // console.log("team", team);
       pushTeamStatusToRedis(team);
     }
-    importFileStore.students.forEach(student => {
+    dataOptionsStore.students.forEach(student => {
       // console.log("student", student.stuName);
       pushStudentStatusToRedis(student.stuName);
     });
@@ -402,10 +365,13 @@ const handleSelectRoom = (event: any) => {
 
   // 扁平化 seatList
   const flatSeatList = data.seatList.flat();
+  // console.log("flatSeatList", flatSeatList);
   // 扁平化 classSeat
-  const classSeatList = importFileStore.classSeat.flat();
+  const classSeatList = dataOptionsStore.classSeat.flat();
+  // console.log("classSeatList", classSeatList);
   // 扁平化 classSeat
-  const computerRoomSeat = importFileStore.computerRoomSeat.flat();
+  const computerRoomSeat = dataOptionsStore.computerRoomSeat.flat();
+  // console.log("computerRoomSeat", computerRoomSeat);
   // 判断是否为空，如果为空，则返回
   if (classSeatList.length == 0 || computerRoomSeat.length == 0) return;
 
@@ -425,10 +391,8 @@ const handleSelectRoom = (event: any) => {
     }));
   }
   data.stuSeat = data.studentList;
+  // console.log("data.stuSeat", data.stuSeat);
 };
-
-// 选择成绩表
-const handleSelectScore = (event: any) => configStore.setSelectedScoreStatu(event);
 
 // 选择座位表
 const add = (id: number) => {
@@ -466,32 +430,8 @@ const addTeam = (id: number) => {
   dialogVisibleForTeam.value = true;
 };
 
-// 改变状态，并获取学生管理信息
-const changeStatus = async (event: any) => {
-  console.log("changeStatus", event);
-  if (event) {
-    getStuManageInfoData();
-    await requestData();
-  }
-};
-
 // 导出excel文件(测试阶段)
-const exportExcel = async () => {
-  const validStudents = data.studentList
-    .filter(student => student.stu && student.stu !== '**' && student.stu !== '')
-    .map(student => student.stu);
-  // console.log("validStudents", validStudents);
-  saveExcelFile({
-    fileName: importFileStore.fileName,
-    filePath: importFileStore.filePath,
-    stuManageInfoData: await requestData(),
-    studentList: validStudents,
-    teamList: data.teamList,
-  }).then(res => {
-    console.log(res);
-  });
-  ElMessage.success({ message: '导出成功', duration: 1000 });
-};
+const exportExcel = async () => { };
 
 // 搜索图片路径
 const getImgURL = () => {
@@ -528,9 +468,13 @@ const getImgURL = () => {
 watchEffect(() => {
   handleSelectRoom(selectRoom.value);
   getclassName();
-  getStuManageInfoData();
 });
 onMounted(() => { getImgURL(); });
+// // 新增辅助函数：根据学生姓名获取对应的 normal_score1，如果没有则返回 0
+// const getNormalScore = (stuName: string): number => {
+//   const teamInfo = dataOptionsStore.teamLists.find(item => item.student_name === stuName);
+//   return teamInfo && teamInfo.normal_score1 ? teamInfo.normal_score1 : 0;
+// };
 </script>
 
 <style lang="scss" scoped>

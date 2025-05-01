@@ -8,6 +8,7 @@ const { getFilePath } = require('./node/tools/option/fileOption');
 const { setEnvironmentVariables } = require('./configureIP'); // 引入ip配置文件
 const { publicPath, PORT, headerConfig, currentDir } = require('./node/config/publicConfig');
 // 引用路由
+const dataOptionsRouter = require('./node/router/dataOptions');
 const getAllDataRouter = require('./node/router/getData');
 
 setEnvironmentVariables();
@@ -20,6 +21,7 @@ app.use(bodyParser.json());
 // 初始化 swagger
 swaggerInit(app)
 // 引用路由
+app.use(dataOptionsRouter); // 数据操作路由
 app.use(getAllDataRouter);
 
 // 允许跨域请求

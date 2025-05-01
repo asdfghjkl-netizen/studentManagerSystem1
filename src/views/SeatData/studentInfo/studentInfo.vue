@@ -137,10 +137,8 @@ const getTeamData = (teamId: any) => {
     if (key.student_name == props.studentName) {
       isLeaderOrMember.value = key.is_leader == 0 ? "组员" : "组长";
     }
-    // // 添加到 Set 中以去重
-    // teamTotalScore.add(key.totalScore);
-    
   })
+
   // getTeamList(teamId).then((res: any) => {
   //   console.log("teamData", res);
   //   // 创建一个 Set 来存储所有团队的小组总分
@@ -177,6 +175,7 @@ const handleChangeValue = (index: any) => {
 const submit = async () => {
   try {
     const addData: any = await addStudentTableData({
+      data: props.className,
       student: props.studentName,
       dateTime: dateTime.value,
       score: score.value,
@@ -199,16 +198,17 @@ const submit = async () => {
 
 // 右键表格菜单
 function handleContextmenu(row: any, column: any, event: Event) {
-  console.log(row, row.score, column, event);
+  console.log(row, row.score, row.dateTime, column, event);
   removeStudentTableData({
+    data: props.className,
     student: props.studentName,
-    dateTime: row.dateTime,
+    dateTime: row.date_time,
     score: row.score,
     teamId: getTeamId.value,
   }).then((res: any) => {
     console.log(res);
     if (res.code == 200) {
-      ElMessage.success({ message: res.message, duration: 1000 });
+      ElMessage.success({ message: res.msg, duration: 1000 });
       getStudentData(props.studentName)
       getTeamData(getTeamId.value)
       emit('changeStatus', isChange.value = true);

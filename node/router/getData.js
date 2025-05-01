@@ -70,7 +70,7 @@ getAllDataRouter.post('/get_stu_data', async (req, res) => {
  * @summary 获取学生表的数据
  * @description 获取指定表的数据，并返回给前端。
  * @param {Object} data - 数据库连接信息
- * @param {string} studentName - 表名
+ * @param {string} studentName - 学生名
  * @returns {Object} result - 包含指定表的数据
  */
 getAllDataRouter.post('/table/student', async (req, res) => {
@@ -111,6 +111,14 @@ getAllDataRouter.post('/table/student', async (req, res) => {
     }
 });
 
+/**
+ * @route POST /table/student
+ * @summary 获取小组表的数据
+ * @description 获取指定表的数据，并返回给前端。
+ * @param {Object} data - 数据库连接信息
+ * @param {string} teamId - 组名
+ * @returns {Object} result - 包含指定表的数据
+ */
 getAllDataRouter.post('/table/team', async (req, res) => {
     // 获取前端传入的数据库连接信息，包装成json对象
     const { data, teamId } = req.body;

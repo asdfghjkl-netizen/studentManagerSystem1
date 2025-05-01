@@ -162,6 +162,7 @@ const handleChangeValue = (index: any) => {
 const submit = async () => {
   try {
     const addData: any = await addTeamTableData({
+      data: props.className,
       dateTime: dateTime.value,
       score: score.value,
       studyStatus: studyStatusString.value,
@@ -184,13 +185,14 @@ const submit = async () => {
 async function handleContextmenu(row: any, column: any, event: Event) {
   console.log(row, column, event, props.teamId);
   removeTeamTableData({
+    data: props.className,
     teamId: props.teamId,
-    dateTime: row.dateTime,
+    dateTime: row.date_time,
     score: row.score,
   }).then((res: any) => {
     console.log("removeTeam", res);
     if (res.code == 200) {
-      ElMessage.success({ message: res.message, duration: 1000 });
+      ElMessage.success({ message: res.msg, duration: 1000 });
       getTeamData(props.teamId);
       emit('changeStatus', isChange.value = true);
     }

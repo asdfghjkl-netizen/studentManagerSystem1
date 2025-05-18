@@ -75,15 +75,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ElMessage } from "element-plus";
-import { getDateTime } from "@/utils/dateTime";
-import InfoTitle from "@/components/InfoTitle.vue";
+import { ElMessage, ElInput, ElInputNumber, ElImage, ElButton, ElPopconfirm, ElTable, ElTableColumn, ElIcon, ElSelect, ElOption } from "element-plus";
+import { addStudentTableData, removeStudentTableData, getStudentTableData } from "@/utils/api/DataOptions";
+import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
+import { getTeamNum, getTeamList } from "@/utils/dataOption/teamOpt";
 import { studentStudyStatus } from "@/utils/studySatus";
 import { InfoFilled } from "@element-plus/icons-vue";
 import { useDataOptions } from "@/store/dataOptions";
-import { getTeamNum, getTeamList } from "@/utils/dataOption/teamOpt";
-import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
-import { addStudentTableData, removeStudentTableData, getStudentTableData } from "@/utils/api/DataOptions";
+import InfoTitle from "@/components/InfoTitle.vue";
+import { getDateTime } from "@/utils/dateTime";
 
 const dataOptionsStore = useDataOptions();
 const memberScore = ref(0);

@@ -38,8 +38,8 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage, ElScrollbar, ElMenu, ElSubMenu, ElMenuItem, ElMenuItemGroup, ElIcon } from 'element-plus';
 import router from '@/router';
-import { ElMessage } from 'element-plus';
 import { defineProps, ref, onMounted } from 'vue';
 import { useMenuStore } from '@/store/menu';
 import { useRoute } from 'vue-router';

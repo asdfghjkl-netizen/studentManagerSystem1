@@ -37,6 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { ElButton, ElBreadcrumb, ElBreadcrumbItem, ElAvatar, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus';
 import { ref, computed, defineEmits } from 'vue';
 import { useRoute } from 'vue-router';
 import { Menu, ArrowDown } from '@element-plus/icons-vue';
@@ -99,7 +100,7 @@ const handleLogout = () => {
     flex: 1;
     display: flex;
     justify-content: center;
-    
+
     .system-title {
       margin: 0;
       font-size: 25px;

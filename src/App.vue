@@ -5,6 +5,7 @@
 </template>
 
 <script setup lang="ts">
+import { ElConfigProvider } from 'element-plus';
 import { translate } from "../translations/translator";
 import { reactive, onMounted, onBeforeMount } from 'vue';
 import { getFileList } from "@/utils/api/apiPromiss";

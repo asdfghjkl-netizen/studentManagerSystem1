@@ -45,6 +45,7 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage, ElContainer, ElHeader, ElMain, ElFooter, ElSelect, ElOption, ElSwitch, ElButton, ElRadioGroup, ElRadio } from 'element-plus';
 import { getClassNameforHomePage } from "@/utils/api/apiPromiss";
 import { handleManage } from '@/utils/dataOption/routerOpt';
 import TooltipButton from '@/components/TooltipButton.vue';
@@ -52,7 +53,6 @@ import { useConfig } from "@/store/globalConfig";
 import { useDataOptions } from "@/store/dataOptions";
 import router from '@/router';
 import { onMounted, ref } from 'vue';
-import { ElMessage } from 'element-plus';
 
 const dataOptionsStore = useDataOptions();
 const configStore = useConfig();

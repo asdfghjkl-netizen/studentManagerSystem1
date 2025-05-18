@@ -75,14 +75,14 @@
 </template>
 
 <script lang="ts" setup>
-import { ElMessage } from "element-plus";
-import { getDateTime } from "@/utils/dateTime";
-import InfoTitle from "@/components/InfoTitle.vue";
-import { InfoFilled } from "@element-plus/icons-vue";
-import { stuTeamStudyStatus } from "@/utils/studySatus";
-import { getTeamList } from "@/utils/dataOption/teamOpt";
-import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
+import { ElMessage, ElButton, ElTable, ElTableColumn, ElSelect, ElOption, ElInputNumber, ElInput, ElImage, ElPopconfirm, ElIcon } from "element-plus";
 import { addTeamTableData, getTeamTableData, removeTeamTableData } from "@/utils/api/DataOptions";
+import { onMounted, ref, defineProps, reactive, watch, defineEmits } from "vue";
+import { getTeamList } from "@/utils/dataOption/teamOpt";
+import { stuTeamStudyStatus } from "@/utils/studySatus";
+import { InfoFilled } from "@element-plus/icons-vue";
+import InfoTitle from "@/components/InfoTitle.vue";
+import { getDateTime } from "@/utils/dateTime";
 
 // 获取时间数据
 const dateTime = ref("");
@@ -115,17 +115,13 @@ const emit = defineEmits(['changeStatus']); // 监听事件
 
 // 获取团队数据(封装),==》 信息引用
 const getTeamData = (teamId: any) => {
+  // 获取团队得分数据
   getTeamTableData({ data: props.className, teamId }).then((res: any) => {
     console.log("teamData", res);
     tableData.value = res.data;
-    // teamScore.value = res.totalScore;
+    teamScore.value = res.totalScore;
   })
-  // getTeamTableData(teamId).then((res: any) => {
-  //   // console.log("teamData", res);
-  //   tableData.value = res.data;
-  //   teamScore.value = res.totalScore;
-  // })
-  // // TODO 给totalTeamScore去重
+  // TODO 给totalTeamScore去重
   // getTeamList(teamId).then((res: any) => {
   //   // console.log("teamData", res);
   //   // 创建一个 Set 来存储所有团队的小组总分

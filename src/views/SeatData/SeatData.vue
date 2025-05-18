@@ -192,6 +192,7 @@
 </template>
 
 <script lang="ts" setup>
+import { ElMessage, ElAffix, ElRow, ElCol, ElButton, ElRadioGroup, ElButtonGroup, ElRadio, ElUpload, ElIcon, ElDivider } from 'element-plus';
 import { pushStudentStatusToRedis, pushTeamStatusToRedis } from "@/utils/api/pushToRedis";
 import { reactive, computed, ref, onMounted, watchEffect } from 'vue';
 import { createElNotification } from "@/utils/dataOption/ElementOpt";
@@ -201,7 +202,6 @@ import StudentDialog from "@/components/InfoDialog.vue";
 import TooltipButton from '@/components/TooltipButton.vue';
 import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
-import { ElMessage } from "element-plus";
 import { useDataOptions } from "@/store/dataOptions";
 import { useConfig } from "@/store/globalConfig";
 // 导入异步组件

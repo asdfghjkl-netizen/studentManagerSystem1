@@ -10,9 +10,7 @@ const sqlFilePath = path.join(currentDir, 'sql'); // SQL 文件路径
  */
 const createConnectionPool = (database) => {
   // 如果数据库名称中不包含“名单”，则追加该后缀
-  if (!database.includes('名单')) {
-    database = database + '名单';
-  }
+  if (!database.includes('名单')) database = database + '名单';
 
   return mysql.createPool({
     port: 3306,               // 数据库端口号
@@ -64,21 +62,7 @@ const executeTransaction = (pool, transactionCallback) => {
           return reject(err);
         }
         // 执行回调函数，传入连接对象，该函数中可以执行多条 SQL 语句，并返回一个 Promise
-        // Promise.resolve(transactionCallback(connection)).then(result => {
-        //   // 提交事务
-        //   connection.commit(commitErr => {
-        //     // 如果提交失败，则回滚事务 
-        //     if (commitErr) {
-        //       return connection.rollback(() => {
-        //         connection.release();
-        //         reject(commitErr);
-        //       });
-        //     }
-        //     // 事务提交成功，释放连接并返回结果
-        //     connection.release();
-        //     resolve(result);
-        //   });
-        // })
+        // Promise.resolve(transactionCallback(connection)).then(result => {})
         // 执行回调函数，要求传入连接对象后返回一个 Promise 数组，每个元素都是一个 Promise
         Promise.all(transactionCallback(connection)).then(resultsArray => {
           // 提交事务

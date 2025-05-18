@@ -11,6 +11,7 @@
 </template>
 
 <script setup lang="ts">
+import { ElTooltip, ElButton } from 'element-plus';
 import { ref, defineProps, defineEmits } from 'vue';
 
 defineProps({

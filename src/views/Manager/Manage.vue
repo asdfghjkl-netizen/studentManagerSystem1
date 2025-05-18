@@ -36,13 +36,13 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage, ElScrollbar, ElContainer, ElMain, ElAside, ElHeader, ElTag, ElIcon } from 'element-plus';
 import MainHeader from '@/views/Manager/Layout/Header/Header.vue';
 import { House, Setting, List } from '@element-plus/icons-vue';
 import MenuData from '@/views/Manager/Layout/Aside/Menu.vue';
-import { ElMessage } from 'element-plus';
 import { ref, Component } from 'vue';
 
-const isMenuCollapsed = ref(false);  // is menu collapsed
+const isMenuCollapsed = ref(false);  // 侧边栏折叠状态
 
 // 添加接口定义
 interface TagItem {

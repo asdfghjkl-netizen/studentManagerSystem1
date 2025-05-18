@@ -8,10 +8,12 @@ const { getFilePath } = require('./node/tools/option/fileOption');
 const { setEnvironmentVariables } = require('./configureIP'); // 引入ip配置文件
 const { publicPath, PORT, headerConfig, currentDir } = require('./node/config/publicConfig');
 // 引用路由
-const dataOptionsRouter = require('./node/router/dataOptions');
-const getAllDataRouter = require('./node/router/getData');
+const filesOptionRouter = require('./node/router/seatData/filesOptions');
+const dataOptionsRouter = require('./node/router/seatData/dataOptions');
+const createClassRouter = require('./node/router/createClass');
+const getAllDataRouter = require('./node/router/getAllData');
 
-setEnvironmentVariables();
+setEnvironmentVariables();  // 设置环境变量
 // 创建 express 应用程序
 const app = express();
 // 静态资源目录
@@ -21,7 +23,9 @@ app.use(bodyParser.json());
 // 初始化 swagger
 swaggerInit(app)
 // 引用路由
-app.use(dataOptionsRouter); // 数据操作路由
+app.use(filesOptionRouter);
+app.use(createClassRouter);
+app.use(dataOptionsRouter);
 app.use(getAllDataRouter);
 
 // 允许跨域请求
@@ -49,8 +53,7 @@ app.get('/file-list', async (req, res) => {
 
 // 新增接口，查询 MySQL 中所有数据库
 app.get('/databases', async (req, res) => {
-  // 注意：为了查询所有数据库，这里直接使用 mysql.createPool，
-  // 不使用 createConnectionPool，因为它会自动追加 "名单" 后缀
+  // 注意：为了查询所有数据库，这里直接使用 mysql.createPool
   const poolForDBs = mysql.createPool({
     host: process.env.DB_HOST,
     port: 3306,
@@ -78,7 +81,7 @@ app.get('/databases', async (req, res) => {
         code: 500,
         error: error.message
       });
-      poolForDBs.end();
+      // poolForDBs.end();
     });
 });
 

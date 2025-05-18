@@ -5,8 +5,8 @@
 </template>
 
 <script setup lang="ts">
+import { ElMessage, ElButton } from 'element-plus';
 import { downloadDesktopApp } from '@/utils/api/apiPromiss';
-import { ElMessage } from 'element-plus';
 
 // 下载桌面端
 const downloadApp = () => {

@@ -9,7 +9,7 @@
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
         <el-breadcrumb-item :to="{ path: '/seatData' }">座位表</el-breadcrumb-item>
-        <el-breadcrumb-item>{{ currentRoute }}</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ menuName }}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
     <div class="center-section">
@@ -18,7 +18,7 @@
     <div class="right-section">
       <el-dropdown trigger="hover" placement="bottom">
         <div class="user-info">
-          <el-avatar :size="32" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
+          <el-avatar :size="32" :src="img" />
           <span class="username">管理员</span>
           <el-icon class="el-icon--right">
             <arrow-down />
@@ -39,13 +39,17 @@
 <script setup lang="ts">
 import { ElButton, ElBreadcrumb, ElBreadcrumbItem, ElAvatar, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus';
 import { ref, computed, defineEmits } from 'vue';
-import { useRoute } from 'vue-router';
 import { Menu, ArrowDown } from '@element-plus/icons-vue';
+import { useRoute } from 'vue-router';
 
 const route = useRoute();
+// 图片路径
+const img = require('@/assets/imgs/avatar.png');
+const prop = defineProps({ menuName: String, });
+const menuName = ref(prop.menuName);  // 菜单名称
 
-// 计算当前路由名称
-const currentRoute = computed(() => {
+// 计算当前路由名称 const currentRoute = 
+computed(() => {
   return route.meta.title || route.name || '未知页面';
 });
 
@@ -58,10 +62,12 @@ const handleProfile = () => {
   console.log('查看个人信息');
 };
 
+// 系统设置处理函数
 const handleSettings = () => {
   console.log('打开系统设置');
 };
 
+// 退出登录处理函数
 const handleLogout = () => {
   console.log('退出登录');
 };

@@ -3,11 +3,12 @@
     <div ref="container" class="layout-container-demo">
       <el-container>
         <el-aside style="background-color: #545c64;" :width="isMenuCollapsed ? '64px' : '210px'">
-          <MenuData :is-collapsed="isMenuCollapsed" />
+          <MenuData :is-collapsed="isMenuCollapsed" @menu-title-click="handleMenuTitleClick"
+            @menu-tag-click="handleClick" />
         </el-aside>
         <el-container>
           <el-header>
-            <MainHeader @click-collapse="isMenuCollapsed = !isMenuCollapsed" />
+            <MainHeader :menu-name="menuName" @click-collapse="isMenuCollapsed = !isMenuCollapsed" />
           </el-header>
           <el-main>
             <div class="main-container">
@@ -38,65 +39,71 @@
 <script setup lang="ts">
 import { ElMessage, ElScrollbar, ElContainer, ElMain, ElAside, ElHeader, ElTag, ElIcon } from 'element-plus';
 import MainHeader from '@/views/Manager/Layout/Header/Header.vue';
-import { House, Setting, List } from '@element-plus/icons-vue';
 import MenuData from '@/views/Manager/Layout/Aside/Menu.vue';
-import { ref, Component } from 'vue';
+import { ref, watchEffect, watch, onMounted } from 'vue';
+import { useMenuStore } from '@/store/menu';
+import router from '@/router';
 
 const isMenuCollapsed = ref(false);  // 侧边栏折叠状态
-
-// 添加接口定义
-interface TagItem {
-  title: string;
-  path: string;
-  icon: Component;
-  active: boolean;
-}
+const menuName = ref('');            // 菜单名称
+const menuStore = useMenuStore();
+const menuTags = menuStore.selectedMenuTags; // 菜单标签数据
 
 // 默认标签页数据
-const defaultTags = ref([
-  {
-    title: '首页',
-    path: '/dashboard',
-    icon: House,
-    active: true
-  },
-  {
-    title: '系统设置',
-    path: '/settings',
-    icon: Setting,
-    active: false
-  },
-  {
-    title: '用户列表',
-    path: '/users',
-    icon: List,
-    active: false
-  }
-]);
+const defaultTags = ref([...menuTags]);
 
-// 标签点击事件
-const handleClick = (tag: TagItem) => {
+// 处理菜单标题点击事件
+const handleMenuTitleClick = (menu: string) => {
+  watchEffect(() => { menuName.value = menu });
+};
+
+// 标签点击事件  TODO： 进来时默认选中当前路由
+const handleClick = (tag) => {
+  // 设置标签页选中状态
   defaultTags.value.forEach(item => {
+    // 把其他标签页设置为非选中状态
+    if (item.path !== tag.path) {
+      item.active = false;
+    }
     item.active = item.path === tag.path;
   });
-  console.log('切换到:', tag.title);
+  // console.log('切换到:', tag.title);
+
+  // 同步到菜单高亮
+  if (tag.path !== '/') menuStore.setActiveIndex(tag.path);
+  router.push(tag.path);
 };
 
 // 关闭标签事件
-const handleClose = (tag: TagItem) => {
-  const tags = defaultTags.value;
-
-  if (tags.length <= 1) {
-    return ElMessage.warning('最后一个标签不能关闭');
+const handleClose = (tag) => {
+  console.log('标签:', tag);
+  // 首页标签不能关闭
+  if (tag.path === '/') {
+    return ElMessage.warning('首页标签不能关闭');
   }
-
-  const index = tags.findIndex(item => item.path === tag.path);
-  tags.splice(index, 1);
-
+  // 当前选中的标签不可关闭
   if (tag.active) {
-    handleClick(tags[index - 1] || tags[index]);
+    return ElMessage.warning('当前标签不能关闭');
   }
+
+  menuStore.removeSelectedMenuTag(tag); // 从 store 中移除标签
 };
+
+// 监听路由变化，更新菜单名称
+watch(() => menuStore.selectedMenuTags, // 监听 store 的响应式属性
+  (newTags) => {
+    defaultTags.value = [...newTags];
+  },
+  { immediate: true, deep: true }   // 立即执行，深度监听
+);
+
+onMounted(() => {
+  defaultTags.value.forEach(item => {
+    // 把标签页设置为非选中状态
+    item.active = false;
+    item.active = item.path === menuStore.activeIndex;
+  });
+});
 </script>
 
 <style lang="scss" scoped>

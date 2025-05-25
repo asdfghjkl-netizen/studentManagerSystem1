@@ -8,9 +8,9 @@ export const useConfig = defineStore('config', {
         lang: '1',             // 语言切换 1 中文 2 英文
         language: 'zh-cn',     // 设置语言包
         ipConfig: '',          // 解密ip
-        /** 学生座位表选择数据，默认为1---》班级座位表 */ 
-        selectedSeatData: 1, 
-        /** 分数选择数据，默认为1---》隐藏 */ 
+        /** 学生座位表选择数据，默认为1---》班级座位表 */
+        selectedSeatData: 1,
+        /** 分数选择数据，默认为1---》隐藏 */
         selectedScoreStatu: 1,
     }),
     // 计算属性 
@@ -33,7 +33,7 @@ export const useConfig = defineStore('config', {
             // TODO 切换语言
             // console.log(event);
             this.lang = event;
-            
+
             if (this.lang === "1") {
                 this.language = "zh-cn";
                 console.log(this.locale)
@@ -72,6 +72,11 @@ export const useConfig = defineStore('config', {
         enabled: true,
         storage: localStorage,
         key: "config",
-        path: ["lang", "language", "locale", "selectedSeatData"]
+        path: [
+            "lang",
+            "language",
+            "locale",
+            "selectedSeatData",
+        ]
     },
 })

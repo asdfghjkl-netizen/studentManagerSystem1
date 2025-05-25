@@ -45,13 +45,13 @@ const routes = [
 ];
 
 const router = createRouter({
-  // history: createWebHashHistory(process.env.BASE_URL),  // 使用 hash 模式
+  history: createWebHashHistory(process.env.BASE_URL),  // 使用 hash 模式
   // history: createWebHistory(process.env.BASE_URL),  // 使用 history 模式
   // history: createMemoryHistory(process.env.BASE_URL),  // 使用 memory 模式
-  // 如果开发环境，使用 hash 模式，否则使用 history 模式
-  history: process.env.NODE_ENV === 'production'
-    ? createWebHistory(process.env.BASE_URL)
-    : createWebHashHistory(process.env.BASE_URL),
+  // // 如果开发环境，使用 hash 模式，否则使用 history 模式
+  // history: process.env.NODE_ENV === 'production'
+  //   ? createWebHistory(process.env.BASE_URL)
+  //   : createWebHashHistory(process.env.BASE_URL),
   routes,
 })
 
@@ -70,8 +70,10 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to, from) => {
-  console.log(to, from);
+  console.log("to", to, "from", from);
   const loadingStore = useRouterStore();
+  loadingStore.toRoute = to;
+  loadingStore.fromRoute = from;
   loadingStore.setLoading(false);
 });
 

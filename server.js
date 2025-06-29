@@ -1,13 +1,13 @@
 const path = require('path');
-const mysql = require('mysql2');
 const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerInit = require('./node/config/swaggerConfig');
-const { queryDatabase } = require('./node/config/mysqlConfig');
+const { queryDatabase, createConnectionPool } = require('./node/config/mysqlConfig');
 const { getFilePath } = require('./node/tools/option/fileOption');
 const { setEnvironmentVariables } = require('./configureIP'); // 引入ip配置文件
 const { publicPath, PORT, headerConfig, currentDir } = require('./node/config/publicConfig');
 // 引用路由
+const authorizationRouter = require('./node/router/manager/authorization');
 const filesOptionRouter = require('./node/router/seatData/filesOptions');
 const dataOptionsRouter = require('./node/router/seatData/dataOptions');
 const createClassRouter = require('./node/router/createClass');
@@ -23,6 +23,7 @@ app.use(bodyParser.json());
 // 初始化 swagger
 swaggerInit(app)
 // 引用路由
+app.use(authorizationRouter);
 app.use(filesOptionRouter);
 app.use(createClassRouter);
 app.use(dataOptionsRouter);
@@ -53,16 +54,7 @@ app.get('/file-list', async (req, res) => {
 
 // 新增接口，查询 MySQL 中所有数据库
 app.get('/databases', async (req, res) => {
-  // 注意：为了查询所有数据库，这里直接使用 mysql.createPool
-  const poolForDBs = mysql.createPool({
-    host: process.env.DB_HOST,
-    port: 3306,
-    user: 'root',
-    password: '',
-    connectionLimit: 10,
-    waitForConnections: true,
-  });
-
+  const poolForDBs = createConnectionPool(); // 创建数据库连接池
   // 使用已有的 queryDatabase 方法执行查询
   queryDatabase(poolForDBs, 'SHOW DATABASES')
     .then(({ results, fields }) => {
@@ -75,7 +67,7 @@ app.get('/databases', async (req, res) => {
         code: 200,
         data: filteredArray,
       });
-      poolForDBs.end();
+      // poolForDBs.end();
     }).catch(error => {
       res.status(500).json({
         code: 500,

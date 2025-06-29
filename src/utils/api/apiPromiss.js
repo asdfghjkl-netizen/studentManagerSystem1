@@ -52,3 +52,12 @@ export function saveExcelFile(data) {
         // headers: { "Content-Type": "multipart/form-data" },
     })
 }
+
+// 创建班级数据
+export function createClassData(data) {
+    return instance({
+        url: 'create-class',
+        method: 'post',
+        data
+    })
+}

@@ -181,8 +181,10 @@
 
 <script setup lang="ts">
 import { ElMessage, ElButton, ElButtonGroup, ElStep, ElCol, ElDivider, ElForm, ElFormItem, ElIcon, ElInput, ElInputNumber, ElPopconfirm, ElRow, ElSteps } from 'element-plus';
+import { createClassData } from '@/utils/api/apiPromiss';
 import { InfoFilled } from '@element-plus/icons-vue';
 import { ref, computed, watch, reactive } from 'vue';
+import router from '@/router';
 
 // 步骤条
 const tableContainer = ref<HTMLElement | null>(null);
@@ -277,8 +279,22 @@ const handleSubmit = () => {
   studentData.value = studentData.value.filter(row =>
     Object.values(row).some(value => value.trim() !== '')
   );
-  // 数据上传到服务器的逻辑
   console.log('提交数据：', [groupData.value, form, studentData.value]);
+  
+  // TODO 数据上传到服务器的逻辑
+  createClassData({
+    className: form.className,
+    courseName: form.courseName,
+    rows: form.rows,
+    columns: form.columns,
+    studentData: studentData.value,
+    groupData: groupData.value,
+  }).then(() => {
+    ElMessage.success({ message: '班级创建成功！' });
+    // router.push('/'); // 跳转到班级列表页面
+  }).catch((error) => {
+    ElMessage.error({ message: `班级创建失败：${error.message}` });
+  });
 };
 
 // 处理输入事件，动态添加新行

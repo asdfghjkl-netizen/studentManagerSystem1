@@ -1,6 +1,7 @@
 const mysql = require('mysql2');
 const { currentDir } = require('./publicConfig');
 const path = require('path');
+
 const sqlFilePath = path.join(currentDir, 'sql'); // SQL 文件路径
 
 /**
@@ -8,9 +9,9 @@ const sqlFilePath = path.join(currentDir, 'sql'); // SQL 文件路径
  * @param {string} database - 数据库名称
  * @return {Pool} - 返回创建的连接池对象
  */
-const createConnectionPool = (database) => {
+const createConnectionPool = (database = null) => {
   // 如果数据库名称中不包含“名单”，则追加该后缀
-  if (!database.includes('名单')) database = database + '名单';
+  if (database && !database.includes('名单')) database = database + '名单';
 
   return mysql.createPool({
     port: 3306,               // 数据库端口号
@@ -40,6 +41,37 @@ const queryDatabase = (pool, sql, params = []) => {
   return new Promise((resolve, reject) => {
     pool.query(sql, params, (error, results, fields) => {
       error ? reject(error) : resolve({ results, fields });
+    });
+  });
+}
+
+/**
+ * 创建数据库
+ * @param {Pool} pool - MySQL 连接池对象
+ * @param {string} databaseName - 要创建的数据库名称
+ */
+const createDatabase = (pool, databaseName) => {
+  return new Promise((resolve, reject) => {
+    const createDatabaseSql = `CREATE DATABASE IF NOT EXISTS ${databaseName}`;
+    pool.query(createDatabaseSql, (error, results) => {
+      error ? reject(error) : resolve(results);
+    })
+  })
+}
+
+ /**
+ * 创建表
+ * @param {Pool} pool - MySQL 连接池对象
+ * @param {string} databaseName - 要创建的表所属的数据库名称
+ * @param {string} tableName - 要创建的表名称
+ * @param {string} columns - 表的列定义
+ * @return {Promise} - 创建表操作的 Promise 对象
+ */
+const createTable = (pool, databaseName, tableName, columns) => {
+  return new Promise((resolve, reject) => {
+    const createTableSql = `CREATE TABLE IF NOT EXISTS ${databaseName}.${tableName} (${columns})`;
+    pool.query(createTableSql, (error, results) => {
+      error ? reject(error) : resolve(results);
     });
   });
 }
@@ -127,4 +159,6 @@ module.exports = {
   executeTransaction,   // 执行事务的函数
   backupDatabase,       // 备份数据库的函数
   restoreDatabase,      // 还原数据库的函数
+  createDatabase,       // 创建数据库的函数
+  createTable,          // 创建表的函数
 };

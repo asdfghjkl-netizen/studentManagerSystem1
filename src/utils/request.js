@@ -4,7 +4,7 @@ import { decrypt } from "./setCrypt";  // 解密
 // 获取配置
 const globalConfig = decrypt(sessionStorage.getItem("globalConfig"));
 // 获取 IP
-const IP = globalConfig ? globalConfig.VUE_APP_IP : '127.0.0.1';
+const IP = globalConfig ? globalConfig.VUE_APP_IP : ('127.0.0.1' || 'localhost');
 
 /** 创建axios实例 */
 let instance = axios.create({

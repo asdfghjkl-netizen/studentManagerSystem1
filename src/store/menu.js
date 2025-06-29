@@ -99,6 +99,10 @@ export const useMenuStore = defineStore('menu', {
     enabled: true,
     storage: localStorage,
     key: "menu",
-    path: ["menus", "activeIndex", "selectedMenuTags"],
+    path: [
+      "menus",
+      "activeIndex",
+      "selectedMenuTags",
+    ],
   }
 });

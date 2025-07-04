@@ -19,7 +19,7 @@
       <el-dropdown trigger="hover" placement="bottom">
         <div class="user-info">
           <el-avatar :size="32" :src="img" />
-          <span class="username">管理员</span>
+          <span class="username">{{ username }}</span>
           <el-icon class="el-icon--right">
             <arrow-down />
           </el-icon>
@@ -47,6 +47,7 @@ const route = useRoute();
 const img = require('@/assets/imgs/avatar.png');
 const prop = defineProps({ menuName: String, });
 const menuName = ref(prop.menuName);  // 菜单名称
+const username = window.sessionStorage.getItem('username') || '管理员';
 
 // 计算当前路由名称 const currentRoute = 
 computed(() => {

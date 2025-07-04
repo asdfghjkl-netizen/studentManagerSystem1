@@ -2,10 +2,13 @@
  * 用户验证路由
  * @description 处理用户验证相关的路由
  */
+const jwt = require('jsonwebtoken');
+const { createConnectionPool, queryDatabase } = require('../../config/mysqlConfig');
 const express = require('express');
 const { headerConfig } = require('../../config/publicConfig');
 
 const authorizationRouter = express.Router();
+const JWT_SECRET = process.env.JWT_SECRET; // JWT 密钥
 
 authorizationRouter.all('*', function (req, res, next) { headerConfig(req, res, next) });
 
@@ -17,29 +20,32 @@ authorizationRouter.post('/auth/login', async (req, res) => {
     const { username, password } = req.body;
     console.log('Received login data:', username, password);
 
-    // 注意：为了查询所有数据库，这里直接使用 mysql.createPool
-    const poolForDBs = mysql.createPool({
-        host: process.env.DB_HOST,
-        port: 3306,
-        user: 'root',
-        password: '',
-        database: 'seatmanagerdata', // 使用指定数据库来查询用户数据
-        connectionLimit: 10,
-        waitForConnections: true,
-    });
+    // 创建一个连接池
+    const poolForDBs = createConnectionPool('stumanagementinfo');
 
     // 使用已有的 queryDatabase 方法执行查询
-    queryDatabase(poolForDBs, 'SHOW DATABASES')
+    queryDatabase(poolForDBs, 'SELECT * FROM authorinfo WHERE username = ? AND password = ?',
+        [username, password])
         .then(({ results, fields }) => {
+            console.log('Received login data:', results);
+            const un = results[0]?.username || '';
+            const passwd = results[0]?.password || '';
             // 模拟验证逻辑
-            if (username === 'admin' && password === 'password') {
+            if (username === un && password === passwd) {
+                // 生成token
+                const token = jwt.sign(
+                    { userId: 1, username: 'admin', role: 'administrator' },
+                    JWT_SECRET,
+                    { expiresIn: '2h' }
+                );
                 res.json({
                     code: 200,
                     message: '登录成功',
                     data: {
                         userId: 1,
-                        username: 'admin',
-                        role: 'administrator'
+                        username: un,
+                        role: 'administrator',
+                        token // 返回token
                     }
                 });
             } else {

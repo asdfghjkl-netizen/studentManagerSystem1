@@ -11,12 +11,6 @@
               <el-select v-model="selectedClass" @change="handleSelectClass" placeholder="请选择班级：">
                 <el-option v-for="item in classList" :key="item" :label="item.label" :value="item.label" />
               </el-select>
-              <TooltipButton tip-placement="top" element-name="button" btn-type="primary" btn-plain
-                @click="isSelectClass">
-                <template #content>
-                  <span>点击选择班级</span>
-                </template>确定选择？
-              </TooltipButton>
             </div>
           </div>
           <div class="buttons">
@@ -77,10 +71,6 @@ const handleToManage = () => handleManage();
 // 选择班级
 const handleSelectClass = () => {
   ElMessage.success('确定选择班级：' + selectedClass.value);
-};
-
-// 确定选择班级
-const isSelectClass = () => {
   if (!selectedClass.value) {
     ElMessage.warning('请先选择班级！');
     return;

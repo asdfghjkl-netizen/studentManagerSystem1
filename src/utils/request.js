@@ -19,6 +19,11 @@ let instance = axios.create({
  */
 instance.interceptors.request.use(
     (config) => {
+        const token = window.sessionStorage.getItem('token');
+        if (token) {
+            // 通常使用 Bearer 方案
+            config.headers.Authorization = 'Bearer ' + token;
+        }
         return config;
     },
     (error) => {
@@ -36,6 +41,11 @@ instance.interceptors.response.use(
         return response.data;
     },
     async (error) => {
+        // token验证响应
+        if (config.data.code == 400) {
+            window.sessionStorage.removeItem("token")
+        }
+
         // console.log("error", error);
         const config = error.config; // 获取请求配置
         const globalConfig = decrypt(sessionStorage.getItem("globalConfig"));

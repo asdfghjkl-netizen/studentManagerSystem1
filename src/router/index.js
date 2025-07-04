@@ -41,7 +41,11 @@ const routes = [
     path: '/createClass',
     name: 'createClass',
     component: () => import(/* webpackChunkName: "createClass" */'@/views/Home/createClass.vue'),
-  }
+  }, {  // 用户管理登录页
+    path: '/login',
+    name: 'Login',
+    component: () => import(/* webpackChunkName: "login" */'@/views/Manager/login.vue'),
+  },
 ];
 
 const router = createRouter({
@@ -60,6 +64,14 @@ router.beforeEach((to, from, next) => {
   const loadingStore = useRouterStore();
   loadingStore.setLoading(true);
 
+  // 判断是否已登录（以 token 为例）
+  const isLoggedIn = !!window.sessionStorage.getItem('token');
+
+  // 如果访问 /manage 及其子路由，且未登录，跳转到 /login
+  if (to.path.startsWith('/manage') && !isLoggedIn && to.path !== '/login') {
+    return next('/login');
+  }
+
   // 移除重定向到首页的逻辑
   //   if (from.name === null || from.name === undefined) {
   //     return to.path === '/'
@@ -70,7 +82,7 @@ router.beforeEach((to, from, next) => {
 });
 
 router.afterEach((to, from) => {
-  console.log("to", to, "from", from);
+  // console.log("to", to, "from", from);
   const loadingStore = useRouterStore();
   loadingStore.toRoute = to;
   loadingStore.fromRoute = from;

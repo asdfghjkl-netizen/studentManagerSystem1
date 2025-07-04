@@ -1,6 +1,7 @@
 <template>
   <div>
     <el-button type="primary" @click="downloadApp">下载桌面端</el-button>
+    <el-button type="primary" @click=""></el-button>
   </div>
 </template>
 

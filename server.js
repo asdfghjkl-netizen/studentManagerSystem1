@@ -12,6 +12,7 @@ const filesOptionRouter = require('./node/router/seatData/filesOptions');
 const dataOptionsRouter = require('./node/router/seatData/dataOptions');
 const createClassRouter = require('./node/router/createClass');
 const getAllDataRouter = require('./node/router/getAllData');
+const manageOpt = require('./node/router/manager/manageOpt');
 
 setEnvironmentVariables();  // 设置环境变量
 // 创建 express 应用程序
@@ -28,6 +29,7 @@ app.use(filesOptionRouter);
 app.use(createClassRouter);
 app.use(dataOptionsRouter);
 app.use(getAllDataRouter);
+app.use(manageOpt);
 
 // 允许跨域请求
 app.all('*', function (req, res, next) { headerConfig(req, res, next) });

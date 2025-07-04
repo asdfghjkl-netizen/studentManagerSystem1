@@ -5,13 +5,23 @@ const path = require('path');
 const sqlFilePath = path.join(currentDir, 'sql'); // SQL 文件路径
 
 /**
- * 根据传入的数据库名称，创建一个 MySQL 连接池
+ * 根据传入的数据库名称，创建一个 MySQL 连接池:学生名单数据库
  * @param {string} database - 数据库名称
  * @return {Pool} - 返回创建的连接池对象
  */
 const createConnectionPool = (database = null) => {
-  // 如果数据库名称中不包含“名单”，则追加该后缀
-  if (database && !database.includes('名单')) database = database + '名单';
+  // 判断database开头是否为数字
+  if (database && /^\d/.test(database)) {
+    // 如果数据库名称以数字开头，则在前面添加“名单”后缀
+    database = database + '名单';
+  } else if (database && database.includes('名单')) {
+    // 如果数据库名称中包含“名单”，则不做任何修改
+    // 这里可以添加其他逻辑，比如检查是否需要修改数据库名称
+    database = database;
+  } else {
+    // 如果数据库名称既不以数字开头，也不包含“名单”，则直接使用传入的数据库名称，不做任何修改
+    database = database;
+  }
 
   return mysql.createPool({
     port: 3306,               // 数据库端口号
@@ -154,11 +164,11 @@ const restoreDatabase = (pool, databaseName) => {
 }
 
 module.exports = {
-  createConnectionPool, // 创建连接池的函数
-  queryDatabase,        // 执行 SQL 查询的函数
-  executeTransaction,   // 执行事务的函数
-  backupDatabase,       // 备份数据库的函数
-  restoreDatabase,      // 还原数据库的函数
-  createDatabase,       // 创建数据库的函数
-  createTable,          // 创建表的函数
+  createConnectionPool,         // 创建学生信息数据库连接池的函数 
+  queryDatabase,                // 执行 SQL 查询的函数
+  executeTransaction,           // 执行事务的函数
+  backupDatabase,               // 备份数据库的函数
+  restoreDatabase,              // 还原数据库的函数
+  createDatabase,               // 创建数据库的函数
+  createTable,                  // 创建表的函数
 };

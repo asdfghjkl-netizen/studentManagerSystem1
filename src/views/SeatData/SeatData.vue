@@ -4,6 +4,8 @@
     <!-- 选择区域 -->
     <el-affix :offset="15">
       <div class="select-area">
+        <el-button type="success" plain @click="router.push('/')">返回首页</el-button>
+        <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
         <!-- 座位表选择 -->
         <el-radio-group v-model="selectRoom" @change="handleSelectRoom($event as any)">
           <el-radio :value="1" size="large" border>班级座位表</el-radio>
@@ -25,7 +27,7 @@
         </el-radio-group>
         <el-divider direction="vertical" border-style="solid" style="margin-left: 15px;margin-right: 15px;" />
         <!-- 点击进入管理界面 -->
-        <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleToManage">
+        <TooltipButton element-name="button" btn-type="success" btn-plain @click="handleManage">
           <template #content>
             <span>需要管理员权限<br />点击进入管理界面<br />能够修改学生信息</span>
           </template>进入管理界面
@@ -204,6 +206,7 @@ import { Download, Upload } from '@element-plus/icons-vue';
 import type { UploadProps } from 'element-plus';
 import { useDataOptions } from "@/store/dataOptions";
 import { useConfig } from "@/store/globalConfig";
+import router from '@/router';
 // 导入异步组件
 const StudentInfo = importAsyncComponent(() => import("@/views/SeatData/studentInfo/studentInfo.vue"));
 const TeamInfo = importAsyncComponent(() => import("@/views/SeatData/teamInfo/teamInfo.vue"));
@@ -276,9 +279,6 @@ const teamList = computed(() => {
   arr['1'].reverse();
   return arr;
 });
-
-// 点击进入管理页面（管理员用户使用）
-const handleToManage = () => handleManage();
 
 // 截取文件名
 const getclassName = () => className.value = dataOptionsStore.getSelectClass();

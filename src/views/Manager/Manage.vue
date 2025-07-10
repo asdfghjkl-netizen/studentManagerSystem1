@@ -38,6 +38,7 @@
 
 <script setup lang="ts">
 import { ElMessage, ElScrollbar, ElContainer, ElMain, ElAside, ElHeader, ElTag, ElIcon } from 'element-plus';
+import { findParentTitleByIndex } from '@/utils/dataOption/menuOpt';
 import MainHeader from '@/views/Manager/Layout/Header/Header.vue';
 import MenuData from '@/views/Manager/Layout/Aside/Menu.vue';
 import { ref, watchEffect, watch, onMounted } from 'vue';
@@ -45,20 +46,22 @@ import { useMenuStore } from '@/store/menu';
 import router from '@/router';
 
 const isMenuCollapsed = ref(false);  // 侧边栏折叠状态
-const menuName = ref('');            // 菜单名称
+const menuName: any = ref('');            // 菜单名称
 const menuStore = useMenuStore();
 const menuTags = menuStore.selectedMenuTags; // 菜单标签数据
-
-// 默认标签页数据
-const defaultTags = ref([...menuTags]);
+const menus = menuStore.menus;   // 菜单数据
+const defaultTags = ref([...menuTags]); // 默认标签页数据
 
 // 处理菜单标题点击事件
 const handleMenuTitleClick = (menu: string) => {
+  // console.log('菜单标题点击:', menu);
   watchEffect(() => { menuName.value = menu });
+  // console.log('当前菜单名称:', menuName.value);
 };
 
 // 标签点击事件  TODO： 进来时默认选中当前路由
 const handleClick = (tag) => {
+  // console.log('标签:', tag);
   // 设置标签页选中状态
   defaultTags.value.forEach(item => {
     // 把其他标签页设置为非选中状态
@@ -67,10 +70,12 @@ const handleClick = (tag) => {
     }
     item.active = item.path === tag.path;
   });
-  // console.log('切换到:', tag.title);
 
   // 同步到菜单高亮
   if (tag.path !== '/') menuStore.setActiveIndex(tag.path);
+  // 获取上一级菜单的标题
+  const parentTitle = findParentTitleByIndex(menus, tag.path);
+  menuName.value = { title: tag.title, parentTitle }; // 更新菜单名称
   router.push(tag.path);
 };
 

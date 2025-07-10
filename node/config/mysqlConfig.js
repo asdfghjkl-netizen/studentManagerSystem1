@@ -10,7 +10,7 @@ const sqlFilePath = path.join(currentDir, 'sql'); // SQL 文件路径
  * @return {Pool} - 返回创建的连接池对象
  */
 const createConnectionPool = (database = null) => {
-  // 判断database开头是否为数字
+  // 判断database开头是否为数字，因为数字开头的数据库为学生名单数据库
   if (database && /^\d/.test(database)) {
     // 如果数据库名称以数字开头，则在前面添加“名单”后缀
     database = database + '名单';
@@ -23,6 +23,7 @@ const createConnectionPool = (database = null) => {
     database = database;
   }
 
+  // 创建并返回一个 MySQL 连接池
   return mysql.createPool({
     port: 3306,               // 数据库端口号
     host: process.env.DB_HOST,// 数据库主机地址

@@ -12,7 +12,6 @@ const createStudentTable = `
                 
 // 创建学生管理信息表
 const createStudentmanagentinfoTable = `
-                CREATE TABLE IF NOT EXISTS studentmanagentinfo (
                 id INT AUTO_INCREMENT PRIMARY KEY COMMENT '主键id',
                 class varchar(50) NOT NULL COMMENT '班级名称',
                 student_id int(20) NOT NULL COMMENT '学生学号',
@@ -24,9 +23,29 @@ const createStudentmanagentinfoTable = `
                 seat_number int(11) NOT NULL COMMENT '座位号',
                 course_name varchar(100) NOT NULL COMMENT '课程名称',
                 course_id int(20) NOT NULL COMMENT '课程id',
-            )`
+            `;
+
+// 创建单独学生的表
+const createStudentTableForSingle = `
+                id INT AUTO_INCREMENT PRIMARY KEY COMMENT '主键id',
+                class varchar(50) NOT NULL COMMENT '班级名称',
+                student_id int(20) NOT NULL COMMENT '学生学号',
+                student_name varchar(100) NOT NULL COMMENT '学生姓名',
+            `;
+
+// 创建小组表
+const createGroupTable = `
+                id INT AUTO_INCREMENT PRIMARY KEY COMMENT '主键id',
+                group_name varchar(50) NOT NULL COMMENT '分组名称',
+                group_id int(20) NOT NULL COMMENT '分组id',
+                group_leader varchar(100) NOT NULL COMMENT '组长姓名',
+                group_leader_id int(20) NOT NULL COMMENT '组长学号',
+                group_member varchar(100) NOT NULL COMMENT '组员姓名',
+            `;
 
 module.exports = {
     createStudentTable,
     createStudentmanagentinfoTable,
+    createStudentTableForSingle,
+    createGroupTable,
 };

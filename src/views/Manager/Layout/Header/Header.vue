@@ -8,7 +8,8 @@
       </el-button>
       <el-breadcrumb separator="/">
         <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-        <el-breadcrumb-item :to="{ path: '/seatData' }">座位表</el-breadcrumb-item>
+        <el-breadcrumb-item v-if="className != ''" :to="{ path: '/seatData' }">座位表</el-breadcrumb-item>
+        <el-breadcrumb-item v-if="lastMenu != ''">{{ lastMenu }}</el-breadcrumb-item>
         <el-breadcrumb-item>{{ menuName }}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -37,22 +38,19 @@
 </template>
 
 <script setup lang="ts">
-import { ElButton, ElBreadcrumb, ElBreadcrumbItem, ElAvatar, ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus';
-import { ref, computed, defineEmits } from 'vue';
+import { ElButton, ElBreadcrumb, ElBreadcrumbItem, ElAvatar, ElDropdown, ElDropdownMenu, ElDropdownItem, ElIcon } from 'element-plus';
+import { ref, defineEmits, watch } from 'vue';
 import { Menu, ArrowDown } from '@element-plus/icons-vue';
-import { useRoute } from 'vue-router';
+import { useDataOptions } from '@/store/dataOptions';
 
-const route = useRoute();
+const dataStore = useDataOptions();
+let className = '';
 // 图片路径
 const img = require('@/assets/imgs/avatar.png');
-const prop = defineProps({ menuName: String, });
-const menuName = ref(prop.menuName);  // 菜单名称
+const prop = defineProps<{ menuName: { title?: string; parentTitle?: string } }>();
+const menuName = ref('');  // 菜单名称
+const lastMenu = ref('');  // 上一级菜单数据
 const username = window.sessionStorage.getItem('username') || '管理员';
-
-// 计算当前路由名称 const currentRoute = 
-computed(() => {
-  return route.meta.title || route.name || '未知页面';
-});
 
 // 侧边栏折叠处理函数
 const emit = defineEmits(["clickCollapse"]);
@@ -72,6 +70,19 @@ const handleSettings = () => {
 const handleLogout = () => {
   console.log('退出登录');
 };
+
+watch(() => dataStore.selectedClass, // 监听 store 的响应式属性
+  (newTags) => { className = newTags },
+  { immediate: true, deep: true }   // 立即执行，深度监听
+);
+watch(() => prop.menuName, // 监听 menuName 的响应式属性
+  (newTags) => {
+    menuName.value = newTags.title;
+    lastMenu.value = newTags.parentTitle;
+    // console.log('菜单名称:', menuName.value, '上一级菜单:', lastMenu.value);
+  },
+  { immediate: true, deep: true }   // 立即执行，深度监听
+);
 </script>
 
 <style lang="scss" scoped>

@@ -32,7 +32,7 @@ createClassRouter.post('/create-class', async (req, res) => {
             // 创建学生表
             executeTransaction(connection, (conn) => {
                 return [
-                    // createTable(conn, dbName, 'student', sqlTableConfig.createStudentTable),
+                    createTable(conn, dbName, 'student', sqlTableConfig.createStudentTable),
                     // createTable(conn, dbName, 'studentmanagentinfo', sqlTableConfig.createStudentmanagentinfoTable),
                 ]
             }).then((result) => {

@@ -3,6 +3,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerInit = require('./node/config/swaggerConfig');
 const { queryDatabase, createConnectionPool } = require('./node/config/mysqlConfig');
+const { startRedisServer } = require('./node/config/redisConfig');
 const { getFilePath } = require('./node/tools/option/fileOption');
 const { setEnvironmentVariables } = require('./configureIP'); // 引入ip配置文件
 const { publicPath, PORT, headerConfig, currentDir } = require('./node/config/publicConfig');
@@ -15,6 +16,7 @@ const getAllDataRouter = require('./node/router/getAllData');
 const manageOpt = require('./node/router/manager/manageOpt');
 
 setEnvironmentVariables();  // 设置环境变量
+startRedisServer();         // 启动 Redis 服务器
 // 创建 express 应用程序
 const app = express();
 // 静态资源目录

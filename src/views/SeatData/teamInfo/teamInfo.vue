@@ -116,7 +116,10 @@ const emit = defineEmits(['changeStatus']); // 监听事件
 // 获取团队数据(封装),==》 信息引用
 const getTeamData = (teamId: any) => {
   // 获取团队得分数据
-  getTeamTableData({ data: props.className, teamId }).then((res: any) => {
+  getTeamTableData({
+    data: props.className,
+    teamId
+  }).then((res: any) => {
     console.log("teamData", res);
     tableData.value = res.data;
     teamScore.value = res.totalScore;

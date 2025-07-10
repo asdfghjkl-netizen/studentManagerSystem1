@@ -40,30 +40,15 @@
 
 <script setup lang="ts">
 import { ElMessage, ElScrollbar, ElMenu, ElSubMenu, ElMenuItem, ElMenuItemGroup, ElIcon } from 'element-plus';
-import { defineProps, ref, onMounted, onBeforeMount, computed } from 'vue';
+import { findMenuTitleByIndex, findParentTitleByIndex } from '@/utils/dataOption/menuOpt';
+import { defineProps, onMounted, computed } from 'vue';
 import { useMenuStore } from '@/store/menu';
 import router from '@/router';
 
-interface MenuItem {
-  index: string;
-  title: string;
-  icon?: string;
-  groups?: Array<{ title: string; items: MenuItem[] }>;
-  subMenus?: Array<{ index: string; title: string; items: MenuItem[] }>;
-  items?: MenuItem[];
-}
-interface MenuStore {
-  menus: MenuItem[];
-  activeIndex: string;
-  setActiveIndex: (index: string) => void;
-}
-
-const menuStore: MenuStore = useMenuStore();
+const menuStore: any = useMenuStore();
 const menus = menuStore.menus;   // 菜单数据
-// const activeIndex = ref(menuStore.activeIndex); 
 // 用计算属性保证activeIndex和menuStore.activeIndex同步
 const activeIndex = computed(() => menuStore.activeIndex);
-
 defineProps({
   // 是否折叠
   isCollapsed: { type: Boolean, required: false }
@@ -71,49 +56,12 @@ defineProps({
 // 点击菜单获取菜单名称，并传递给父组件
 const emits = defineEmits(['menuTitleClick', 'menuTagClick']);
 
-/**
- * 递归查找菜单项名称
- * @param menus 菜单数据数组
- * @param index 需要查找的菜单项 index
- * @returns 返回对应 index 的菜单项名称，未找到则返回 null
- */
-function findMenuTitleByIndex(menus: MenuItem[], index: string) {
-  for (const menu of menus) {
-    // 如果当前菜单项的 index 匹配，返回其 title
-    if (menu.index === index) return { title: menu.title, icon: menu.icon };
-    // 如果有 groups，遍历每个 group
-    if (menu.groups) {
-      for (const group of menu.groups) {
-        // 在 group.items 中查找 index 匹配的项，找到则返回其 title
-        const found = group.items.find(item => item.index === index);
-        if (found) return { title: found.title, icon: found.icon };
-      }
-    }
-    // 如果有 subMenus，遍历每个 subMenu
-    if (menu.subMenus) {
-      for (const subMenu of menu.subMenus) {
-        // 如果 subMenu 的 index 匹配，返回其 title
-        if (subMenu.index === index) return { title: subMenu.title, icon: subMenu.icon };
-        // 在 subMenu.items 中查找 index 匹配的项，找到则返回其 title
-        const found = subMenu.items.find(item => item.index === index);
-        if (found) return { title: found.title, icon: found.icon };
-      }
-    }
-    // 如果有 items，遍历 items 查找 index 匹配的项，找到则返回其 title
-    if (menu.items) {
-      const found = menu.items.find(item => item.index === index);
-      if (found) return { title: found.title, icon: found.icon };
-    }
-  }
-  return null;
-}
-
 // 选择菜单
 const handleSelect = (index: string) => {
   if (!index) return; // 如果index为空，则不执行后续操作
 
   // 获取目录名称
-  const { title, icon } = findMenuTitleByIndex(menus, index);
+  const { path, title, icon } = findMenuTitleByIndex(menus, index);
   console.log('目录名称:', title, '图标:', icon);
 
   // 检查路由是否存在
@@ -121,8 +69,13 @@ const handleSelect = (index: string) => {
   if (resolved.matched.length > 0) {
     // 更新 Pinia store 中的 activeIndex
     menuStore.setActiveIndex(index);
+    // 获取上一级菜单的标题
+    const parentTitle = findParentTitleByIndex(menus, path);
+    // console.log('上一级菜单title:', parentTitle);
     // 通过事件传递目录名称
-    if (title || icon) emits('menuTitleClick', title);
+    if (title || icon) {
+      emits('menuTitleClick', { title, parentTitle });
+    }
     // console.log('activeIndex', menuStore.activeIndex);
     router.push(index);
     const tag = { title, path: index, icon, active: true };
@@ -133,24 +86,29 @@ const handleSelect = (index: string) => {
     ElMessage.error('路由不存在，请检查路径是否正确！');
     // 不做 router.push 和 activeIndex 变更，保持当前选中项不变
     const activeIndex = menuStore.getActiveIndex();
-    console.log('当前菜单:', activeIndex);
-    // 通过事件传递目录名称
-    if (title || icon) emits('menuTitleClick', activeIndex);
+    // console.log('当前菜单:', activeIndex);
+    // 通过事件传递目录名称，只在 path 与 activeIndex 一致时传递 title
+    const parentTitle = findParentTitleByIndex(menus, activeIndex);
+    // console.log('上一级菜单title:', parentTitle);
+    if (path === activeIndex && (title || icon)) {
+      emits('menuTitleClick', { title, parentTitle });
+    };
   }
 };
 
 // 组件挂载时初始化
 onMounted(() => {
-  if (!menuStore.activeIndex) {
-    menuStore.setActiveIndex('/manage/test/table');
+  if (!menuStore.activeIndex || menuStore.activeIndex === '') {
+    menuStore.setActiveIndex('/manage/test/table');  // 设置默认选中项
+    const parentTitle = findParentTitleByIndex(menus, '/manage/test/table');
+    emits('menuTitleClick', { title: "表格测试", parentTitle });
+    menuStore.pushSelectedMenuTag({ title: '表格测试', path: '/manage/test/table', active: true });
     router.push('/manage/test/table');
   }
+  const { title } = findMenuTitleByIndex(menus, menuStore.activeIndex);
+  const parentTitle = findParentTitleByIndex(menus, menuStore.activeIndex);
+  emits('menuTitleClick', { title, parentTitle });
   router.push(menuStore.activeIndex);
-});
-// 组件加载前获取菜单名称
-onBeforeMount(() => {
-  emits('menuTitleClick', "表格测试");
-  menuStore.pushSelectedMenuTag({ title: '表格测试', path: '/manage/test/table', active: true });
 });
 </script>
 

@@ -45,7 +45,9 @@
                 <el-row class="table-header">
                   <el-col :span="6" class="header-cell">学号</el-col>
                   <el-col :span="6" class="header-cell">姓名</el-col>
-                  <el-col :span="6" class="header-cell">性别</el-col>
+                  <el-col :span="6" class="header-cell">性别
+                    <div>（0:男 1:女）</div>
+                  </el-col>
                   <el-col :span="6" class="header-cell">头像文件</el-col>
                 </el-row>
               </div>
